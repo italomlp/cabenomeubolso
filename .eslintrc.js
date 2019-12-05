@@ -32,6 +32,7 @@ module.exports = {
     'global-require': 'off',
     'react-native/no-raw-text': 'off',
     'no-console': 'off',
+    'react-native/no-inline-styles': 'warn',
   },
   settings: {
     'import/resolver': {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Header, ListItem, Button, Text, Icon } from 'react-native-elements';
+import { useNavigation } from 'react-navigation-hooks';
 
 import {
   FloatingButtonContainer,
@@ -44,17 +45,22 @@ const CabesList = [
 ];
 
 export default function Main() {
+  const { navigate } = useNavigation();
+
   return (
     <>
       <Header
         centerComponent={{
           text: 'Meus Cabes',
-          h4: true,
-          style: { color: '#fff' },
         }}
       />
       <FloatingButtonContainer>
-        <Button title="Adicionar" type="solid" icon={{ name: 'add-circle' }} />
+        <Button
+          title="Adicionar"
+          type="solid"
+          icon={{ name: 'add-circle' }}
+          onPress={() => navigate('CabeInfo')}
+        />
       </FloatingButtonContainer>
       <List
         data={CabesList}
