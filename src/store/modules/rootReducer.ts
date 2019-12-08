@@ -1,15 +1,13 @@
 import { combineReducers } from 'redux';
 
+import cabes, { State as CabesState } from './cabes/reducer';
+
 const reducers = combineReducers({
-  example: () => ({}),
+  cabes,
 });
 
-// export type RootStore = {
-//   auth: AuthState;
-//   users: UsersState;
-//   clients: ClientsState;
-//   rounds: RoundsState;
-//   user: UserState;
-// };
+export type RootStore = {
+  cabes: CabesState;
+};
 
 export default reducers;

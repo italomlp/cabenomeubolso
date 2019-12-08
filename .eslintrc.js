@@ -33,6 +33,7 @@ module.exports = {
     'react-native/no-raw-text': 'off',
     'no-console': 'off',
     'react-native/no-inline-styles': 'warn',
+    'no-param-reassign': 'off',
   },
   settings: {
     'import/resolver': {

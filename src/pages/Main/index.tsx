@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Header, ListItem, Button, Text, Icon } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { listCabesRequest } from 'store/modules/cabes/actions';
+import { RootStore } from 'store/modules/rootReducer';
 import {
   FloatingButtonContainer,
   List,
@@ -9,43 +12,18 @@ import {
   SubTitleContainer,
 } from './styles';
 
-const CabesList = [
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-  {
-    title: 'Feira do mês',
-    value: 450,
-  },
-];
-
 export default function Main() {
   const { navigate } = useNavigation();
+  const dispatch = useDispatch();
+  const [list] = useSelector((state: RootStore) => [state.cabes.list]);
+
+  const getCabes = () => {
+    dispatch(listCabesRequest());
+  };
+
+  useEffect(() => {
+    getCabes();
+  }, []);
 
   return (
     <>
@@ -63,13 +41,13 @@ export default function Main() {
         />
       </FloatingButtonContainer>
       <List
-        data={CabesList}
-        keyExtractor={(item, index) => index.toString()}
+        data={list}
+        keyExtractor={(item: any) => item.id.toString()}
         renderItem={({ item }: any) => (
           <ListItem
             title={
               <ListItemTitleContainer>
-                <Text>{item.title}</Text>
+                <Text>{item.name}</Text>
                 <Icon name="edit" />
               </ListItemTitleContainer>
             }
