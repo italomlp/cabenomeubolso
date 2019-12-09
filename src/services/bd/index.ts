@@ -23,20 +23,28 @@ class RealmAPI {
 
   getAllCabes = () => {
     const list = this.realmInstance.objects<Cabe>('Cabe');
-    return list;
+    return [
+      ...list.map(({ id, name, items, value }) => ({
+        id,
+        name,
+        items,
+        value,
+      })),
+    ];
   };
 
-  getCabeById = (id: number): Cabe => {
-    const cabe = this.realmInstance
+  getCabeById = (idToSearch: number): Cabe => {
+    const { id, name, items, value } = this.realmInstance
       .objects<Cabe>('Cabe')
-      .filtered(`id == ${id}`)[0];
-    return cabe;
+      .filtered(`id == ${idToSearch}`)[0];
+    return { id, name, items, value };
   };
 
   createCabe = (c: Cabe) => {
     let returnCabe;
     this.realmInstance.write(() => {
-      returnCabe = this.realmInstance.create('Cabe', c);
+      const { id, name, items, value } = this.realmInstance.create('Cabe', c);
+      returnCabe = { id, name, items, value };
     });
     return returnCabe;
   };
@@ -44,7 +52,12 @@ class RealmAPI {
   updateCabe = (c: Cabe) => {
     let returnCabe;
     this.realmInstance.write(() => {
-      returnCabe = this.realmInstance.create('Cabe', c, UpdateMode.Modified);
+      const { id, name, items, value } = this.realmInstance.create(
+        'Cabe',
+        c,
+        UpdateMode.Modified
+      );
+      returnCabe = { id, name, items, value };
     });
     return returnCabe;
   };

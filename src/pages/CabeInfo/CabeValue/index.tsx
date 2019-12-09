@@ -55,12 +55,14 @@ export default function CabeValue({
         contentContainerStyle={{ flex: 1 }}
       >
         <SafeAreaView>
-          <Button
-            onPress={nextStep}
-            title="Avançar"
-            type="solid"
-            style={{ marginBottom: 10, paddingHorizontal: 20 }}
-          />
+          {!!value && (
+            <Button
+              onPress={nextStep}
+              title="Avançar"
+              type="solid"
+              style={{ marginBottom: 10, paddingHorizontal: 20 }}
+            />
+          )}
           <Button
             onPress={backStep}
             title="Voltar"

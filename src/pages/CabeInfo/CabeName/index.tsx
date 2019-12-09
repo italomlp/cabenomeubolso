@@ -36,12 +36,14 @@ export default function CabeName({ name, setName, nextStep, backStep }: Props) {
         contentContainerStyle={{ flex: 1 }}
       >
         <SafeAreaView>
-          <Button
-            onPress={nextStep}
-            title="Avançar"
-            type="solid"
-            style={{ marginBottom: 10, paddingHorizontal: 20 }}
-          />
+          {!!name && (
+            <Button
+              onPress={nextStep}
+              title="Avançar"
+              type="solid"
+              style={{ marginBottom: 10, paddingHorizontal: 20 }}
+            />
+          )}
           <Button
             onPress={backStep}
             title="Voltar"

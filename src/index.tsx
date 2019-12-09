@@ -7,11 +7,18 @@ import { ThemeProvider } from 'react-native-elements';
 
 import { store } from 'store';
 import Routes from 'routes';
+import NavigationService from 'services/NavigationService';
 
 const App = () => (
   <Provider store={store}>
     <ThemeProvider>
-      <Routes />
+      <Routes
+        ref={navigatorRef => {
+          if (navigatorRef) {
+            NavigationService.setTopLevelNavigator(navigatorRef);
+          }
+        }}
+      />
     </ThemeProvider>
   </Provider>
 );

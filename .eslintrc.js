@@ -1,10 +1,16 @@
 module.exports = {
-  parser: 'babel-eslint',
+  parser: '@typescript-eslint/parser',
   env: {
     es6: true,
     jest: true,
   },
-  extends: ['airbnb', 'plugin:react-native/all', 'prettier', 'prettier/react'],
+  extends: [
+    'airbnb',
+    'plugin:react-native/all',
+    'prettier',
+    'prettier/react',
+    'prettier/@typescript-eslint',
+  ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
@@ -16,8 +22,16 @@ module.exports = {
     },
     ecmaVersion: 2018,
     sourceType: 'module',
+    project: './tsconfig.json',
   },
-  plugins: ['react', 'react-native', 'jsx-a11y', 'import', 'prettier'],
+  plugins: [
+    'react',
+    'react-native',
+    '@typescript-eslint',
+    'jsx-a11y',
+    'import',
+    'prettier',
+  ],
   rules: {
     'prettier/prettier': 'error',
     'react/jsx-filename-extension': [
@@ -34,6 +48,15 @@ module.exports = {
     'no-console': 'off',
     'react-native/no-inline-styles': 'warn',
     'no-param-reassign': 'off',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: false,
+      },
+    ],
   },
   settings: {
     'import/resolver': {

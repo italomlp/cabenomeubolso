@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Header } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 import { Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
+
+import { createCabeRequest } from 'store/modules/cabes/actions';
+import { CabeItem } from 'models/CabeItem';
 
 import CabeItemsList from './CabeItemsList';
 import CabeName from './CabeName';
@@ -9,24 +13,19 @@ import CabeValue from './CabeValue';
 
 // import { Container } from './styles';
 
-type Item = {
-  name: string | undefined;
-  quantity: number | undefined;
-  id?: number;
-};
-
 export default function CabeInfo() {
   const { goBack } = useNavigation();
   const [name, setName] = useState('');
   const [value, setValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<CabeItem[]>([]);
+  const dispatch = useDispatch();
 
-  const addItem = (item: Item) => {
+  const addItem = (item: CabeItem) => {
     setItems([...items, item]);
   };
 
-  const editItem = (i: number, item: Item) => {
+  const editItem = (i: number, item: CabeItem) => {
     if (i >= 0) {
       const itemsCopy = [...items];
       itemsCopy[i] = item;
@@ -43,7 +42,9 @@ export default function CabeInfo() {
   };
 
   const saveCabe = () => {
-    console.tron.log('save', { name, value, items });
+    dispatch(
+      createCabeRequest({ name, value, items, id: Date.now() + Math.random() })
+    );
   };
 
   const cancel = () => {

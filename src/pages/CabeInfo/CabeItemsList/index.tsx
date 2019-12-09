@@ -8,19 +8,14 @@ import {
   View,
 } from 'react-native';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+import { CabeItem } from 'models/CabeItem';
 
 // import { Container } from './styles';
 
-type Item = {
-  name: string | undefined;
-  quantity: number | undefined;
-  id?: number;
-};
-
 type Props = {
-  items: Item[];
-  addItem: (_: Item) => void;
-  editItem: (index: number, item: Item) => void;
+  items: CabeItem[];
+  addItem: (_: CabeItem) => void;
+  editItem: (index: number, item: CabeItem) => void;
   removeItem: (index: number) => void;
   nextStep: () => void;
 };
@@ -33,7 +28,7 @@ export default function CabeItemsList({
   nextStep,
 }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [currentItem, setCurrentItem] = useState<Item>({
+  const [currentItem, setCurrentItem] = useState<Partial<CabeItem>>({
     name: undefined,
     quantity: undefined,
     id: Date.now(),
@@ -42,18 +37,18 @@ export default function CabeItemsList({
   let inputRef: Input;
 
   const handleAddItem = () => {
-    const item = currentItem;
+    const item = currentItem as CabeItem;
     addItem(item);
     setCurrentItem({
       name: undefined,
       quantity: undefined,
-      id: Date.now(),
+      id: Date.now() + Math.random(),
     });
     setCurrentStep(0);
   };
 
   const handleEditItem = () => {
-    const item = currentItem;
+    const item = currentItem as CabeItem;
     const i = items.findIndex(e => e.id === item.id);
     if (i >= 0) {
       editItem(i, item);
@@ -75,7 +70,7 @@ export default function CabeItemsList({
     }
   };
 
-  const handleRemoveItem = (item: Item) => {
+  const handleRemoveItem = (item: CabeItem) => {
     const i = items.findIndex(e => e.id === item.id);
     if (i >= 0) {
       removeItem(i);
@@ -92,7 +87,7 @@ export default function CabeItemsList({
     return undefined;
   };
 
-  const populateItemToEdit = (item: Item) => {
+  const populateItemToEdit = (item: CabeItem) => {
     if (item && inputRef) {
       setCurrentItem(item);
       setCurrentStep(0);
@@ -200,7 +195,6 @@ export default function CabeItemsList({
             <Button
               onPress={() => nextStep()}
               title="Avançar"
-              type="outline"
               style={{ marginBottom: 10, paddingHorizontal: 20 }}
             />
           )}

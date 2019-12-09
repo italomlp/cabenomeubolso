@@ -1,6 +1,7 @@
 import { all, takeLatest, call, put } from 'redux-saga/effects';
 import { Action } from 'redux';
 
+import NavigationService from 'services/NavigationService';
 import RealmAPI from 'services/bd';
 
 import {
@@ -46,6 +47,7 @@ export function* updateCabe({ payload }: Action) {
     const response = yield call(RealmAPI.updateCabe, cabe);
 
     yield put(updateCabeSuccess(response));
+    NavigationService.navigate('Main');
   } catch (error) {
     console.tron.log('error', error);
     yield put(cabesFailure());
@@ -59,8 +61,9 @@ export function* createCabe({ payload }: Action) {
     const response = yield call(RealmAPI.createCabe, cabe);
 
     yield put(createCabeSuccess(response));
+    NavigationService.navigate('Main');
   } catch (error) {
-    console.tron.log('error', error);
+    console.tron.log('error', error, error.message);
     yield put(cabesFailure());
   }
 }
