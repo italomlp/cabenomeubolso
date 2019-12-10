@@ -1,5 +1,5 @@
 import { Cabe } from 'models/Cabe';
-import Realm, { UpdateMode } from 'realm';
+import Realm from 'realm';
 
 import CabeItemSchema from './schemas/CabeItemSchema';
 import CabeSchema from './schemas/CabeSchema';
@@ -66,7 +66,7 @@ class RealmAPI {
         value,
         createdAt,
         finalized,
-      } = this.realmInstance.create('Cabe', c, UpdateMode.Modified);
+      } = this.realmInstance.create('Cabe', c, Realm.UpdateMode.Modified);
       returnCabe = { id, name, items, value, createdAt, finalized };
     });
     return returnCabe;

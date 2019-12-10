@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Header } from 'react-native-elements';
+import { Header, Button } from 'react-native-elements';
 import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
 import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView, Alert } from 'react-native';
 
 import { CabeItem } from 'models/CabeItem';
-import { getCabeRequest } from 'store/modules/cabes/actions';
+import { getCabeRequest, updateCabeRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
 
+import { Cabe } from 'models/Cabe';
 import CabeItems from './CabeItems';
 import CabeItemQuantity from './CabeItemQuantity';
 import CabeItemValue from './CabeItemValue';
@@ -43,6 +45,32 @@ export default function CabeDetails() {
     );
   };
 
+  const notFinalizedItemsCount = () =>
+    items.filter(i => i.done === false).length;
+
+  const saveCabe = () => {
+    if (cabe) {
+      const updatedCabe: Cabe = {
+        ...cabe,
+        items,
+        finalized: true,
+      };
+      dispatch(updateCabeRequest(updatedCabe));
+    }
+  };
+
+  const handleSaveCabe = () => {
+    if (notFinalizedItemsCount()) {
+      Alert.alert(
+        'Finalizar Cabe?',
+        'Vemos que você não concluiu todos os itens deste Cabe. Deseja finalizar mesmo assim?',
+        [{ text: 'Não' }, { text: 'Sim', onPress: saveCabe }]
+      );
+    } else {
+      saveCabe();
+    }
+  };
+
   useEffect(() => {
     dispatch(getCabeRequest(id));
   }, []);
@@ -65,18 +93,32 @@ export default function CabeDetails() {
             ? { icon: 'arrow-back', onPress: () => goBack() }
             : undefined
         }
-        centerComponent={{ text: 'Titulo do Cabe' }}
+        centerComponent={{ text: cabe?.name }}
       />
       {step === 0 && (
-        <CabeItems
-          maxValue={cabe ? cabe.value : 0}
-          currentValue={getCurrentValue()}
-          items={items}
-          onClickItem={(item: CabeItem) => {
-            setCurrentItem(item);
-            setStep(1);
-          }}
-        />
+        <>
+          <CabeItems
+            maxValue={cabe ? cabe.value : 0}
+            currentValue={getCurrentValue()}
+            items={items}
+            onClickItem={(item: CabeItem) => {
+              setCurrentItem(item);
+              setStep(1);
+            }}
+          />
+          {notFinalizedItemsCount() < items.length && (
+            <SafeAreaView
+              style={{ position: 'absolute', width: '100%', bottom: 0 }}
+            >
+              <Button
+                onPress={handleSaveCabe}
+                title="Finalizar"
+                type="solid"
+                style={{ marginBottom: 10, paddingHorizontal: 20 }}
+              />
+            </SafeAreaView>
+          )}
+        </>
       )}
       {step === 1 && (
         <CabeItemQuantity

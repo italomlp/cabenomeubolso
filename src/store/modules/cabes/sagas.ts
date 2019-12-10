@@ -49,7 +49,7 @@ export function* updateCabe({ payload }: Action) {
     yield put(updateCabeSuccess(response));
     NavigationService.navigate('Main');
   } catch (error) {
-    console.tron.log('error', error);
+    console.tron.log('error', error.message);
     yield put(cabesFailure());
   }
 }
