@@ -97,11 +97,12 @@ export default function CabeDetails() {
         <CabeItemValue
           itemName={currentItem ? currentItem.name : ''}
           quantity={currentItem ? currentItem.quantity : 0}
+          initialValue={currentItem?.value}
           nextStep={value => {
             if (currentItem && value !== currentItem.value) {
               setCurrentItem({ ...currentItem, value, done: true });
-              setStep(0);
             }
+            setStep(0);
           }}
           previousStep={() => {
             setStep(1);

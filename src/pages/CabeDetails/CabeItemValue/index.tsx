@@ -13,6 +13,7 @@ import { TextInputMask, MaskService } from 'react-native-masked-text';
 type Props = {
   quantity: number;
   itemName: string;
+  initialValue?: number;
   nextStep: (value: number) => void;
   previousStep: () => void;
 };
@@ -22,10 +23,13 @@ export default function CabeItemValue({
   previousStep,
   quantity,
   itemName,
+  initialValue,
 }: Props) {
   const [value, setValue] = useState({
-    toShow: '0',
-    toUse: 0,
+    toShow: initialValue
+      ? MaskService.toMask('money', initialValue.toFixed(2))
+      : '0',
+    toUse: initialValue || 0,
   });
 
   return (

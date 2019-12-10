@@ -22,12 +22,12 @@ export default function CabeItems({
     {
       title: 'Não finalizados',
       data: items.filter(i => i.done === false),
-      lowOpacity: false,
+      done: false,
     },
     {
       title: 'Finalizados',
       data: items.filter(i => i.done === true),
-      lowOpacity: true,
+      done: true,
     },
   ];
 
@@ -51,13 +51,14 @@ export default function CabeItems({
         keyExtractor={(item: any) => item.id}
         sections={makeSections()}
         renderSectionHeader={({ section: { title } }) => <Text>{title}</Text>}
-        renderItem={({ item, section: { lowOpacity } }) => (
+        renderItem={({ item, section: { done } }) => (
           <TouchableOpacity
             onPress={() => onClickItem(item)}
-            style={{ opacity: lowOpacity ? 0.2 : 1 }}
+            style={{ opacity: done ? 0.2 : 1 }}
           >
             <Text>{item.quantity}x</Text>
             <Text>{item.name}</Text>
+            {done && <Text>{item.value}</Text>}
           </TouchableOpacity>
         )}
       />
