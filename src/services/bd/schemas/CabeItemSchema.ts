@@ -8,6 +8,8 @@ export default class CabeItemSchema {
       id: { type: 'int', indexed: true },
       name: 'string',
       quantity: 'int',
+      value: { type: 'float', default: 0 },
+      done: { type: 'bool', default: false },
     },
   };
 }

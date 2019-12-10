@@ -1,50 +1,57 @@
 import { Cabe } from 'models/Cabe';
-import realm, { UpdateMode } from 'realm';
+import Realm, { UpdateMode } from 'realm';
 
 import CabeItemSchema from './schemas/CabeItemSchema';
 import CabeSchema from './schemas/CabeSchema';
 
-export function getRealm() {
-  return realm.open({ schema: [CabeItemSchema, CabeSchema] });
-}
-
 class RealmAPI {
-  // @ts-ignore
-  realmInstance: realm;
+  realmInstance: Realm;
 
   constructor() {
-    this.initRealm();
+    this.realmInstance = new Realm({ schema: [CabeItemSchema, CabeSchema] });
+    console.tron.log('realm', this.realmInstance, this.realmInstance.path);
   }
-
-  initRealm = async () => {
-    this.realmInstance = await getRealm();
-    console.tron.log('realm path', this.realmInstance.path);
-  };
 
   getAllCabes = () => {
     const list = this.realmInstance.objects<Cabe>('Cabe');
     return [
-      ...list.map(({ id, name, items, value }) => ({
+      ...list.map(({ id, name, items, value, createdAt, finalized }: Cabe) => ({
         id,
         name,
         items,
         value,
+        createdAt,
+        finalized,
       })),
     ];
   };
 
   getCabeById = (idToSearch: number): Cabe => {
-    const { id, name, items, value } = this.realmInstance
+    const {
+      id,
+      name,
+      items,
+      value,
+      createdAt,
+      finalized,
+    } = this.realmInstance
       .objects<Cabe>('Cabe')
       .filtered(`id == ${idToSearch}`)[0];
-    return { id, name, items, value };
+    return { id, name, items, value, createdAt, finalized };
   };
 
   createCabe = (c: Cabe) => {
     let returnCabe;
     this.realmInstance.write(() => {
-      const { id, name, items, value } = this.realmInstance.create('Cabe', c);
-      returnCabe = { id, name, items, value };
+      const {
+        id,
+        name,
+        items,
+        value,
+        createdAt,
+        finalized,
+      } = this.realmInstance.create('Cabe', c);
+      returnCabe = { id, name, items, value, createdAt, finalized };
     });
     return returnCabe;
   };
@@ -52,12 +59,15 @@ class RealmAPI {
   updateCabe = (c: Cabe) => {
     let returnCabe;
     this.realmInstance.write(() => {
-      const { id, name, items, value } = this.realmInstance.create(
-        'Cabe',
-        c,
-        UpdateMode.Modified
-      );
-      returnCabe = { id, name, items, value };
+      const {
+        id,
+        name,
+        items,
+        value,
+        createdAt,
+        finalized,
+      } = this.realmInstance.create('Cabe', c, UpdateMode.Modified);
+      returnCabe = { id, name, items, value, createdAt, finalized };
     });
     return returnCabe;
   };

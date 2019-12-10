@@ -22,7 +22,7 @@ export function* listCabes() {
 
     yield put(listCabesSuccess(response));
   } catch (error) {
-    console.tron.log(error);
+    console.tron.log(error.message);
     yield put(cabesFailure());
   }
 }

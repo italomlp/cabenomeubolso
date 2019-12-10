@@ -1,4 +1,4 @@
-import { Cabe } from 'models/Cabe';
+import { Cabe, CanonCabe } from 'models/Cabe';
 
 const PREFIX = '@cabes';
 
@@ -54,7 +54,7 @@ export function getCabeSuccess(cabe: Cabe) {
   };
 }
 
-export function createCabeRequest(cabe: Cabe) {
+export function createCabeRequest(cabe: CanonCabe) {
   return {
     type: TYPES.createCabeRequest,
     payload: { cabe },

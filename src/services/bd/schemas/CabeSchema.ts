@@ -6,9 +6,12 @@ export default class CabeSchema {
     primaryKey: 'id',
     properties: {
       id: { type: 'int', indexed: true },
+      createdAt: { type: 'date', default: new Date() },
       name: 'string',
       value: 'float',
+      usedValue: { type: 'float', default: 0 },
       items: 'CabeItem[]',
+      finalized: { type: 'bool', default: false },
     },
   };
 }

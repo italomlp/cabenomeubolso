@@ -41,6 +41,11 @@ export default function Main() {
         />
       </FloatingButtonContainer>
       <List
+        ListEmptyComponent={
+          <Text>
+            Ainda não há nenhum Cabe. Adicione um clicando no botão abaixo.
+          </Text>
+        }
         data={list}
         keyExtractor={(item: any) => item.id.toString()}
         renderItem={({ item }: any) => (
@@ -51,6 +56,7 @@ export default function Main() {
                 <Icon name="edit" />
               </ListItemTitleContainer>
             }
+            onPress={() => navigate('CabeDetails')}
             bottomDivider
             subtitle={
               <SubTitleContainer>
