@@ -57,6 +57,7 @@ module.exports = {
         ignoreRestSiblings: false,
       },
     ],
+    'react/jsx-props-no-spreading': 'off',
   },
   settings: {
     'import/resolver': {

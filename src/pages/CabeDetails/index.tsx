@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Header, Button } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, Alert } from 'react-native';
@@ -7,6 +7,7 @@ import { SafeAreaView, Alert } from 'react-native';
 import { CabeItem } from 'models/CabeItem';
 import { getCabeRequest, updateCabeRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
+import { Header } from 'components';
 
 import { Cabe } from 'models/Cabe';
 import CabeItems from './CabeItems';
@@ -88,12 +89,12 @@ export default function CabeDetails() {
   return (
     <>
       <Header
-        leftComponent={
+        leftIcon={
           step === 0
-            ? { icon: 'arrow-back', onPress: () => goBack() }
+            ? { name: 'arrow-back', onPress: () => goBack() }
             : undefined
         }
-        centerComponent={{ text: cabe?.name }}
+        title={cabe?.name}
       />
       {step === 0 && (
         <>

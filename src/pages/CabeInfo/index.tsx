@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Header } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 import { Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
 
 import { createCabeRequest } from 'store/modules/cabes/actions';
 import { CabeItem } from 'models/CabeItem';
+import { Header } from 'components';
 
 import CabeItemsList from './CabeItemsList';
 import CabeName from './CabeName';
@@ -57,8 +57,8 @@ export default function CabeInfo() {
   return (
     <>
       <Header
-        leftComponent={{ icon: 'arrow-back', onPress: cancel }}
-        centerComponent={{ text: 'Novo Cabe' }}
+        leftIcon={{ name: 'arrow-back', onPress: cancel }}
+        title="Novo Cabe"
       />
       {currentStep === 0 && (
         <CabeItemsList

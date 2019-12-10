@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react';
-import { Header, ListItem, Button, Text, Icon } from 'react-native-elements';
+import { ListItem, Button, Text, Icon } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { listCabesRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
+
+import { Header } from 'components';
+
 import {
   FloatingButtonContainer,
   List,
@@ -27,11 +30,7 @@ export default function Main() {
 
   return (
     <>
-      <Header
-        centerComponent={{
-          text: 'Meus Cabes',
-        }}
-      />
+      <Header title="Meus Cabes" />
       <FloatingButtonContainer>
         <Button
           title="Adicionar"
