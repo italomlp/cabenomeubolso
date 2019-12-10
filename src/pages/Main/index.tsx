@@ -56,7 +56,7 @@ export default function Main() {
                 <Icon name="edit" />
               </ListItemTitleContainer>
             }
-            onPress={() => navigate('CabeDetails')}
+            onPress={() => navigate('CabeDetails', { id: item.id })}
             bottomDivider
             subtitle={
               <SubTitleContainer>

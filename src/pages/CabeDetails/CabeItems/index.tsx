@@ -5,47 +5,28 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 
 // import { Container } from './styles';
 
-const ITEMS = [
-  {
-    id: 1,
-    name: 'Item 1',
-    quantity: 3,
-    done: false,
-  },
-  {
-    id: 2,
-    name: 'Item 2',
-    quantity: 3,
-    done: false,
-  },
-  {
-    id: 3,
-    name: 'Item 3',
-    quantity: 2,
-    done: false,
-  },
-  {
-    id: 4,
-    name: 'Item 4',
-    quantity: 1,
-    done: true,
-  },
-];
-
 type Props = {
+  items: CabeItem[];
+  maxValue: number;
+  currentValue: number;
   onClickItem: (item: CabeItem) => void;
 };
 
-export default function CabeItems({ onClickItem }: Props) {
+export default function CabeItems({
+  onClickItem,
+  items,
+  maxValue,
+  currentValue,
+}: Props) {
   const makeSections = () => [
     {
       title: 'Não finalizados',
-      data: ITEMS.filter(i => i.done === false),
+      data: items.filter(i => i.done === false),
       lowOpacity: false,
     },
     {
       title: 'Finalizados',
-      data: ITEMS.filter(i => i.done === true),
+      data: items.filter(i => i.done === true),
       lowOpacity: true,
     },
   ];
@@ -55,18 +36,18 @@ export default function CabeItems({ onClickItem }: Props) {
       <View>
         <Text>Quanto você pode gastar?</Text>
         <View>
-          <Text>R$ 450,00</Text>
+          <Text>R$ {maxValue}</Text>
         </View>
       </View>
       <View>
         <Text>Quanto você já gastou?</Text>
         <View>
-          <Text>R$ 400,00</Text>
+          <Text>R$ {currentValue}</Text>
         </View>
       </View>
 
       <SectionList
-        data={ITEMS}
+        data={items}
         keyExtractor={(item: any) => item.id}
         sections={makeSections()}
         renderSectionHeader={({ section: { title } }) => <Text>{title}</Text>}

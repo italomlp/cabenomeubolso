@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from 'react-native-elements';
-import { useNavigation } from 'react-navigation-hooks';
+import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { CabeItem } from 'models/CabeItem';
+import { getCabeRequest } from 'store/modules/cabes/actions';
+import { RootStore } from 'store/modules/rootReducer';
 
 import CabeItems from './CabeItems';
 import CabeItemQuantity from './CabeItemQuantity';
@@ -11,33 +14,48 @@ import CabeItemValue from './CabeItemValue';
 // import { Container } from './styles';
 
 export default function CabeDetails() {
+  const id = useNavigationParam('id');
   const { goBack } = useNavigation();
   const [step, setStep] = useState(0);
   const [currentItem, setCurrentItem] = useState<CabeItem | null>(null);
-  const [itemsDone, setItemsDone] = useState<CabeItem[]>([]);
-
-  const addItem = (item: CabeItem) => {
-    setItemsDone([...itemsDone, item]);
-  };
-
-  const editItem = (item: CabeItem, index: number) => {
-    const itemsCopy = [...itemsDone];
-    itemsCopy[index] = item;
-    setItemsDone(itemsCopy);
-  };
+  const [items, setItems] = useState<CabeItem[]>([]);
+  const dispatch = useDispatch();
+  const cabe = useSelector((state: RootStore) => state.cabes.current);
 
   const saveItem = () => {
     if (!currentItem) {
       return;
     }
 
-    const index = itemsDone.findIndex(i => i.id === currentItem.id);
+    const index = items.findIndex(i => i.id === currentItem.id);
     if (index >= 0) {
-      editItem(currentItem, index);
-    } else {
-      addItem(currentItem);
+      const itemsCopy = [...items];
+      itemsCopy[index] = currentItem;
+      setItems(itemsCopy);
     }
   };
+
+  const getCurrentValue = () => {
+    return items.reduce(
+      (previousValue, currentValue) =>
+        currentValue.value * currentValue.quantity + previousValue,
+      0
+    );
+  };
+
+  useEffect(() => {
+    dispatch(getCabeRequest(id));
+  }, []);
+
+  useEffect(() => {
+    if (cabe) {
+      setItems(cabe.items);
+    }
+  }, [cabe]);
+
+  useEffect(() => {
+    saveItem();
+  }, [currentItem]);
 
   return (
     <>
@@ -51,6 +69,9 @@ export default function CabeDetails() {
       />
       {step === 0 && (
         <CabeItems
+          maxValue={cabe ? cabe.value : 0}
+          currentValue={getCurrentValue()}
+          items={items}
           onClickItem={(item: CabeItem) => {
             setCurrentItem(item);
             setStep(1);
@@ -78,8 +99,7 @@ export default function CabeDetails() {
           quantity={currentItem ? currentItem.quantity : 0}
           nextStep={value => {
             if (currentItem && value !== currentItem.value) {
-              setCurrentItem({ ...currentItem, value });
-              saveItem();
+              setCurrentItem({ ...currentItem, value, done: true });
               setStep(0);
             }
           }}
