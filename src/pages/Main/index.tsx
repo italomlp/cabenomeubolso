@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
-import { ListItem, Button, Text, Icon } from 'react-native-elements';
+import { ListItem, Text, Icon } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { listCabesRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
 
-import { Header } from 'components';
+import { Header, Button } from 'components';
 
+import LinearGradient from 'react-native-linear-gradient';
+import colors from 'styles/colors';
 import {
   FloatingButtonContainer,
   List,
@@ -33,9 +35,19 @@ export default function Main() {
       <Header title="Meus Cabes" />
       <FloatingButtonContainer>
         <Button
+          buttonStyle={{ marginHorizontal: 10 }}
+          ViewComponent={LinearGradient}
+          linearGradientProps={{
+            colors: [colors.c200, colors.c300],
+            start: { x: 0, y: 0 },
+            end: { x: 1, y: 0 },
+          }}
           title="Adicionar"
           type="solid"
-          icon={{ name: 'add-circle' }}
+          icon={{
+            name: 'add-circle',
+            color: colors.n100,
+          }}
           onPress={() => navigate('CabeInfo')}
         />
       </FloatingButtonContainer>

@@ -7,7 +7,9 @@ export const FloatingButtonContainer = styled.SafeAreaView`
   bottom: 0;
   width: 100%;
   justify-content: flex-end;
-  align-items: center;
+  padding-right: 10px;
+  padding-left: 10px;
+  padding-bottom: 20px;
 `;
 
 export const List = styled(FlatList).attrs(() => ({
