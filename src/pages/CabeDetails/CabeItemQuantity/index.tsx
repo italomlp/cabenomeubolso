@@ -7,6 +7,8 @@ import {
 } from 'react-native';
 import { Input, Text, Button } from 'react-native-elements';
 
+import { NumericKeyboard } from 'components';
+
 // import { Container } from './styles';
 
 type Props = {
@@ -46,18 +48,8 @@ export default function CabeItemQuantity({
             informou inicialmente, coloque o novo valor aqui
           </Text>
           <Input
-            keyboardType="number-pad"
-            autoFocus
+            editable={false}
             value={quantity ? quantity.toString() : undefined}
-            onChangeText={value => {
-              const qtt = Number.parseInt(value, 10);
-              if (!Number.isNaN(qtt)) {
-                setQuantity(qtt);
-              } else {
-                setQuantity(0);
-              }
-            }}
-            blurOnSubmit={false}
             label="Quantidade"
             placeholder="0"
           />
@@ -75,6 +67,17 @@ export default function CabeItemQuantity({
             onPress={() => nextStep(quantity)}
           />
         </View>
+        <NumericKeyboard
+          value={quantity ? quantity.toString() : undefined}
+          onChangeText={value => {
+            const qtt = Number.parseInt(value, 10);
+            if (!Number.isNaN(qtt)) {
+              setQuantity(qtt);
+            } else {
+              setQuantity(0);
+            }
+          }}
+        />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );

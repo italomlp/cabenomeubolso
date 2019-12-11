@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { Input, Text, Button } from 'react-native-elements';
 import { TextInputMask, MaskService } from 'react-native-masked-text';
+import { NumericKeyboard } from 'components';
 
 // import { Container } from './styles';
 
@@ -54,31 +55,15 @@ export default function CabeItemValue({
             o total para você!
           </Text>
           <TextInputMask
-            keyboardType="decimal-pad"
             type="money"
+            editable={false}
             customTextInput={Input}
             customTextInputProps={{
               label: 'Valor unitário',
               placeholder: '00.00',
             }}
             includeRawValueInChangeText
-            autoFocus
             value={value.toShow}
-            onChangeText={(newValue, newValueRaw) => {
-              const v = Number.parseFloat(newValueRaw || '');
-              if (!Number.isNaN(v)) {
-                setValue({
-                  toShow: newValue,
-                  toUse: v,
-                });
-              } else {
-                setValue({
-                  toShow: '0',
-                  toUse: 0,
-                });
-              }
-            }}
-            blurOnSubmit={false}
           />
           <Text>
             Total baseado no valor que você digitou:
@@ -98,6 +83,32 @@ export default function CabeItemValue({
             onPress={() => nextStep(value.toUse)}
           />
         </View>
+        <NumericKeyboard
+          value={
+            Number.parseFloat(
+              MaskService.toRawValue('money', value.toShow)
+            ).toFixed(2) || undefined
+          }
+          onChangeText={newValue => {
+            const v = Number.parseFloat(newValue || '');
+
+            if (!Number.isNaN(v)) {
+              const realValue = MaskService.toMask('money', newValue);
+
+              setValue({
+                toShow: realValue,
+                toUse: Number.parseFloat(
+                  MaskService.toRawValue('money', realValue) // we need to make this transform again to ensure that we have correct float precision
+                ),
+              });
+            } else {
+              setValue({
+                toShow: '0',
+                toUse: 0,
+              });
+            }
+          }}
+        />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );

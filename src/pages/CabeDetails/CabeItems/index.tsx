@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, SectionList } from 'react-native';
 import { CabeItem } from 'models/CabeItem';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ListItem } from 'react-native-elements';
 
 // import { Container } from './styles';
 
@@ -52,14 +52,24 @@ export default function CabeItems({
         sections={makeSections()}
         renderSectionHeader={({ section: { title } }) => <Text>{title}</Text>}
         renderItem={({ item, section: { done } }) => (
-          <TouchableOpacity
+          <ListItem
             onPress={() => onClickItem(item)}
             style={{ opacity: done ? 0.2 : 1 }}
-          >
-            <Text>{item.quantity}x</Text>
-            <Text>{item.name}</Text>
-            {done && <Text>{item.value}</Text>}
-          </TouchableOpacity>
+            title={
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Text>
+                  <Text>{item.quantity}x </Text>
+                  <Text>{item.name}</Text>
+                </Text>
+                {done && <Text>{item.value}</Text>}
+              </View>
+            }
+          />
         )}
       />
     </>
