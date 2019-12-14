@@ -72,18 +72,18 @@ export const EmptyListText = styled.Text`
   padding: 20px 0;
 `;
 
-export const FinalizedHeader = styled(LinearGradient).attrs((props: any) => ({
+export const FinalizedHeader = styled(LinearGradient).attrs({
   colors: [
-    Color(props.show ? colors.c300 : colors.c400)
+    Color(colors.c300)
       .lighten(0.5)
       .hex(),
-    Color(props.show ? colors.c400 : colors.c300)
+    Color(colors.c400)
       .lighten(0.5)
       .hex(),
   ],
   start: { x: 0, y: 0 },
   end: { x: 1, y: 0 },
-}))<{
+})<{
   show: boolean;
 }>`
   margin-top: 20px;
@@ -93,6 +93,7 @@ export const FinalizedHeader = styled(LinearGradient).attrs((props: any) => ({
   border-top-right-radius: 5px;
   border-bottom-left-radius: ${props => (props.show ? 0 : '5px')};
   border-bottom-right-radius: ${props => (props.show ? 0 : '5px')};
+  opacity: ${props => (props.show ? 1 : 0.6)};
 `;
 
 export const FinalizedHeaderText = styled.Text<{
@@ -121,20 +122,19 @@ export const FinalizedContent = styled(LinearGradient).attrs({
   border-bottom-right-radius: 5px;
 `;
 
-export const FinalizedContentItem = styled.View`
+export const FinalizedContentItem = styled.TouchableOpacity<{ last?: boolean }>`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 0;
-  margin: 0 5px;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid #fff;
-  }
+  padding: 10px 0;
+  margin: 0 10px;
+  border-style: solid;
+  border-bottom-color: ${colors.n100};
+  border-bottom-width: ${props => (props.last ? '0' : '1px')};
 `;
 
 export const FinalizedContentItemText = styled.Text`
   color: ${colors.n100};
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
 `;

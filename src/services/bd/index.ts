@@ -15,14 +15,25 @@ class RealmAPI {
   getAllCabes = () => {
     const list = this.realmInstance.objects<Cabe>('Cabe');
     return [
-      ...list.map(({ id, name, items, value, createdAt, finalized }: Cabe) => ({
-        id,
-        name,
-        items,
-        value,
-        createdAt,
-        finalized,
-      })),
+      ...list.map(
+        ({
+          id,
+          name,
+          items,
+          value,
+          createdAt,
+          finalized,
+          finalizedAt,
+        }: Cabe) => ({
+          id,
+          name,
+          items,
+          value,
+          createdAt,
+          finalized,
+          finalizedAt,
+        })
+      ),
     ];
   };
 
@@ -34,10 +45,11 @@ class RealmAPI {
       value,
       createdAt,
       finalized,
+      finalizedAt,
     } = this.realmInstance
       .objects<Cabe>('Cabe')
       .filtered(`id == ${idToSearch}`)[0];
-    return { id, name, items, value, createdAt, finalized };
+    return { id, name, items, value, createdAt, finalized, finalizedAt };
   };
 
   createCabe = (c: Cabe) => {
@@ -50,8 +62,17 @@ class RealmAPI {
         value,
         createdAt,
         finalized,
+        finalizedAt,
       } = this.realmInstance.create('Cabe', c);
-      returnCabe = { id, name, items, value, createdAt, finalized };
+      returnCabe = {
+        id,
+        name,
+        items,
+        value,
+        createdAt,
+        finalized,
+        finalizedAt,
+      };
     });
     return returnCabe;
   };
@@ -66,8 +87,17 @@ class RealmAPI {
         value,
         createdAt,
         finalized,
+        finalizedAt,
       } = this.realmInstance.create('Cabe', c, Realm.UpdateMode.Modified);
-      returnCabe = { id, name, items, value, createdAt, finalized };
+      returnCabe = {
+        id,
+        name,
+        items,
+        value,
+        createdAt,
+        finalized,
+        finalizedAt,
+      };
     });
     return returnCabe;
   };

@@ -10,4 +10,5 @@ export interface CanonCabe {
 export interface Cabe extends CanonCabe {
   createdAt: Date;
   finalized: boolean;
+  finalizedAt?: Date;
 }

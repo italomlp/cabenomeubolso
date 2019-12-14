@@ -98,8 +98,14 @@ export default function Main() {
               ]}
               renderContent={section => (
                 <FinalizedContent>
-                  {section.content.items.map(cabe => (
-                    <FinalizedContentItem>
+                  {section.content.items.map((cabe, index) => (
+                    <FinalizedContentItem
+                      key={cabe.id}
+                      onPress={() =>
+                        navigate('FinalizedCabeView', { cabeId: cabe.id })
+                      }
+                      last={index === section.content.items.length - 1}
+                    >
                       <FinalizedContentItemText>
                         {cabe.name}
                       </FinalizedContentItemText>

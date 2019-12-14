@@ -54,6 +54,7 @@ export default function CabeDetails() {
         ...cabe,
         items,
         finalized: true,
+        finalizedAt: new Date(),
       };
       dispatch(updateCabeRequest(updatedCabe));
     }
@@ -72,14 +73,14 @@ export default function CabeDetails() {
   };
 
   const backFromCabe = () => {
-    if (notFinalizedItemsCount() === 0) {
-      goBack();
-    } else {
+    if (cabe && cabe.items.length !== notFinalizedItemsCount()) {
       Alert.alert(
         'Cancelar Cabe?',
         'Vemos que você começou esse Cabe, mas não finalizou. Seu progresso será perdido caso volte. Deseja voltar mesmo assim?',
         [{ text: 'Não' }, { text: 'Sim', onPress: goBack }]
       );
+    } else {
+      goBack();
     }
   };
 

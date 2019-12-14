@@ -12,6 +12,7 @@ export default class CabeSchema {
       usedValue: { type: 'float', default: 0 },
       items: 'CabeItem[]',
       finalized: { type: 'bool', default: false },
+      finalizedAt: { type: 'date', optional: true },
     },
   };
 }
