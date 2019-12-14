@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button } from 'react-native-elements';
 import { TextInputMask, MaskService } from 'react-native-masked-text';
+
+import { Button } from 'components';
 
 import { FloatingBottomContainer } from '../components';
 
@@ -62,17 +63,18 @@ export default function CabeValue({
         <>
           {!!value && (
             <Button
+              gradient="tertiary"
               onPress={nextStep}
               title="Avançar"
               type="solid"
-              style={{ marginBottom: 10 }}
+              containerStyle={{ padding: 10, paddingBottom: 5 }}
             />
           )}
           <Button
             onPress={backStep}
             title="Voltar"
             type="outline"
-            style={{ marginBottom: 10 }}
+            containerStyle={{ padding: 10, paddingTop: 5 }}
           />
         </>
       </FloatingBottomContainer>

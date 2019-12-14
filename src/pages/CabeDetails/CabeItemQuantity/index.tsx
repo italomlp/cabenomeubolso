@@ -6,9 +6,8 @@ import {
   Platform,
   Text,
 } from 'react-native';
-import { Button } from 'react-native-elements';
 
-import { NumericKeyboard } from 'components';
+import { NumericKeyboard, Button } from 'components';
 
 import { DescriptionContainer, DescriptionText, Input } from './styles';
 
@@ -61,12 +60,13 @@ export default function CabeItemQuantity({
         </View>
         <View style={{ marginBottom: 30, marginHorizontal: 10 }}>
           <Button
-            style={{ marginBottom: 10 }}
+            containerStyle={{ marginBottom: 10 }}
             title="Voltar"
             type="outline"
             onPress={previousStep}
           />
           <Button
+            gradient="quaternary"
             title="Avançar"
             disabled={!quantity}
             onPress={() => nextStep(quantity)}

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Button } from 'react-native-elements';
+
+import { Button } from 'components';
+
 import { FloatingBottomContainer } from '../components';
 
 import { DescriptionContainer, DescriptionText, Input } from './styles';
@@ -32,17 +34,18 @@ export default function CabeName({ name, setName, nextStep, backStep }: Props) {
         <>
           {!!name && (
             <Button
+              gradient="tertiary"
               onPress={nextStep}
-              title="Avançar"
+              title="Concluir"
               type="solid"
-              style={{ marginBottom: 10 }}
+              containerStyle={{ padding: 10, paddingBottom: 5 }}
             />
           )}
           <Button
             onPress={backStep}
             title="Voltar"
             type="outline"
-            style={{ marginBottom: 10 }}
+            containerStyle={{ padding: 10, paddingTop: 5 }}
           />
         </>
       </FloatingBottomContainer>

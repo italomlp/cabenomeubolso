@@ -5,6 +5,6 @@ export const Container = styled.KeyboardAvoidingView.attrs({
 })`
   position: absolute;
   width: 100%;
-  padding: 10px;
+  padding-bottom: 10px;
   bottom: 0;
 `;

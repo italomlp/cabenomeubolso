@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'react-native-elements';
 import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, Alert } from 'react-native';
@@ -7,7 +6,7 @@ import { SafeAreaView, Alert } from 'react-native';
 import { CabeItem } from 'models/CabeItem';
 import { getCabeRequest, updateCabeRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
-import { Header } from 'components';
+import { Header, Button } from 'components';
 
 import { Cabe } from 'models/Cabe';
 import CabeItems from './CabeItems';
@@ -109,13 +108,19 @@ export default function CabeDetails() {
           />
           {notFinalizedItemsCount() < items.length && (
             <SafeAreaView
-              style={{ position: 'absolute', width: '100%', bottom: 0 }}
+              style={{
+                position: 'absolute',
+                width: '100%',
+                bottom: 0,
+                paddingBottom: 20,
+              }}
             >
               <Button
+                gradient="quaternary"
                 onPress={handleSaveCabe}
                 title="Finalizar"
                 type="solid"
-                style={{ marginBottom: 10, paddingHorizontal: 20 }}
+                containerStyle={{ padding: 10 }}
               />
             </SafeAreaView>
           )}

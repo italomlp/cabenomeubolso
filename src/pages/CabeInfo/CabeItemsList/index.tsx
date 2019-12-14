@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Input, ListItem, Button, Icon } from 'react-native-elements';
+import { Input, ListItem, Icon } from 'react-native-elements';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+
 import { CabeItem } from 'models/CabeItem';
+import { Button } from 'components';
+import colors from 'styles/colors';
+
 import { FloatingBottomContainer } from '../components';
 
 import {
@@ -100,6 +104,14 @@ export default function CabeItemsList({
     }
   };
 
+  const getAddButtonDisable = () => {
+    if (currentStep === 0) {
+      return !currentItem.name;
+    }
+
+    return !currentItem.quantity;
+  };
+
   return (
     <>
       <SwipeListView
@@ -156,7 +168,12 @@ export default function CabeItemsList({
       <FloatingBottomContainer>
         <>
           {!!items.length && (
-            <Button onPress={() => nextStep()} title="Avançar" />
+            <Button
+              gradient="tertiary"
+              containerStyle={{ padding: 10 }}
+              onPress={() => nextStep()}
+              title="Avançar"
+            />
           )}
           <Input
             ref={r => {
@@ -170,13 +187,18 @@ export default function CabeItemsList({
             autoFocus
             value={getInputValue()}
             onChangeText={value => {
-              const newCurrentItem =
-                currentStep === 0
-                  ? { ...currentItem, name: value }
-                  : {
-                      ...currentItem,
-                      quantity: Number.parseInt(value, 10),
-                    };
+              let newCurrentItem;
+              if (currentStep === 0)
+                newCurrentItem = { ...currentItem, name: value };
+              else {
+                if (!Number.parseInt(value, 10) && value) {
+                  return;
+                }
+                newCurrentItem = {
+                  ...currentItem,
+                  quantity: Number.parseInt(value, 10),
+                };
+              }
               setCurrentItem(newCurrentItem);
             }}
             placeholder={currentStep === 0 ? 'Nome do item' : 'Quantidade'}
@@ -185,9 +207,23 @@ export default function CabeItemsList({
               onPress: () => {
                 setCurrentStep(0);
               },
+              containerStyle: {
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                backgroundColor: colors.c400,
+                justifyContent: 'center',
+                alignItems: 'center',
+              },
+              iconStyle: {
+                color: colors.n100,
+              },
             }}
             leftIconContainerStyle={{
               display: currentStep === 0 ? 'none' : 'flex',
+              marginLeft: 0,
+              paddingLeft: 0,
+              marginRight: 10,
             }}
             rightIcon={{
               name: currentStep === 0 ? 'add' : 'check',
@@ -198,8 +234,24 @@ export default function CabeItemsList({
                   handleSaveItem();
                 }
               },
-              disabled:
-                currentStep === 0 ? !currentItem.name : !currentItem.quantity,
+              containerStyle: {
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                backgroundColor: getAddButtonDisable()
+                  ? 'transparent'
+                  : colors.c200,
+                justifyContent: 'center',
+                alignItems: 'center',
+              },
+              disabled: getAddButtonDisable(),
+              disabledStyle: {
+                backgroundColor: 'transparent',
+                opacity: 0.2,
+              },
+              iconStyle: {
+                color: getAddButtonDisable() ? undefined : colors.n100,
+              },
             }}
           />
         </>

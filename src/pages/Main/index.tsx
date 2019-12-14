@@ -3,7 +3,6 @@ import { ListItem, Text, Icon } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { MaskService } from 'react-native-masked-text';
-import LinearGradient from 'react-native-linear-gradient';
 
 import { listCabesRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
@@ -35,17 +34,11 @@ export default function Main() {
       <Header title="Meus Cabes" />
       <FloatingButtonContainer>
         <Button
-          buttonStyle={{ marginHorizontal: 10 }}
-          ViewComponent={LinearGradient}
-          linearGradientProps={{
-            colors: [colors.c200, colors.c300],
-            start: { x: 0, y: 0 },
-            end: { x: 1, y: 0 },
-          }}
-          title="Adicionar"
+          iconButton
+          gradient="primary"
           type="solid"
           icon={{
-            name: 'add-circle',
+            name: 'add',
             color: colors.n100,
           }}
           onPress={() => navigate('CabeInfo')}

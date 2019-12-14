@@ -4,10 +4,11 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  Text,
 } from 'react-native';
-import { Text, Button } from 'react-native-elements';
 import { TextInputMask, MaskService } from 'react-native-masked-text';
-import { NumericKeyboard } from 'components';
+
+import { NumericKeyboard, Button } from 'components';
 
 import {
   DescriptionContainer,
@@ -84,12 +85,13 @@ export default function CabeItemValue({
         </View>
         <View style={{ marginBottom: 30, marginHorizontal: 10 }}>
           <Button
-            style={{ marginBottom: 10 }}
+            containerStyle={{ marginBottom: 10 }}
             title="Voltar"
             type="outline"
             onPress={previousStep}
           />
           <Button
+            gradient="quaternary"
             title="Concluir item"
             disabled={!value.toUse}
             onPress={() => nextStep(value.toUse)}
