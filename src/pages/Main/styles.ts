@@ -62,3 +62,79 @@ export const RightSwipeableItem = styled(LinearGradient).attrs({
   justify-content: flex-end;
   flex-direction: row;
 `;
+
+export const EmptyListText = styled.Text`
+  font-size: 18px;
+  text-align: center;
+  font-weight: 500;
+  margin-top: auto;
+  margin-bottom: auto;
+  padding: 20px 0;
+`;
+
+export const FinalizedHeader = styled(LinearGradient).attrs((props: any) => ({
+  colors: [
+    Color(props.show ? colors.c300 : colors.c400)
+      .lighten(0.5)
+      .hex(),
+    Color(props.show ? colors.c400 : colors.c300)
+      .lighten(0.5)
+      .hex(),
+  ],
+  start: { x: 0, y: 0 },
+  end: { x: 1, y: 0 },
+}))<{
+  show: boolean;
+}>`
+  margin-top: 20px;
+  margin-bottom: -1px;
+  padding: 5px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: ${props => (props.show ? 0 : '5px')};
+  border-bottom-right-radius: ${props => (props.show ? 0 : '5px')};
+`;
+
+export const FinalizedHeaderText = styled.Text<{
+  show: boolean;
+}>`
+  text-align: center;
+  color: ${colors.n100};
+  font-size: 16px;
+  font-weight: ${props => (props.show ? 'bold' : '500')};
+`;
+
+export const FinalizedContent = styled(LinearGradient).attrs({
+  colors: [
+    Color(colors.c300)
+      .lighten(0.5)
+      .hex(),
+    Color(colors.c400)
+      .lighten(0.5)
+      .hex(),
+  ],
+  start: { x: 0, y: 0 },
+  end: { x: 1, y: 0 },
+})`
+  padding: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+`;
+
+export const FinalizedContentItem = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  margin: 0 5px;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #fff;
+  }
+`;
+
+export const FinalizedContentItemText = styled.Text`
+  color: ${colors.n100};
+  font-size: 14px;
+  font-weight: 400;
+`;

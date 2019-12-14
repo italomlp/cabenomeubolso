@@ -7,4 +7,5 @@ export const Container = styled.KeyboardAvoidingView.attrs({
   width: 100%;
   padding-bottom: 10px;
   bottom: 0;
+  background-color: #fff;
 `;

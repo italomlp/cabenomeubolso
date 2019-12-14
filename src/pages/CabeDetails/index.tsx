@@ -71,6 +71,18 @@ export default function CabeDetails() {
     }
   };
 
+  const backFromCabe = () => {
+    if (notFinalizedItemsCount() === 0) {
+      goBack();
+    } else {
+      Alert.alert(
+        'Cancelar Cabe?',
+        'Vemos que você começou esse Cabe, mas não finalizou. Seu progresso será perdido caso volte. Deseja voltar mesmo assim?',
+        [{ text: 'Não' }, { text: 'Sim', onPress: goBack }]
+      );
+    }
+  };
+
   useEffect(() => {
     dispatch(getCabeRequest(id));
   }, []);
@@ -89,9 +101,7 @@ export default function CabeDetails() {
     <>
       <Header
         leftIcon={
-          step === 0
-            ? { name: 'arrow-back', onPress: () => goBack() }
-            : undefined
+          step === 0 ? { name: 'arrow-back', onPress: backFromCabe } : undefined
         }
         title={cabe?.name}
       />

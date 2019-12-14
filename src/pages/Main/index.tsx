@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ListItem, Text, Icon } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { MaskService } from 'react-native-masked-text';
 import { SwipeRow } from 'react-native-swipe-list-view';
 import { Alert } from 'react-native';
+import Accordion from 'react-native-collapsible/Accordion';
 
 import {
   listCabesRequest,
@@ -23,12 +24,19 @@ import {
   RightSwipeableItem,
   SwipeableContainer,
   SwipeableItemContent,
+  EmptyListText,
+  FinalizedHeader,
+  FinalizedHeaderText,
+  FinalizedContent,
+  FinalizedContentItem,
+  FinalizedContentItemText,
 } from './styles';
 
 export default function Main() {
   const { navigate } = useNavigation();
   const dispatch = useDispatch();
   const [list] = useSelector((state: RootStore) => [state.cabes.list]);
+  const [showFinalized, setShowFinalized] = useState(false);
 
   const getCabes = () => {
     dispatch(listCabesRequest());
@@ -40,6 +48,8 @@ export default function Main() {
       { text: 'Sim', onPress: () => dispatch(removeCabeRequest(cabe.id)) },
     ]);
   };
+
+  const getFinalized = () => list.filter(c => c.finalized === true);
 
   useEffect(() => {
     getCabes();
@@ -62,11 +72,48 @@ export default function Main() {
       </FloatingButtonContainer>
       <List
         ListEmptyComponent={
-          <Text>
+          <EmptyListText>
             Ainda não há nenhum Cabe. Adicione um clicando no botão abaixo.
-          </Text>
+          </EmptyListText>
         }
-        data={list}
+        ListFooterComponent={
+          getFinalized().length ? (
+            <Accordion
+              activeSections={showFinalized ? [0] : []}
+              onChange={() => setShowFinalized(!showFinalized)}
+              renderHeader={section => (
+                <FinalizedHeader show={showFinalized}>
+                  <FinalizedHeaderText show={showFinalized}>
+                    {section.title}
+                  </FinalizedHeaderText>
+                </FinalizedHeader>
+              )}
+              sections={[
+                {
+                  title: 'Finalizados',
+                  content: {
+                    items: getFinalized(),
+                  },
+                },
+              ]}
+              renderContent={section => (
+                <FinalizedContent>
+                  {section.content.items.map(cabe => (
+                    <FinalizedContentItem>
+                      <FinalizedContentItemText>
+                        {cabe.name}
+                      </FinalizedContentItemText>
+                      <FinalizedContentItemText>
+                        {MaskService.toMask('money', cabe.value.toFixed(2))}
+                      </FinalizedContentItemText>
+                    </FinalizedContentItem>
+                  ))}
+                </FinalizedContent>
+              )}
+            />
+          ) : null
+        }
+        data={list.filter(c => c.finalized === false)}
         keyExtractor={(item: any) => item.id.toString()}
         renderItem={({ item }: any) => (
           <SwipeRow

@@ -115,6 +115,7 @@ export default function CabeItemsList({
   return (
     <>
       <SwipeListView
+        contentContainerStyle={{ paddingBottom: 110 }}
         ListEmptyComponent={<EmptyList>Ainda não há itens</EmptyList>}
         ListHeaderComponent={
           <DescriptionContainer>
