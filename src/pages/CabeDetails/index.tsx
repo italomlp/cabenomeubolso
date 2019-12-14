@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, Alert } from 'react-native';
+import { AndroidBackHandler } from 'react-navigation-backhandler';
 
 import { CabeItem } from 'models/CabeItem';
 import { getCabeRequest, updateCabeRequest } from 'store/modules/cabes/actions';
@@ -82,6 +83,7 @@ export default function CabeDetails() {
     } else {
       goBack();
     }
+    return true;
   };
 
   useEffect(() => {
@@ -106,6 +108,7 @@ export default function CabeDetails() {
         }
         title={cabe?.name}
       />
+      <AndroidBackHandler onBackPress={() => backFromCabe()} />
       {step === 0 && (
         <>
           <CabeItems

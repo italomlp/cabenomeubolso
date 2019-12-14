@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
 import { Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { AndroidBackHandler } from 'react-navigation-backhandler';
 
 import {
   createCabeRequest,
@@ -98,6 +99,7 @@ export default function CabeInfo() {
     } else {
       goBack();
     }
+    return true;
   };
 
   return (
@@ -106,6 +108,7 @@ export default function CabeInfo() {
         leftIcon={{ name: 'arrow-back', onPress: cancel }}
         title={isEditing() ? `${cabe?.name}` : 'Novo Cabe'}
       />
+      <AndroidBackHandler onBackPress={() => cancel()} />
       {currentStep === 0 && (
         <CabeItemsList
           addItem={addItem}
