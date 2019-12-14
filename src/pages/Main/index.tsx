@@ -6,6 +6,7 @@ import { MaskService } from 'react-native-masked-text';
 import { SwipeRow } from 'react-native-swipe-list-view';
 import { Alert } from 'react-native';
 import Accordion from 'react-native-collapsible/Accordion';
+import RNBootSplash from 'react-native-bootsplash';
 
 import {
   listCabesRequest,
@@ -53,6 +54,7 @@ export default function Main() {
 
   useEffect(() => {
     getCabes();
+    RNBootSplash.hide({ duration: 250 });
   }, []);
 
   return (

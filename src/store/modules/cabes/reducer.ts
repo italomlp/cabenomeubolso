@@ -65,6 +65,7 @@ export default function cabes(state = INITIAL_STATE, action: Action) {
         draft.loading = false;
         const index = draft.list.findIndex(c => c.id === action.payload.id);
         draft.list.splice(index, 1);
+        draft.current = null;
         break;
       }
       default:
