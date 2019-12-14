@@ -90,7 +90,7 @@ export default function CabeItemsList({
     if (currentItem.quantity) {
       return currentItem.quantity.toString();
     }
-    return undefined;
+    return '';
   };
 
   const populateItemToEdit = (item: CabeItem) => {
@@ -191,7 +191,7 @@ export default function CabeItemsList({
               if (currentStep === 0)
                 newCurrentItem = { ...currentItem, name: value };
               else {
-                if (!Number.parseInt(value, 10) && value) {
+                if (value && !Number.parseInt(value, 10)) {
                   return;
                 }
                 newCurrentItem = {
