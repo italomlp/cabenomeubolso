@@ -1,13 +1,10 @@
 import React from 'react';
-import { Input, Button } from 'react-native-elements';
-import {
-  Text,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Button } from 'react-native-elements';
+import { TextInputMask, MaskService } from 'react-native-masked-text';
 
-// import { Container } from './styles';
+import { FloatingBottomContainer } from '../components';
+
+import { DescriptionContainer, DescriptionText, Input } from './styles';
 
 type Props = {
   value: number;
@@ -22,55 +19,63 @@ export default function CabeValue({
   nextStep,
   backStep,
 }: Props) {
-  const handleSetValue = (valueToChange: string) => {
-    if (!valueToChange) return;
+  const handleSetValue = (valueToChange?: string) => {
+    let parsedValue = Number.parseFloat(valueToChange || '');
 
-    const parsedValue = Number.parseFloat(valueToChange);
-
-    if (!parsedValue) return;
+    if (!parsedValue) {
+      parsedValue = 0;
+    }
 
     setValue(parsedValue);
   };
 
   return (
     <>
-      <Text>Quanto você pode gastar nesse Cabe?</Text>
+      <DescriptionContainer>
+        <DescriptionText style={{ textAlign: 'center', fontWeight: 'bold' }}>
+          Quanto você pode gastar nesse Cabe?
+        </DescriptionText>
 
-      <Text>Descrição do valor</Text>
+        <DescriptionText>
+          Esse é o valor alvo, que você não poderá ultrapassar enquanto estiver
+          fazendo o Cabe.
+        </DescriptionText>
+      </DescriptionContainer>
 
-      <Input
+      <TextInputMask
+        type="money"
         autoCorrect={false}
         autoCapitalize="sentences"
-        keyboardType="decimal-pad"
         autoFocus
-        value={value ? value.toString() : undefined}
-        onChangeText={handleSetValue}
-        placeholder="00,00"
-        leftIcon={<Text>R$</Text>}
+        keyboardType="decimal-pad"
+        customTextInput={Input}
+        customTextInputProps={{
+          label: 'Valor',
+          placeholder: '00.00',
+        }}
+        includeRawValueInChangeText
+        value={MaskService.toMask('money', value.toFixed(2))}
+        onChangeText={(v, rawValue) => handleSetValue(rawValue)}
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ position: 'absolute', width: '100%', bottom: 0 }}
-        contentContainerStyle={{ flex: 1 }}
-      >
-        <SafeAreaView>
+      <FloatingBottomContainer>
+        <>
           {!!value && (
             <Button
               onPress={nextStep}
               title="Avançar"
               type="solid"
-              style={{ marginBottom: 10, paddingHorizontal: 20 }}
+              style={{ marginBottom: 10 }}
             />
           )}
           <Button
             onPress={backStep}
             title="Voltar"
             type="outline"
-            style={{ marginBottom: 10, paddingHorizontal: 20 }}
+            style={{ marginBottom: 10 }}
           />
-        </SafeAreaView>
-      </KeyboardAvoidingView>
+        </>
+      </FloatingBottomContainer>
     </>
   );
 }

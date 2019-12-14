@@ -1,9 +1,21 @@
 import React from 'react';
-import { View, Text, SectionList } from 'react-native';
-import { CabeItem } from 'models/CabeItem';
-import { ListItem } from 'react-native-elements';
+import { SectionList } from 'react-native';
+import { MaskService } from 'react-native-masked-text';
 
-// import { Container } from './styles';
+import { CabeItem } from 'models/CabeItem';
+
+import {
+  ValueItemContainer,
+  ValueItemText,
+  ValueItemTitle,
+  ValuesContainer,
+  SectionHeader,
+  ItemRow,
+  ItemText,
+  ListItem,
+  ValueRestText,
+  ListHeaderContainer,
+} from './styles';
 
 type Props = {
   items: CabeItem[];
@@ -33,41 +45,53 @@ export default function CabeItems({
 
   return (
     <>
-      <View>
-        <Text>Quanto você pode gastar?</Text>
-        <View>
-          <Text>R$ {maxValue}</Text>
-        </View>
-      </View>
-      <View>
-        <Text>Quanto você já gastou?</Text>
-        <View>
-          <Text>R$ {currentValue}</Text>
-        </View>
-      </View>
-
       <SectionList
+        ListHeaderComponent={
+          <ListHeaderContainer>
+            <ValuesContainer>
+              <ValueItemContainer>
+                <ValueItemTitle>Pode Gastar</ValueItemTitle>
+                <ValueItemText healthy>
+                  {MaskService.toMask('money', maxValue.toFixed(2))}
+                </ValueItemText>
+              </ValueItemContainer>
+              <ValueItemContainer>
+                <ValueItemTitle>Já gastou</ValueItemTitle>
+                <ValueItemText healthy={currentValue <= maxValue}>
+                  {MaskService.toMask('money', currentValue.toFixed(2))}
+                </ValueItemText>
+              </ValueItemContainer>
+            </ValuesContainer>
+            <ValueRestText>
+              Restam:{' '}
+              {MaskService.toMask(
+                'money',
+                (maxValue - currentValue).toFixed(2)
+              )}
+            </ValueRestText>
+          </ListHeaderContainer>
+        }
         data={items}
         keyExtractor={(item: any) => item.id}
         sections={makeSections()}
-        renderSectionHeader={({ section: { title } }) => <Text>{title}</Text>}
+        renderSectionHeader={({ section: { title, data } }) =>
+          data && data.length ? <SectionHeader>{title}</SectionHeader> : null
+        }
         renderItem={({ item, section: { done } }) => (
           <ListItem
             onPress={() => onClickItem(item)}
-            style={{ opacity: done ? 0.2 : 1 }}
+            done={done}
             title={
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Text>
-                  <Text>{item.quantity}x </Text>
-                  <Text>{item.name}</Text>
-                </Text>
-                {done && <Text>{item.value}</Text>}
-              </View>
+              <ItemRow>
+                <ItemText>
+                  {item.quantity}x {item.name}
+                </ItemText>
+                {done && (
+                  <ItemText>
+                    {MaskService.toMask('money', item.value.toFixed(2))}
+                  </ItemText>
+                )}
+              </ItemRow>
             }
           />
         )}

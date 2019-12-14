@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Input, ListItem, Button, Icon } from 'react-native-elements';
-import {
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  View,
-} from 'react-native';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import { CabeItem } from 'models/CabeItem';
+import { FloatingBottomContainer } from '../components';
 
-// import { Container } from './styles';
+import {
+  DescriptionContainer,
+  DescriptionLine,
+  EmptyList,
+  SwipeableContainer,
+  LeftSwipeableItem,
+  RightSwipeableItem,
+  SwipeableItemContent,
+} from './styles';
 
 type Props = {
   items: CabeItem[];
@@ -100,103 +102,61 @@ export default function CabeItemsList({
 
   return (
     <>
-      <Text>
-        Adicione itens ao seu Cabe digitando abaixo. Remova arrastando o item
-        para o lado esquerdo. Edite clicando sobre cada item. Ao finalizar a
-        lista, clique em Avançar.
-      </Text>
-      {!items.length ? (
-        <Text>Não há itens ainda</Text>
-      ) : (
-        <SwipeListView
-          data={items}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }: any) => (
-            <SwipeRow
-              rightOpenValue={-75}
-              leftOpenValue={75}
-              stopLeftSwipe={100}
-              stopRightSwipe={-100}
-            >
-              <View
-                style={{
-                  height: '100%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    alignItems: 'flex-start',
-                    backgroundColor: 'green',
-                  }}
-                >
-                  <View
-                    style={{
-                      height: '100%',
-                      width: 75,
-                      backgroundColor: 'green',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Icon
-                      name="edit"
-                      color="#fff"
-                      onPress={() => populateItemToEdit(item)}
-                    />
-                  </View>
-                </View>
-                <View
-                  style={{
-                    flex: 1,
-                    alignItems: 'flex-end',
-                    backgroundColor: 'red',
-                  }}
-                >
-                  <View
-                    style={{
-                      height: '100%',
-                      width: 75,
-                      backgroundColor: 'red',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Icon
-                      name="delete"
-                      color="#fff"
-                      onPress={() => handleRemoveItem(item)}
-                    />
-                  </View>
-                </View>
-              </View>
-              <ListItem
-                title={`${item.quantity}x ${item.name}`}
-                bottomDivider
-              />
-            </SwipeRow>
-          )}
-        />
-      )}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{
-          position: 'absolute',
-          width: '100%',
-          bottom: 0,
-        }}
-        contentContainerStyle={{ flex: 1 }}
-      >
-        <SafeAreaView>
+      <SwipeListView
+        ListEmptyComponent={<EmptyList>Ainda não há itens</EmptyList>}
+        ListHeaderComponent={
+          <DescriptionContainer>
+            <DescriptionLine>
+              - Adicione itens ao seu Cabe digitando abaixo.
+            </DescriptionLine>
+            <DescriptionLine>
+              - Remova arrastando o item para o lado esquerdo.
+            </DescriptionLine>
+            <DescriptionLine>
+              - Edite arrastando o item para o lado direito.
+            </DescriptionLine>
+            <DescriptionLine>
+              - Ao finalizar a lista, clique em Avançar.
+            </DescriptionLine>
+          </DescriptionContainer>
+        }
+        data={items}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }: any) => (
+          <SwipeRow
+            rightOpenValue={-75}
+            leftOpenValue={75}
+            stopLeftSwipe={100}
+            stopRightSwipe={-100}
+          >
+            <SwipeableContainer>
+              <LeftSwipeableItem>
+                <SwipeableItemContent>
+                  <Icon
+                    name="edit"
+                    color="#fff"
+                    onPress={() => populateItemToEdit(item)}
+                  />
+                </SwipeableItemContent>
+              </LeftSwipeableItem>
+              <RightSwipeableItem>
+                <SwipeableItemContent>
+                  <Icon
+                    name="delete"
+                    color="#fff"
+                    onPress={() => handleRemoveItem(item)}
+                  />
+                </SwipeableItemContent>
+              </RightSwipeableItem>
+            </SwipeableContainer>
+            <ListItem title={`${item.quantity}x ${item.name}`} bottomDivider />
+          </SwipeRow>
+        )}
+      />
+      <FloatingBottomContainer>
+        <>
           {!!items.length && (
-            <Button
-              onPress={() => nextStep()}
-              title="Avançar"
-              style={{ marginBottom: 10, paddingHorizontal: 20 }}
-            />
+            <Button onPress={() => nextStep()} title="Avançar" />
           )}
           <Input
             ref={r => {
@@ -242,8 +202,8 @@ export default function CabeItemsList({
                 currentStep === 0 ? !currentItem.name : !currentItem.quantity,
             }}
           />
-        </SafeAreaView>
-      </KeyboardAvoidingView>
+        </>
+      </FloatingBottomContainer>
     </>
   );
 }

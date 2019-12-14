@@ -4,12 +4,13 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  Text,
 } from 'react-native';
-import { Input, Text, Button } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 
 import { NumericKeyboard } from 'components';
 
-// import { Container } from './styles';
+import { DescriptionContainer, DescriptionText, Input } from './styles';
 
 type Props = {
   initialQuantity: number;
@@ -43,10 +44,14 @@ export default function CabeItemQuantity({
         }}
       >
         <View style={{ flex: 1 }}>
-          <Text>
-            Caso a quantidade do item {itemName} seja diferente do que você
-            informou inicialmente, coloque o novo valor aqui
-          </Text>
+          <DescriptionContainer>
+            <DescriptionText>
+              Caso a quantidade do item{' '}
+              <Text style={{ fontWeight: 'bold' }}>{itemName}</Text> seja
+              diferente do que você informou inicialmente, coloque o novo valor
+              aqui
+            </DescriptionText>
+          </DescriptionContainer>
           <Input
             editable={false}
             value={quantity ? quantity.toString() : undefined}

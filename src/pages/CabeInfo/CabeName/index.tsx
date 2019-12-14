@@ -1,13 +1,8 @@
 import React from 'react';
-import { Input, Button } from 'react-native-elements';
-import {
-  Text,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Button } from 'react-native-elements';
+import { FloatingBottomContainer } from '../components';
 
-// import { Container } from './styles';
+import { DescriptionContainer, DescriptionText, Input } from './styles';
 
 type Props = {
   name: string;
@@ -19,39 +14,38 @@ type Props = {
 export default function CabeName({ name, setName, nextStep, backStep }: Props) {
   return (
     <>
-      <Text>Dê um nome a esse Cabe</Text>
+      <DescriptionContainer>
+        <DescriptionText>Dê um nome a esse Cabe</DescriptionText>
+      </DescriptionContainer>
 
       <Input
         autoCorrect={false}
         autoCapitalize="sentences"
         autoFocus
+        label="Nome"
         value={name}
         onChangeText={setName}
         placeholder="Meu Cabe Maravilhoso"
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ position: 'absolute', width: '100%', bottom: 0 }}
-        contentContainerStyle={{ flex: 1 }}
-      >
-        <SafeAreaView>
+      <FloatingBottomContainer>
+        <>
           {!!name && (
             <Button
               onPress={nextStep}
               title="Avançar"
               type="solid"
-              style={{ marginBottom: 10, paddingHorizontal: 20 }}
+              style={{ marginBottom: 10 }}
             />
           )}
           <Button
             onPress={backStep}
             title="Voltar"
             type="outline"
-            style={{ marginBottom: 10, paddingHorizontal: 20 }}
+            style={{ marginBottom: 10 }}
           />
-        </SafeAreaView>
-      </KeyboardAvoidingView>
+        </>
+      </FloatingBottomContainer>
     </>
   );
 }

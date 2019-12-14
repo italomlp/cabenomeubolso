@@ -5,11 +5,17 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Input, Text, Button } from 'react-native-elements';
+import { Text, Button } from 'react-native-elements';
 import { TextInputMask, MaskService } from 'react-native-masked-text';
 import { NumericKeyboard } from 'components';
 
-// import { Container } from './styles';
+import {
+  DescriptionContainer,
+  DescriptionText,
+  Input,
+  QuantityText,
+  TotalValue,
+} from './styles';
 
 type Props = {
   quantity: number;
@@ -50,10 +56,13 @@ export default function CabeItemValue({
         }}
       >
         <View style={{ flex: 1 }}>
-          <Text>
-            Informe o valor unitário do item {itemName}, que nós vamos calcular
-            o total para você!
-          </Text>
+          <DescriptionContainer>
+            <DescriptionText>
+              Informe o valor unitário do item{' '}
+              <Text style={{ fontWeight: 'bold' }}>{itemName}</Text>, que nós
+              vamos calcular o total para você!
+            </DescriptionText>
+          </DescriptionContainer>
           <TextInputMask
             type="money"
             editable={false}
@@ -65,10 +74,13 @@ export default function CabeItemValue({
             includeRawValueInChangeText
             value={value.toShow}
           />
-          <Text>
-            Total baseado no valor que você digitou:
-            {MaskService.toMask('money', (value.toUse * quantity).toFixed(2))}
-          </Text>
+          <QuantityText>Quantidade: {quantity}</QuantityText>
+          <TotalValue>
+            Total baseado no valor que você digitou:{' '}
+            <Text style={{ fontWeight: 'bold' }}>
+              {MaskService.toMask('money', (value.toUse * quantity).toFixed(2))}
+            </Text>
+          </TotalValue>
         </View>
         <View style={{ marginBottom: 30, marginHorizontal: 10 }}>
           <Button

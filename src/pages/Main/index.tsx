@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { ListItem, Text, Icon } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
-
 import { useDispatch, useSelector } from 'react-redux';
+import { MaskService } from 'react-native-masked-text';
+import LinearGradient from 'react-native-linear-gradient';
+
 import { listCabesRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
-
 import { Header, Button } from 'components';
-
-import LinearGradient from 'react-native-linear-gradient';
 import colors from 'styles/colors';
+
 import {
   FloatingButtonContainer,
   List,
@@ -71,8 +71,7 @@ export default function Main() {
             bottomDivider
             subtitle={
               <SubTitleContainer>
-                <Text>R$ </Text>
-                <Text h2>{item.value}</Text>
+                <Text h2>{MaskService.toMask('money', item.value)}</Text>
               </SubTitleContainer>
             }
           />
