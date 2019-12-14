@@ -72,7 +72,10 @@ class RealmAPI {
     return returnCabe;
   };
 
-  deleteCabe = (c: Cabe) => {
+  deleteCabe = (id: number) => {
+    const c = this.realmInstance
+      .objects<Cabe>('Cabe')
+      .filtered(`id == ${id}`)[0];
     this.realmInstance.write(() => {
       this.realmInstance.delete(c);
     });

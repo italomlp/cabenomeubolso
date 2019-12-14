@@ -3,17 +3,26 @@ import { ListItem, Text, Icon } from 'react-native-elements';
 import { useNavigation } from 'react-navigation-hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { MaskService } from 'react-native-masked-text';
+import { SwipeRow } from 'react-native-swipe-list-view';
+import { Alert } from 'react-native';
 
-import { listCabesRequest } from 'store/modules/cabes/actions';
+import {
+  listCabesRequest,
+  removeCabeRequest,
+} from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
 import { Header, Button } from 'components';
 import colors from 'styles/colors';
+import { Cabe } from 'models/Cabe';
 
 import {
   FloatingButtonContainer,
   List,
   ListItemTitleContainer,
   SubTitleContainer,
+  RightSwipeableItem,
+  SwipeableContainer,
+  SwipeableItemContent,
 } from './styles';
 
 export default function Main() {
@@ -23,6 +32,13 @@ export default function Main() {
 
   const getCabes = () => {
     dispatch(listCabesRequest());
+  };
+
+  const removeCabe = (cabe: Cabe) => {
+    Alert.alert('Remover Cabe?', `Deseja remover o Cabe ${cabe.name}?`, [
+      { text: 'Não' },
+      { text: 'Sim', onPress: () => dispatch(removeCabeRequest(cabe.id)) },
+    ]);
   };
 
   useEffect(() => {
@@ -53,21 +69,38 @@ export default function Main() {
         data={list}
         keyExtractor={(item: any) => item.id.toString()}
         renderItem={({ item }: any) => (
-          <ListItem
-            title={
-              <ListItemTitleContainer>
-                <Text>{item.name}</Text>
-                <Icon name="edit" />
-              </ListItemTitleContainer>
-            }
-            onPress={() => navigate('CabeDetails', { id: item.id })}
-            bottomDivider
-            subtitle={
-              <SubTitleContainer>
-                <Text h2>{MaskService.toMask('money', item.value)}</Text>
-              </SubTitleContainer>
-            }
-          />
+          <SwipeRow
+            rightOpenValue={-150}
+            stopRightSwipe={-250}
+            disableRightSwipe
+          >
+            <SwipeableContainer>
+              <RightSwipeableItem>
+                <SwipeableItemContent
+                  onPress={() => navigate('CabeInfo', { cabeId: item.id })}
+                >
+                  <Icon name="edit" color="#fff" />
+                </SwipeableItemContent>
+                <SwipeableItemContent onPress={() => removeCabe(item)}>
+                  <Icon name="delete" color="#fff" />
+                </SwipeableItemContent>
+              </RightSwipeableItem>
+            </SwipeableContainer>
+            <ListItem
+              title={
+                <ListItemTitleContainer>
+                  <Text>{item.name}</Text>
+                </ListItemTitleContainer>
+              }
+              onPress={() => navigate('CabeDetails', { id: item.id })}
+              bottomDivider
+              subtitle={
+                <SubTitleContainer>
+                  <Text h2>{MaskService.toMask('money', item.value)}</Text>
+                </SubTitleContainer>
+              }
+            />
+          </SwipeRow>
         )}
       />
     </>

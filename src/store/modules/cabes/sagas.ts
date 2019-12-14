@@ -76,7 +76,7 @@ export function* removeCabe({ payload }: Action) {
 
     yield put(removeCabeSuccess(id));
   } catch (error) {
-    console.tron.log('error', error);
+    console.tron.log('error', error, error.message);
     yield put(cabesFailure());
   }
 }

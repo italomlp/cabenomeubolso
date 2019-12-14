@@ -68,7 +68,7 @@ export function createCabeSuccess(cabe: Cabe) {
   };
 }
 
-export function updateCabeRequest(cabe: Cabe) {
+export function updateCabeRequest(cabe: CanonCabe) {
   return {
     type: TYPES.updateCabeRequest,
     payload: { cabe },
