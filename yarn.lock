@@ -1789,6 +1789,11 @@ babel-plugin-dynamic-import-node@^2.3.0:
   dependencies:
     object.assign "^4.1.0"
 
+babel-plugin-ignite-ignore-reactotron@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-ignite-ignore-reactotron/-/babel-plugin-ignite-ignore-reactotron-0.3.0.tgz#1801b207c7e3de5b3482671ca3cbb75dd4abd29e"
+  integrity sha1-GAGyB8fj3ls0gmcco8u3XdSr0p4=
+
 babel-plugin-istanbul@^5.1.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-istanbul/-/babel-plugin-istanbul-5.2.0.tgz#df4ade83d897a92df069c4d9a25cf2671293c854"
