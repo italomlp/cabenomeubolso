@@ -12,13 +12,16 @@ Costumeiramente, acontecia de haver a necessidade de fazer compras baseado em um
 
 ## Onde baixar?
 
-Em breve, os links para o download nas principais lojas de aplicativos estarão disponíveis aqui.
+Baixe agora nosso app:
+
+[Download para Android](https://play.google.com/store/apps/details?id=com.cabenomeubolso)
 
 ## ROADMAP
 
 O que vem por aí?
 
 - [ ] Melhorias de design, como inclusão de modo dark, melhoramentos no logotipo, etc.
+- [ ] Adição da tela de boas vindas/intro
 - [ ] Criação de API backend para sincronização de listas na conta de usuário
 - [ ] Inserção de itens na hora da compra
 - [ ] Lixeira para listas apagadas
