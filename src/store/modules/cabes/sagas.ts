@@ -18,11 +18,11 @@ export function* listCabes() {
   try {
     const response = yield call(RealmAPI.getAllCabes);
 
-    console.tron.log('response', response);
+    // console.tron.log('response', response);
 
     yield put(listCabesSuccess(response));
   } catch (error) {
-    console.tron.log(error.message);
+    // console.tron.log(error.message);
     yield put(cabesFailure());
   }
 }
@@ -35,7 +35,7 @@ export function* getCabe({ payload }: Action) {
 
     yield put(getCabeSuccess(response));
   } catch (error) {
-    console.tron.log('error', error);
+    // console.tron.log('error', error);
     yield put(cabesFailure());
   }
 }
@@ -49,7 +49,7 @@ export function* updateCabe({ payload }: Action) {
     yield put(updateCabeSuccess(response));
     NavigationService.navigate('Main');
   } catch (error) {
-    console.tron.log('error', error.message);
+    // console.tron.log('error', error.message);
     yield put(cabesFailure());
   }
 }
@@ -63,7 +63,7 @@ export function* createCabe({ payload }: Action) {
     yield put(createCabeSuccess(response));
     NavigationService.navigate('Main');
   } catch (error) {
-    console.tron.log('error', error, error.message);
+    // console.tron.log('error', error, error.message);
     yield put(cabesFailure());
   }
 }
@@ -76,7 +76,7 @@ export function* removeCabe({ payload }: Action) {
 
     yield put(removeCabeSuccess(id));
   } catch (error) {
-    console.tron.log('error', error, error.message);
+    // console.tron.log('error', error, error.message);
     yield put(cabesFailure());
   }
 }

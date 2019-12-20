@@ -9,7 +9,7 @@ class RealmAPI {
 
   constructor() {
     this.realmInstance = new Realm({ schema: [CabeItemSchema, CabeSchema] });
-    console.tron.log('realm', this.realmInstance, this.realmInstance.path);
+    // console.tron.log('realm', this.realmInstance, this.realmInstance.path);
   }
 
   getAllCabes = () => {
