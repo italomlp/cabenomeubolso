@@ -46,6 +46,7 @@ export default function CabeItems({
   return (
     <>
       <SectionList
+        contentContainerStyle={{ paddingBottom: 80 }}
         ListHeaderComponent={
           <ListHeaderContainer>
             <ValuesContainer>
