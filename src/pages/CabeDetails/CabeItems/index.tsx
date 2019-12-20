@@ -43,6 +43,22 @@ export default function CabeItems({
     },
   ];
 
+  const getRestText = () => {
+    const diff = maxValue - currentValue;
+    if (diff > 0) {
+      return `Restam: ${MaskService.toMask('money', diff.toFixed(2))}`;
+    }
+
+    if (diff === 0) {
+      return 'Você gastou exatamente o valor previsto';
+    }
+
+    return `Você gastou ${MaskService.toMask(
+      'money',
+      diff.toFixed(2)
+    )} a mais que o previsto`;
+  };
+
   return (
     <>
       <SectionList
@@ -63,13 +79,7 @@ export default function CabeItems({
                 </ValueItemText>
               </ValueItemContainer>
             </ValuesContainer>
-            <ValueRestText>
-              Restam:{' '}
-              {MaskService.toMask(
-                'money',
-                (maxValue - currentValue).toFixed(2)
-              )}
-            </ValueRestText>
+            <ValueRestText>{getRestText()}</ValueRestText>
           </ListHeaderContainer>
         }
         data={items}
