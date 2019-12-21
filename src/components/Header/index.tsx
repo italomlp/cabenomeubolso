@@ -6,6 +6,7 @@ import {
 } from 'react-native-elements';
 import LinearGradient from 'react-native-linear-gradient';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Platform } from 'react-native';
 
 import colors from 'styles/colors';
 
@@ -34,6 +35,9 @@ export default function Header({
         barStyle: 'light-content',
         translucent: true,
       }}
+      containerStyle={Platform.select({
+        android: Platform.Version <= 20 ? { paddingTop: 0, height: 56 } : {},
+      })}
       linearGradientProps={{
         colors: [colors.c400, colors.c500],
         start: { x: 0, y: 0 },
