@@ -4,18 +4,18 @@ import { Action } from 'redux';
 import { TYPES } from './actions';
 
 export type State = {
-  introSawn: boolean;
+  introViewed: boolean;
 };
 
 const INITIAL_STATE: State = {
-  introSawn: false,
+  introViewed: false,
 };
 
 export default function meta(state = INITIAL_STATE, action: Action) {
   return produce(state, draft => {
     switch (action.type) {
-      case TYPES.markIntroAsSawn:
-        draft.introSawn = true;
+      case TYPES.markIntroAsViewed:
+        draft.introViewed = true;
         break;
       default:
     }
