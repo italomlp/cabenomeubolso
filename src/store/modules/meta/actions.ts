@@ -1,11 +1,11 @@
 const PREFIX = '@meta';
 
 export const TYPES = {
-  markIntroAsSawn: `${PREFIX}/MARK_INTRO_AS_SAWN`,
+  markIntroAsViewed: `${PREFIX}/MARK_INTRO_AS_VIEWED`,
 };
 
-export function markIntroAsSawn() {
+export function markIntroAsViewed() {
   return {
-    type: TYPES.markIntroAsSawn,
+    type: TYPES.markIntroAsViewed,
   };
 }
