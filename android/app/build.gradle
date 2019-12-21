@@ -165,6 +165,7 @@ android {
         }
 
         releaseStaging {
+            signingConfig signingConfigs.release
             resValue "string", "CodePushDeploymentKey", '"UW2zhW2noBbkkZ6omUrcAPZpJEjFCLDcgCgwY"'
 
             matchingFallbacks = ['debug', 'release']
@@ -219,3 +220,4 @@ task copyDownloadableDepsToLibs(type: Copy) {
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+apply from: file("../../node_modules/react-native-code-push/android/codepush.gradle");
