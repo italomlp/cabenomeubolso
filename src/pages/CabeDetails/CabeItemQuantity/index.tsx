@@ -9,6 +9,7 @@ import {
 
 import { NumericKeyboard, Button } from 'components';
 
+import { ScrollView } from 'react-native-gesture-handler';
 import { DescriptionContainer, DescriptionText, Input } from './styles';
 
 type Props = {
@@ -42,36 +43,38 @@ export default function CabeItemQuantity({
           flex: 1,
         }}
       >
-        <View style={{ flex: 1 }}>
-          <DescriptionContainer>
-            <DescriptionText>
-              Caso a quantidade do item{' '}
-              <Text style={{ fontWeight: 'bold' }}>{itemName}</Text> seja
-              diferente do que você informou inicialmente, coloque o novo valor
-              aqui
-            </DescriptionText>
-          </DescriptionContainer>
-          <Input
-            editable={false}
-            value={quantity ? quantity.toString() : undefined}
-            label="Quantidade"
-            placeholder="0"
-          />
-        </View>
-        <View style={{ marginBottom: 30, marginHorizontal: 10 }}>
-          <Button
-            containerStyle={{ marginBottom: 10 }}
-            title="Voltar"
-            type="outline"
-            onPress={previousStep}
-          />
-          <Button
-            gradient="quaternary"
-            title="Avançar"
-            disabled={!quantity}
-            onPress={() => nextStep(quantity)}
-          />
-        </View>
+        <ScrollView>
+          <View style={{ flex: 1 }}>
+            <DescriptionContainer>
+              <DescriptionText>
+                Caso a quantidade do item{' '}
+                <Text style={{ fontWeight: 'bold' }}>{itemName}</Text> seja
+                diferente do que você informou inicialmente, coloque o novo
+                valor aqui
+              </DescriptionText>
+            </DescriptionContainer>
+            <Input
+              editable={false}
+              value={quantity ? quantity.toString() : undefined}
+              label="Quantidade"
+              placeholder="0"
+            />
+          </View>
+          <View style={{ marginVertical: 30, marginHorizontal: 10 }}>
+            <Button
+              containerStyle={{ marginBottom: 10 }}
+              title="Voltar"
+              type="outline"
+              onPress={previousStep}
+            />
+            <Button
+              gradient="quaternary"
+              title="Avançar"
+              disabled={!quantity}
+              onPress={() => nextStep(quantity)}
+            />
+          </View>
+        </ScrollView>
         <NumericKeyboard
           value={quantity ? quantity.toString() : undefined}
           onChangeText={value => {

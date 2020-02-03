@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Text,
+  ScrollView,
 } from 'react-native';
 import { TextInputMask, MaskService } from 'react-native-masked-text';
 
@@ -56,47 +57,52 @@ export default function CabeItemValue({
           flex: 1,
         }}
       >
-        <View style={{ flex: 1 }}>
-          <DescriptionContainer>
-            <DescriptionText>
-              Informe o valor unitário do item{' '}
-              <Text style={{ fontWeight: 'bold' }}>{itemName}</Text>, que nós
-              vamos calcular o total para você!
-            </DescriptionText>
-          </DescriptionContainer>
-          <TextInputMask
-            type="money"
-            editable={false}
-            customTextInput={Input}
-            customTextInputProps={{
-              label: 'Valor unitário',
-              placeholder: '00.00',
-            }}
-            includeRawValueInChangeText
-            value={value.toShow}
-          />
-          <QuantityText>Quantidade: {quantity}</QuantityText>
-          <TotalValue>
-            Total baseado no valor que você digitou:{' '}
-            <Text style={{ fontWeight: 'bold' }}>
-              {MaskService.toMask('money', (value.toUse * quantity).toFixed(2))}
-            </Text>
-          </TotalValue>
-        </View>
-        <View style={{ marginBottom: 30, marginHorizontal: 10 }}>
-          <Button
-            containerStyle={{ marginBottom: 10 }}
-            title="Voltar"
-            type="outline"
-            onPress={previousStep}
-          />
-          <Button
-            gradient="quaternary"
-            title="Concluir item"
-            disabled={!value.toUse}
-            onPress={() => nextStep(value.toUse)}
-          />
-        </View>
+        <ScrollView>
+          <View style={{ flex: 1 }}>
+            <DescriptionContainer>
+              <DescriptionText>
+                Informe o valor unitário do item{' '}
+                <Text style={{ fontWeight: 'bold' }}>{itemName}</Text>, que nós
+                vamos calcular o total para você!
+              </DescriptionText>
+            </DescriptionContainer>
+            <TextInputMask
+              type="money"
+              editable={false}
+              customTextInput={Input}
+              customTextInputProps={{
+                label: 'Valor unitário',
+                placeholder: '00.00',
+              }}
+              includeRawValueInChangeText
+              value={value.toShow}
+            />
+            <QuantityText>Quantidade: {quantity}</QuantityText>
+            <TotalValue>
+              Total baseado no valor que você digitou:{' '}
+              <Text style={{ fontWeight: 'bold' }}>
+                {MaskService.toMask(
+                  'money',
+                  (value.toUse * quantity).toFixed(2)
+                )}
+              </Text>
+            </TotalValue>
+          </View>
+          <View style={{ marginBottom: 30, marginHorizontal: 10 }}>
+            <Button
+              containerStyle={{ marginBottom: 10 }}
+              title="Voltar"
+              type="outline"
+              onPress={previousStep}
+            />
+            <Button
+              gradient="quaternary"
+              title="Concluir item"
+              disabled={!value.toUse}
+              onPress={() => nextStep(value.toUse)}
+            />
+          </View>
+        </ScrollView>
         <NumericKeyboard
           value={
             Number.parseFloat(
