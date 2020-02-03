@@ -20,13 +20,13 @@ const slides = [
     title: 'Listas de Compras',
     subtitle: 'Faça e organize suas listas de compras',
     text:
-      'Desde feira de casa à uma lista de roupas, tenha tudo em mãos facilmente',
+      'Desde feira de casa a uma lista de roupas, tenha tudo em mãos facilmente',
     icon: 'format-list-bulleted',
     colors: [colors.c200, colors.c100],
   },
   {
     key: 'buytotal',
-    title: 'Quanto está gastanto',
+    title: 'Quanto está gastando',
     subtitle: 'Acompanhe o quanto está gastando no momento da compra',
     text:
       'Insira os valores ao marcar itens como concluídos e tenha o total de gastos instantaneamente',
