@@ -9,12 +9,15 @@ export const Container = styled.View`
   background-color: ${Color(colors.c200)
     .lighten(0.4)
     .hex()};
+  max-height: 40%;
+  padding-bottom: 1px;
 `;
 
 export const Row = styled.View`
   flex-direction: row;
   margin-bottom: 1px;
   margin-top: 1px;
+  height: 24.5%;
 
   &:last-child {
     margin-bottom: 0;
@@ -28,7 +31,6 @@ export const Key = styled.TouchableOpacity.attrs({
   activeOpacity: 0.7,
 })`
   flex: 1;
-  height: 70px;
   margin-right: 1px;
   margin-left: 1px;
 
@@ -53,5 +55,5 @@ export const LinearGradient = styled(DefaultLinearGradient).attrs({
 export const KeyText = styled.Text`
   color: ${colors.n100};
   font-weight: bold;
-  font-size: 20px;
+  font-size: 26px;
 `;
