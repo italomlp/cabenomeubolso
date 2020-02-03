@@ -74,14 +74,24 @@ export default function CabeDetails() {
   };
 
   const backFromCabe = () => {
-    if (cabe && cabe.items.length !== notFinalizedItemsCount()) {
-      Alert.alert(
-        'Cancelar Cabe?',
-        'Vemos que você começou esse Cabe, mas não finalizou. Seu progresso será perdido caso volte. Deseja voltar mesmo assim?',
-        [{ text: 'Não' }, { text: 'Sim', onPress: goBack }]
-      );
-    } else {
-      goBack();
+    switch (step) {
+      case 0:
+        if (cabe && cabe.items.length !== notFinalizedItemsCount()) {
+          Alert.alert(
+            'Cancelar Cabe?',
+            'Vemos que você começou esse Cabe, mas não finalizou. Seu progresso será perdido caso volte. Deseja voltar mesmo assim?',
+            [{ text: 'Não' }, { text: 'Sim', onPress: goBack }]
+          );
+        } else {
+          goBack();
+        }
+        break;
+      case 1:
+      case 2:
+        setStep(step - 1);
+        break;
+      default:
+        break;
     }
     return true;
   };
