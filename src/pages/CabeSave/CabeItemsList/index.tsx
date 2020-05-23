@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { Input, ListItem, Icon } from 'react-native-elements';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,7 +24,7 @@ type Props = {
   nextStep: () => void;
 };
 
-export default function CabeItemsList({ nextStep }: Props) {
+function CabeItemsList({ nextStep }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [currentItem, setCurrentItem] = useState<Partial<CabeItem>>({
     name: undefined,
@@ -38,9 +38,9 @@ export default function CabeItemsList({ nextStep }: Props) {
     removeItem,
     cabeValue: { items },
   } = useCabeSave();
-  let inputRef: Input;
+  const inputRef = useRef<Input>();
 
-  const handleAddItem = () => {
+  const handleAddItem = useCallback(() => {
     const item = currentItem as CabeItem;
     addItem(item);
     setCurrentItem({
@@ -49,9 +49,9 @@ export default function CabeItemsList({ nextStep }: Props) {
       id: uuidv4(),
     });
     setCurrentStep(0);
-  };
+  }, [currentItem]);
 
-  const handleEditItem = () => {
+  const handleEditItem = useCallback(() => {
     const item = currentItem as CabeItem;
     const i = items.findIndex(e => e.id === item.id);
     if (i >= 0) {
@@ -64,24 +64,27 @@ export default function CabeItemsList({ nextStep }: Props) {
       setCurrentStep(0);
       setIsEditing(false);
     }
-  };
+  }, [currentItem, items, editItem]);
 
-  const handleSaveItem = () => {
+  const handleSaveItem = useCallback(() => {
     if (isEditing) {
       handleEditItem();
     } else {
       handleAddItem();
     }
-  };
+  }, [isEditing, handleEditItem, handleAddItem]);
 
-  const handleRemoveItem = (item: CabeItem) => {
-    const i = items.findIndex(e => e.id === item.id);
-    if (i >= 0) {
-      removeItem(i);
-    }
-  };
+  const handleRemoveItem = useCallback(
+    (item: CabeItem) => {
+      const i = items.findIndex(e => e.id === item.id);
+      if (i >= 0) {
+        removeItem(i);
+      }
+    },
+    [items, removeItem]
+  );
 
-  const getInputValue = () => {
+  const getInputValue = useCallback(() => {
     if (currentStep === 0) {
       return currentItem.name;
     }
@@ -89,26 +92,29 @@ export default function CabeItemsList({ nextStep }: Props) {
       return currentItem.quantity.toString();
     }
     return '';
-  };
+  }, [currentStep, currentItem]);
 
-  const populateItemToEdit = (item: CabeItem) => {
-    if (item && inputRef) {
-      setCurrentItem(item);
-      setCurrentStep(0);
-      if (!inputRef.isFocused()) {
-        inputRef.focus();
+  const populateItemToEdit = useCallback(
+    (item: CabeItem) => {
+      if (item && inputRef.current) {
+        setCurrentItem(item);
+        setCurrentStep(0);
+        if (!inputRef.current.isFocused()) {
+          inputRef.current.focus();
+        }
+        setIsEditing(true);
       }
-      setIsEditing(true);
-    }
-  };
+    },
+    [inputRef.current]
+  );
 
-  const getAddButtonDisable = () => {
+  const getAddButtonDisable = useCallback(() => {
     if (currentStep === 0) {
       return !currentItem.name;
     }
 
     return !currentItem.quantity;
-  };
+  }, [currentStep, currentItem]);
 
   return (
     <>
@@ -177,7 +183,7 @@ export default function CabeItemsList({ nextStep }: Props) {
           <Input
             ref={r => {
               if (r) {
-                inputRef = r;
+                inputRef.current = r;
               }
             }}
             autoCorrect={false}
@@ -258,3 +264,5 @@ export default function CabeItemsList({ nextStep }: Props) {
     </>
   );
 }
+
+export default memo(CabeItemsList);
