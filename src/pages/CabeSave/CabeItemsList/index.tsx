@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Input, ListItem, Icon } from 'react-native-elements';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+import { v4 as uuidv4 } from 'uuid';
 
 import { CabeItem } from 'models/CabeItem';
 import { Button } from 'components';
@@ -28,7 +29,7 @@ export default function CabeItemsList({ nextStep }: Props) {
   const [currentItem, setCurrentItem] = useState<Partial<CabeItem>>({
     name: undefined,
     quantity: undefined,
-    id: Date.now(),
+    id: uuidv4(),
   });
   const [isEditing, setIsEditing] = useState(false);
   const {
@@ -45,7 +46,7 @@ export default function CabeItemsList({ nextStep }: Props) {
     setCurrentItem({
       name: undefined,
       quantity: undefined,
-      id: Date.now() + Math.random(),
+      id: uuidv4(),
     });
     setCurrentStep(0);
   };
@@ -58,7 +59,7 @@ export default function CabeItemsList({ nextStep }: Props) {
       setCurrentItem({
         name: undefined,
         quantity: undefined,
-        id: Date.now(),
+        id: uuidv4(),
       });
       setCurrentStep(0);
       setIsEditing(false);

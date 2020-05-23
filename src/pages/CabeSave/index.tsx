@@ -3,6 +3,7 @@ import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
 import { Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AndroidBackHandler } from 'react-navigation-backhandler';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   createCabeRequest,
@@ -60,7 +61,7 @@ function CabeSave() {
           name,
           value,
           items,
-          id: Date.now() + Math.random(),
+          id: uuidv4(),
         })
       );
     }

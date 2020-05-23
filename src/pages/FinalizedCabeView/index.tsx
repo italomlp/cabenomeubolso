@@ -4,6 +4,7 @@ import { MaskService } from 'react-native-masked-text';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigationParam, useNavigation } from 'react-navigation-hooks';
 import { format } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   getCabeRequest,
@@ -26,12 +27,6 @@ import {
   ListHeaderContainer,
   FinalizedAtText,
 } from './styles';
-
-const generateId = () => {
-  const now = Date.now();
-  const random = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-  return now + random;
-};
 
 export default function FinalizedCabeView() {
   const dispatch = useDispatch();
@@ -68,9 +63,9 @@ export default function FinalizedCabeView() {
         ...item,
         done: false,
         value: 0,
-        id: generateId(),
+        id: uuidv4(),
       }));
-      const newCabeId = Date.now() + Math.random();
+      const newCabeId = uuidv4();
       dispatch(
         createCabeRequest(
           {
@@ -80,7 +75,7 @@ export default function FinalizedCabeView() {
             id: newCabeId,
           },
           () => {
-            navigate('CabeSave', { cabeId: Math.trunc(newCabeId) });
+            navigate('CabeSave', { cabeId: newCabeId });
           }
         )
       );

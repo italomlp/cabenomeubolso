@@ -5,7 +5,7 @@ export default class CabeSchema {
     name: 'Cabe',
     primaryKey: 'id',
     properties: {
-      id: { type: 'int', indexed: true },
+      id: { type: 'string', indexed: true },
       createdAt: { type: 'date', default: new Date() },
       name: 'string',
       value: 'float',
