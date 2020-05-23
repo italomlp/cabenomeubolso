@@ -11,7 +11,7 @@ import {
   updateCabeRequest,
 } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
-import { Header } from 'components';
+import { Header, ShimmerLoading } from 'components';
 
 import CabeItemsList from './CabeItemsList';
 import CabeName from './CabeName';
@@ -24,6 +24,7 @@ function CabeSave() {
   const { goBack } = useNavigation();
   const cabeId = useNavigationParam('cabeId');
   const [currentStep, setCurrentStep] = useState(0);
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const {
     cabeValue: { items, name, value },
@@ -40,7 +41,10 @@ function CabeSave() {
 
   useEffect(() => {
     if (cabeId) {
+      setLoading(true);
       dispatch(getCabeRequest(cabeId));
+    } else {
+      setTimeout(() => setLoading(false), 400);
     }
   }, []);
 
@@ -49,6 +53,7 @@ function CabeSave() {
       setName(cabe.name);
       setValue(cabe.value);
       setItems(cabe.items);
+      setTimeout(() => setLoading(false), 400);
     }
   }, [isEditing, cabe]);
 
@@ -91,6 +96,7 @@ function CabeSave() {
 
   return (
     <>
+      {loading && <ShimmerLoading />}
       <Header
         leftIcon={{ name: 'arrow-back', onPress: cancel }}
         title={isEditing ? `${cabe?.name}` : 'Novo Cabe'}
