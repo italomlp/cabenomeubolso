@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { TextInputMask, MaskService } from 'react-native-masked-text';
 
-import { NumericKeyboard, Button } from 'components';
+import { Button } from 'components';
 
 import {
   DescriptionContainer,
@@ -57,7 +57,7 @@ export default function CabeItemValue({
           flex: 1,
         }}
       >
-        <ScrollView>
+        <ScrollView keyboardShouldPersistTaps="always">
           <View style={{ flex: 1 }}>
             <DescriptionContainer>
               <DescriptionText>
@@ -68,7 +68,8 @@ export default function CabeItemValue({
             </DescriptionContainer>
             <TextInputMask
               type="money"
-              editable={false}
+              autoFocus
+              keyboardType="numeric"
               customTextInput={Input}
               customTextInputProps={{
                 label: 'Valor unitário',
@@ -76,6 +77,31 @@ export default function CabeItemValue({
               }}
               includeRawValueInChangeText
               value={value.toShow}
+              onChangeText={newV => {
+                const newValue =
+                  Number.parseFloat(
+                    MaskService.toRawValue('money', newV)
+                  ).toFixed(2) || '0';
+                const v = Number.parseFloat(newValue || '');
+
+                console.tron.log('value', v, newValue);
+
+                if (!Number.isNaN(v)) {
+                  const realValue = MaskService.toMask('money', newValue);
+
+                  setValue({
+                    toShow: realValue,
+                    toUse: Number.parseFloat(
+                      MaskService.toRawValue('money', realValue) // we need to make this transform again to ensure that we have correct float precision
+                    ),
+                  });
+                } else {
+                  setValue({
+                    toShow: '0',
+                    toUse: 0,
+                  });
+                }
+              }}
             />
             <QuantityText>Quantidade: {quantity}</QuantityText>
             <TotalValue>
@@ -103,7 +129,7 @@ export default function CabeItemValue({
             />
           </View>
         </ScrollView>
-        <NumericKeyboard
+        {/* <NumericKeyboard
           value={
             Number.parseFloat(
               MaskService.toRawValue('money', value.toShow)
@@ -128,7 +154,7 @@ export default function CabeItemValue({
               });
             }
           }}
-        />
+        /> */}
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
