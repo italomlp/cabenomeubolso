@@ -19,7 +19,7 @@ import CabeValue from './CabeValue';
 
 // import { Container } from './styles';
 
-export default function CabeInfo() {
+export default function CabeSave() {
   const { goBack } = useNavigation();
   const cabeId = useNavigationParam('cabeId');
   const [name, setName] = useState('');

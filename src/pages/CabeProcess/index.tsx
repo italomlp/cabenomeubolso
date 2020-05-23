@@ -16,7 +16,7 @@ import CabeItemValue from './CabeItemValue';
 
 // import { Container } from './styles';
 
-export default function CabeDetails() {
+export default function CabeProcess() {
   const id = useNavigationParam('id');
   const { goBack } = useNavigation();
   const [step, setStep] = useState(0);
