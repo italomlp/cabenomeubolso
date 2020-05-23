@@ -17,22 +17,13 @@ import {
   RightSwipeableItem,
   SwipeableItemContent,
 } from './styles';
+import { useCabeSave } from '../CabeSaveContext';
 
 type Props = {
-  items: CabeItem[];
-  addItem: (_: CabeItem) => void;
-  editItem: (index: number, item: CabeItem) => void;
-  removeItem: (index: number) => void;
   nextStep: () => void;
 };
 
-export default function CabeItemsList({
-  addItem,
-  items,
-  editItem,
-  removeItem,
-  nextStep,
-}: Props) {
+export default function CabeItemsList({ nextStep }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [currentItem, setCurrentItem] = useState<Partial<CabeItem>>({
     name: undefined,
@@ -40,6 +31,12 @@ export default function CabeItemsList({
     id: Date.now(),
   });
   const [isEditing, setIsEditing] = useState(false);
+  const {
+    addItem,
+    editItem,
+    removeItem,
+    cabeValue: { items },
+  } = useCabeSave();
   let inputRef: Input;
 
   const handleAddItem = () => {

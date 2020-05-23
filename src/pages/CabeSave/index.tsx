@@ -26,9 +26,6 @@ function CabeSave() {
   const dispatch = useDispatch();
   const {
     cabeValue: { items, name, value },
-    addItem,
-    editItem,
-    removeItem,
     setName,
     setValue,
     setItems,
@@ -99,29 +96,16 @@ function CabeSave() {
       />
       <AndroidBackHandler onBackPress={() => cancel()} />
       {currentStep === 0 && (
-        <CabeItemsList
-          addItem={addItem}
-          editItem={editItem}
-          items={items}
-          removeItem={removeItem}
-          nextStep={() => setCurrentStep(1)}
-        />
+        <CabeItemsList nextStep={() => setCurrentStep(1)} />
       )}
       {currentStep === 1 && (
         <CabeValue
-          value={value}
-          setValue={setValue}
           nextStep={() => setCurrentStep(2)}
           backStep={() => setCurrentStep(0)}
         />
       )}
       {currentStep === 2 && (
-        <CabeName
-          name={name}
-          setName={setName}
-          nextStep={saveCabe}
-          backStep={() => setCurrentStep(1)}
-        />
+        <CabeName nextStep={saveCabe} backStep={() => setCurrentStep(1)} />
       )}
     </>
   );

@@ -69,17 +69,7 @@ const CabeSaveProvider: React.FC<Props> = ({ children }: Props) => {
       setValue,
       setItems,
     }),
-    [
-      name,
-      value,
-      items,
-      addItem,
-      removeItem,
-      editItem,
-      setName,
-      setItems,
-      setValue,
-    ]
+    [name, value, items, addItem, removeItem, editItem]
   );
 
   return (

@@ -6,20 +6,18 @@ import { Button } from 'components';
 import { FloatingBottomContainer } from '../components';
 
 import { DescriptionContainer, DescriptionText, Input } from './styles';
+import { useCabeSave } from '../CabeSaveContext';
 
 type Props = {
-  value: number;
-  setValue: (value: number) => void;
   nextStep: () => void;
   backStep: () => void;
 };
 
-export default function CabeValue({
-  value,
-  setValue,
-  nextStep,
-  backStep,
-}: Props) {
+export default function CabeValue({ nextStep, backStep }: Props) {
+  const {
+    cabeValue: { value },
+    setValue,
+  } = useCabeSave();
   const handleSetValue = (valueToChange?: string) => {
     let parsedValue = Number.parseFloat(valueToChange || '');
 
