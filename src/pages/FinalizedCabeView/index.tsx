@@ -67,6 +67,7 @@ export default function FinalizedCabeView() {
 
   const newCabeFromThis = useCallback(() => {
     if (cabe) {
+      setLoading(true);
       const items = cabe.items.map(item => ({
         ...item,
         done: false,
@@ -87,6 +88,7 @@ export default function FinalizedCabeView() {
           }
         )
       );
+      setTimeout(() => setLoading(false), 400);
     }
   }, [cabe]);
 
