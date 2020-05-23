@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 
-import { NumericKeyboard, Button } from 'components';
+import { Button } from 'components';
 
 import { ScrollView } from 'react-native-gesture-handler';
 import { DescriptionContainer, DescriptionText, Input } from './styles';
@@ -43,7 +43,7 @@ export default function CabeItemQuantity({
           flex: 1,
         }}
       >
-        <ScrollView>
+        <ScrollView keyboardShouldPersistTaps="always">
           <View style={{ flex: 1 }}>
             <DescriptionContainer>
               <DescriptionText>
@@ -54,10 +54,19 @@ export default function CabeItemQuantity({
               </DescriptionText>
             </DescriptionContainer>
             <Input
-              editable={false}
+              autoFocus
               value={quantity ? quantity.toString() : undefined}
               label="Quantidade"
               placeholder="0"
+              keyboardType="numeric"
+              onChangeText={value => {
+                const qtt = Number.parseInt(value, 10);
+                if (!Number.isNaN(qtt)) {
+                  setQuantity(qtt);
+                } else {
+                  setQuantity(0);
+                }
+              }}
             />
           </View>
           <View style={{ marginVertical: 30, marginHorizontal: 10 }}>
@@ -75,17 +84,6 @@ export default function CabeItemQuantity({
             />
           </View>
         </ScrollView>
-        <NumericKeyboard
-          value={quantity ? quantity.toString() : undefined}
-          onChangeText={value => {
-            const qtt = Number.parseInt(value, 10);
-            if (!Number.isNaN(qtt)) {
-              setQuantity(qtt);
-            } else {
-              setQuantity(0);
-            }
-          }}
-        />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
