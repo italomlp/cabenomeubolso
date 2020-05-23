@@ -84,8 +84,6 @@ export default function CabeItemValue({
                   ).toFixed(2) || '0';
                 const v = Number.parseFloat(newValue || '');
 
-                console.tron.log('value', v, newValue);
-
                 if (!Number.isNaN(v)) {
                   const realValue = MaskService.toMask('money', newValue);
 
