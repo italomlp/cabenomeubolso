@@ -113,9 +113,12 @@ export default function CabeProcess() {
     saveItem();
   }, [currentItem]);
 
+  if (loading) {
+    return <ShimmerLoading />;
+  }
+
   return (
     <>
-      {loading && <ShimmerLoading />}
       <Header
         leftIcon={
           step === 0 ? { name: 'arrow-back', onPress: backFromCabe } : undefined

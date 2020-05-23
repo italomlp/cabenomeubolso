@@ -15,7 +15,20 @@ export const Container = styled.View`
   z-index: 999;
 `;
 
+export const TextContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+`;
+
 export const Title = styled.Text`
   font-size: 24px;
   color: ${colors.c400};
+  text-align: center;
+`;
+
+export const Description = styled.Text`
+  font-size: 14px;
+  color: ${colors.n900};
+  text-align: center;
+  padding-top: 30px;
 `;

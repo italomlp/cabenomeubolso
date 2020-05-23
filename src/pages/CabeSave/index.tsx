@@ -94,9 +94,12 @@ function CabeSave() {
     return true;
   }, [isEditing, cabe, name, value, items, goBack]);
 
+  if (loading) {
+    return <ShimmerLoading />;
+  }
+
   return (
     <>
-      {loading && <ShimmerLoading />}
       <Header
         leftIcon={{ name: 'arrow-back', onPress: cancel }}
         title={isEditing ? `${cabe?.name}` : 'Novo Cabe'}

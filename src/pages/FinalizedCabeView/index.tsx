@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { SectionList, Alert } from 'react-native';
 import { MaskService } from 'react-native-masked-text';
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,7 +12,7 @@ import {
   createCabeRequest,
 } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
-import { Header, Button } from 'components';
+import { Header, Button, ShimmerLoading } from 'components';
 
 import {
   ValueItemContainer,
@@ -33,10 +33,18 @@ export default function FinalizedCabeView() {
   const cabeId = useNavigationParam('cabeId');
   const { goBack, navigate } = useNavigation();
   const cabe = useSelector((state: RootStore) => state.cabes.current);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     dispatch(getCabeRequest(cabeId));
   }, []);
+
+  useEffect(() => {
+    if (cabe) {
+      setTimeout(() => setLoading(false), 400);
+    }
+  }, [cabe]);
 
   const makeSections = useMemo(() => {
     if (cabe) {
@@ -111,11 +119,15 @@ export default function FinalizedCabeView() {
         )
       : 0;
 
+  if (loading) {
+    return <ShimmerLoading />;
+  }
+
   return (
     <>
       <Header
         leftIcon={{ name: 'arrow-back', onPress: goBack }}
-        title={cabe ? cabe.name : 'Ver Cabe'}
+        title={cabe?.name ?? 'Ver Cabe'}
       />
       <SectionList
         ListHeaderComponent={
