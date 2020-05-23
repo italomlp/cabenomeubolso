@@ -54,10 +54,10 @@ export function getCabeSuccess(cabe: Cabe) {
   };
 }
 
-export function createCabeRequest(cabe: CanonCabe) {
+export function createCabeRequest(cabe: CanonCabe, onCreateSuccess?: Function) {
   return {
     type: TYPES.createCabeRequest,
-    payload: { cabe },
+    payload: { cabe, onCreateSuccess },
   };
 }
 

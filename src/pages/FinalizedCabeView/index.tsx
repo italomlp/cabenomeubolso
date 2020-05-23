@@ -1,11 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { SectionList, Alert } from 'react-native';
 import { MaskService } from 'react-native-masked-text';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigationParam, useNavigation } from 'react-navigation-hooks';
 import { format } from 'date-fns';
 
-import { getCabeRequest, removeCabeRequest } from 'store/modules/cabes/actions';
+import {
+  getCabeRequest,
+  removeCabeRequest,
+  createCabeRequest,
+} from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
 import { Header, Button } from 'components';
 
@@ -23,17 +27,23 @@ import {
   FinalizedAtText,
 } from './styles';
 
+const generateId = () => {
+  const now = Date.now();
+  const random = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+  return now + random;
+};
+
 export default function FinalizedCabeView() {
   const dispatch = useDispatch();
   const cabeId = useNavigationParam('cabeId');
-  const { goBack } = useNavigation();
+  const { goBack, navigate } = useNavigation();
   const cabe = useSelector((state: RootStore) => state.cabes.current);
 
   useEffect(() => {
     dispatch(getCabeRequest(cabeId));
   }, []);
 
-  const makeSections = () => {
+  const makeSections = useMemo(() => {
     if (cabe) {
       return [
         {
@@ -50,7 +60,32 @@ export default function FinalizedCabeView() {
     }
 
     return [];
-  };
+  }, [cabe]);
+
+  const newCabeFromThis = useCallback(() => {
+    if (cabe) {
+      const items = cabe.items.map(item => ({
+        ...item,
+        done: false,
+        value: 0,
+        id: generateId(),
+      }));
+      const newCabeId = Date.now() + Math.random();
+      dispatch(
+        createCabeRequest(
+          {
+            name: `${cabe.name} Novo`,
+            value: cabe.value,
+            items,
+            id: newCabeId,
+          },
+          () => {
+            navigate('CabeInfo', { cabeId: Math.trunc(newCabeId) });
+          }
+        )
+      );
+    }
+  }, [cabe]);
 
   const removeCabe = () => {
     if (cabe) {
@@ -116,6 +151,19 @@ export default function FinalizedCabeView() {
                 (getMaxValue() - getCurrentValue()).toFixed(2)
               )}
             </ValueRestText>
+            <Button
+              title="Novo a partir deste"
+              gradient="tertiary"
+              icon={{
+                name: 'add-circle',
+                color: '#fff',
+              }}
+              onPress={() => newCabeFromThis()}
+              containerStyle={{
+                marginTop: 20,
+                alignSelf: 'center',
+              }}
+            />
           </ListHeaderContainer>
         }
         ListFooterComponent={
@@ -128,7 +176,7 @@ export default function FinalizedCabeView() {
         }
         data={cabe ? cabe.items : []}
         keyExtractor={(item: any) => item.id}
-        sections={makeSections()}
+        sections={makeSections}
         renderSectionHeader={({ section: { title, data } }) =>
           data && data.length ? <SectionHeader>{title}</SectionHeader> : null
         }
