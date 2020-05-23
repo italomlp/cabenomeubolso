@@ -80,7 +80,7 @@ export default function FinalizedCabeView() {
             id: newCabeId,
           },
           () => {
-            navigate('CabeInfo', { cabeId: Math.trunc(newCabeId) });
+            navigate('CabeSave', { cabeId: Math.trunc(newCabeId) });
           }
         )
       );
