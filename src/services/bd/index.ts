@@ -1,3 +1,4 @@
+import { CabeItem } from 'models/CabeItem';
 import { Cabe } from 'models/Cabe';
 import Realm from 'realm';
 
@@ -8,7 +9,29 @@ class RealmAPI {
   realmInstance: Realm;
 
   constructor() {
-    this.realmInstance = new Realm({ schema: [CabeItemSchema, CabeSchema] });
+    this.realmInstance = new Realm({
+      schema: [CabeItemSchema, CabeSchema],
+      schemaVersion: 2,
+      migration: (oldRealm, newRealm) => {
+        if (oldRealm.schemaVersion < 2) {
+          const oldCabeItems = oldRealm.objects<CabeItem & { id: number }>(
+            'CabeItem'
+          );
+          const newCabeItems = newRealm.objects<CabeItem>('CabeItem');
+
+          for (let i = 0; i < oldCabeItems.length; i += 1) {
+            newCabeItems[i].id = String(oldCabeItems[i].id);
+          }
+
+          const oldCabes = oldRealm.objects<Cabe & { id: number }>('Cabe');
+          const newCabes = newRealm.objects<Cabe>('Cabe');
+
+          for (let i = 0; i < oldCabes.length; i += 1) {
+            newCabes[i].id = String(oldCabes[i].id);
+          }
+        }
+      },
+    });
     // console.tron.log('realm', this.realmInstance, this.realmInstance.path);
   }
 
@@ -37,7 +60,7 @@ class RealmAPI {
     ];
   };
 
-  getCabeById = (idToSearch: number): Cabe => {
+  getCabeById = (idToSearch: string): Cabe => {
     const {
       id,
       name,
@@ -48,7 +71,7 @@ class RealmAPI {
       finalizedAt,
     } = this.realmInstance
       .objects<Cabe>('Cabe')
-      .filtered(`id == ${idToSearch}`)[0];
+      .filtered(`id == "${idToSearch}"`)[0];
     return { id, name, items, value, createdAt, finalized, finalizedAt };
   };
 
@@ -102,10 +125,10 @@ class RealmAPI {
     return returnCabe;
   };
 
-  deleteCabe = (id: number) => {
+  deleteCabe = (id: string) => {
     const c = this.realmInstance
       .objects<Cabe>('Cabe')
-      .filtered(`id == ${id}`)[0];
+      .filtered(`id == "${id}"`)[0];
     this.realmInstance.write(() => {
       this.realmInstance.delete(c);
     });

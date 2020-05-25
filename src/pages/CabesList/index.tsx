@@ -67,7 +67,7 @@ export default function CabesList() {
             name: 'add',
             color: colors.n100,
           }}
-          onPress={() => navigate('CabeInfo')}
+          onPress={() => navigate('CabeSave')}
         />
       </FloatingButtonContainer>
       <List
@@ -130,7 +130,7 @@ export default function CabesList() {
             <SwipeableContainer>
               <RightSwipeableItem>
                 <SwipeableItemContent
-                  onPress={() => navigate('CabeInfo', { cabeId: item.id })}
+                  onPress={() => navigate('CabeSave', { cabeId: item.id })}
                 >
                   <Icon name="edit" color="#fff" />
                 </SwipeableItemContent>
@@ -145,7 +145,7 @@ export default function CabesList() {
                   <Text>{item.name}</Text>
                 </ListItemTitleContainer>
               }
-              onPress={() => navigate('CabeDetails', { id: item.id })}
+              onPress={() => navigate('CabeProcess', { id: item.id })}
               bottomDivider
               subtitle={
                 <SubTitleContainer>

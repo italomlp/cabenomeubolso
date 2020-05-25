@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
 import { Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AndroidBackHandler } from 'react-navigation-backhandler';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   createCabeRequest,
@@ -10,63 +11,54 @@ import {
   updateCabeRequest,
 } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
-import { CabeItem } from 'models/CabeItem';
-import { Header } from 'components';
+import { Header, ShimmerLoading } from 'components';
 
 import CabeItemsList from './CabeItemsList';
 import CabeName from './CabeName';
 import CabeValue from './CabeValue';
+import { CabeSaveProvider, useCabeSave } from './CabeSaveContext';
 
 // import { Container } from './styles';
 
-export default function CabeInfo() {
+function CabeSave() {
   const { goBack } = useNavigation();
   const cabeId = useNavigationParam('cabeId');
-  const [name, setName] = useState('');
-  const [value, setValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
-  const [items, setItems] = useState<CabeItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const {
+    cabeValue: { items, name, value },
+    setName,
+    setValue,
+    setItems,
+  } = useCabeSave();
   const cabe = useSelector((state: RootStore) => state.cabes.current);
 
-  const isEditing = () => cabeId && cabe && cabe.id === cabeId;
+  const isEditing = useMemo(() => cabeId && cabe && cabe.id === cabeId, [
+    cabeId,
+    cabe,
+  ]);
 
   useEffect(() => {
     if (cabeId) {
+      setLoading(true);
       dispatch(getCabeRequest(cabeId));
+    } else {
+      setTimeout(() => setLoading(false), 400);
     }
   }, []);
 
   useEffect(() => {
-    if (isEditing() && cabe) {
+    if (isEditing && cabe) {
       setName(cabe.name);
       setValue(cabe.value);
       setItems(cabe.items);
+      setTimeout(() => setLoading(false), 400);
     }
-  }, [cabe]);
+  }, [isEditing, cabe]);
 
-  const addItem = (item: CabeItem) => {
-    setItems([...items, item]);
-  };
-
-  const editItem = (i: number, item: CabeItem) => {
-    if (i >= 0) {
-      const itemsCopy = [...items];
-      itemsCopy[i] = item;
-      setItems(itemsCopy);
-    }
-  };
-
-  const removeItem = (i: number) => {
-    if (i >= 0) {
-      const itemsCopy = [...items];
-      itemsCopy.splice(i, 1);
-      setItems(itemsCopy);
-    }
-  };
-
-  const saveCabe = () => {
-    if (isEditing()) {
+  const saveCabe = useCallback(() => {
+    if (isEditing) {
       dispatch(updateCabeRequest({ name, value, items, id: cabeId }));
     } else {
       dispatch(
@@ -74,15 +66,15 @@ export default function CabeInfo() {
           name,
           value,
           items,
-          id: Date.now() + Math.random(),
+          id: uuidv4(),
         })
       );
     }
-  };
+  }, [dispatch, isEditing, name, value, items, cabeId]);
 
-  const cancel = () => {
+  const cancel = useCallback(() => {
     let shouldShowAlert = false;
-    if (isEditing() && cabe) {
+    if (isEditing && cabe) {
       if (name !== cabe.name || cabe.items !== items || cabe.value !== value) {
         shouldShowAlert = true;
       }
@@ -93,47 +85,46 @@ export default function CabeInfo() {
     if (shouldShowAlert) {
       Alert.alert(
         'Cancelar Cabe?',
-        `Deseja cancelar a ${isEditing() ? 'edição' : 'criação'} do seu Cabe?`,
+        `Deseja cancelar a ${isEditing ? 'edição' : 'criação'} do seu Cabe?`,
         [{ text: 'Não' }, { text: 'Sim', onPress: goBack }]
       );
     } else {
       goBack();
     }
     return true;
-  };
+  }, [isEditing, cabe, name, value, items, goBack]);
+
+  if (loading) {
+    return <ShimmerLoading />;
+  }
 
   return (
     <>
       <Header
         leftIcon={{ name: 'arrow-back', onPress: cancel }}
-        title={isEditing() ? `${cabe?.name}` : 'Novo Cabe'}
+        title={isEditing ? `${cabe?.name}` : 'Novo Cabe'}
       />
       <AndroidBackHandler onBackPress={() => cancel()} />
       {currentStep === 0 && (
-        <CabeItemsList
-          addItem={addItem}
-          editItem={editItem}
-          items={items}
-          removeItem={removeItem}
-          nextStep={() => setCurrentStep(1)}
-        />
+        <CabeItemsList nextStep={() => setCurrentStep(1)} />
       )}
       {currentStep === 1 && (
         <CabeValue
-          value={value}
-          setValue={setValue}
           nextStep={() => setCurrentStep(2)}
           backStep={() => setCurrentStep(0)}
         />
       )}
       {currentStep === 2 && (
-        <CabeName
-          name={name}
-          setName={setName}
-          nextStep={saveCabe}
-          backStep={() => setCurrentStep(1)}
-        />
+        <CabeName nextStep={saveCabe} backStep={() => setCurrentStep(1)} />
       )}
     </>
   );
 }
+
+export default () => {
+  return (
+    <CabeSaveProvider>
+      <CabeSave />
+    </CabeSaveProvider>
+  );
+};
