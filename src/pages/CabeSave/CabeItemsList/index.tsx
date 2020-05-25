@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, memo } from 'react';
+import React, { useState, useRef, useCallback, memo, useMemo } from 'react';
 import { Input, ListItem, Icon } from 'react-native-elements';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import { v4 as uuidv4 } from 'uuid';
@@ -84,7 +84,7 @@ function CabeItemsList({ nextStep }: Props) {
     [items, removeItem]
   );
 
-  const getInputValue = useCallback(() => {
+  const inputValue = useMemo(() => {
     if (currentStep === 0) {
       return currentItem.name;
     }
@@ -108,7 +108,8 @@ function CabeItemsList({ nextStep }: Props) {
     [inputRef.current]
   );
 
-  const getAddButtonDisable = useCallback(() => {
+  const addButtonDisabled = useMemo(() => {
+    console.tron.log('addButtonDisabled', currentItem);
     if (currentStep === 0) {
       return !currentItem.name;
     }
@@ -116,10 +117,62 @@ function CabeItemsList({ nextStep }: Props) {
     return !currentItem.quantity;
   }, [currentStep, currentItem]);
 
+  const renderItem = useCallback(
+    ({ item }: any) => (
+      <SwipeRow
+        rightOpenValue={-75}
+        leftOpenValue={75}
+        stopLeftSwipe={100}
+        stopRightSwipe={-100}
+      >
+        <SwipeableContainer>
+          <LeftSwipeableItem>
+            <SwipeableItemContent>
+              <Icon
+                name="edit"
+                color="#fff"
+                onPress={() => populateItemToEdit(item)}
+              />
+            </SwipeableItemContent>
+          </LeftSwipeableItem>
+          <RightSwipeableItem>
+            <SwipeableItemContent>
+              <Icon
+                name="delete"
+                color="#fff"
+                onPress={() => handleRemoveItem(item)}
+              />
+            </SwipeableItemContent>
+          </RightSwipeableItem>
+        </SwipeableContainer>
+        <ListItem title={`${item.quantity}x ${item.name}`} bottomDivider />
+      </SwipeRow>
+    ),
+    [populateItemToEdit, handleRemoveItem]
+  );
+
+  const handleChangeText = useCallback(
+    value => {
+      let newCurrentItem;
+      if (currentStep === 0) newCurrentItem = { ...currentItem, name: value };
+      else {
+        if (value && !Number.parseInt(value, 10)) {
+          return;
+        }
+        newCurrentItem = {
+          ...currentItem,
+          quantity: Number.parseInt(value, 10),
+        };
+      }
+      setCurrentItem(newCurrentItem);
+    },
+    [currentStep, currentItem]
+  );
+
   return (
     <>
       <SwipeListView
-        contentContainerStyle={{ paddingBottom: 110 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         ListEmptyComponent={<EmptyList>Ainda não há itens</EmptyList>}
         ListHeaderComponent={
           <DescriptionContainer>
@@ -139,36 +192,7 @@ function CabeItemsList({ nextStep }: Props) {
         }
         data={items}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }: any) => (
-          <SwipeRow
-            rightOpenValue={-75}
-            leftOpenValue={75}
-            stopLeftSwipe={100}
-            stopRightSwipe={-100}
-          >
-            <SwipeableContainer>
-              <LeftSwipeableItem>
-                <SwipeableItemContent>
-                  <Icon
-                    name="edit"
-                    color="#fff"
-                    onPress={() => populateItemToEdit(item)}
-                  />
-                </SwipeableItemContent>
-              </LeftSwipeableItem>
-              <RightSwipeableItem>
-                <SwipeableItemContent>
-                  <Icon
-                    name="delete"
-                    color="#fff"
-                    onPress={() => handleRemoveItem(item)}
-                  />
-                </SwipeableItemContent>
-              </RightSwipeableItem>
-            </SwipeableContainer>
-            <ListItem title={`${item.quantity}x ${item.name}`} bottomDivider />
-          </SwipeRow>
-        )}
+        renderItem={renderItem}
       />
       <FloatingBottomContainer>
         <>
@@ -190,22 +214,8 @@ function CabeItemsList({ nextStep }: Props) {
             autoCapitalize="sentences"
             keyboardType={currentStep === 0 ? 'default' : 'number-pad'}
             autoFocus
-            value={getInputValue()}
-            onChangeText={value => {
-              let newCurrentItem;
-              if (currentStep === 0)
-                newCurrentItem = { ...currentItem, name: value };
-              else {
-                if (value && !Number.parseInt(value, 10)) {
-                  return;
-                }
-                newCurrentItem = {
-                  ...currentItem,
-                  quantity: Number.parseInt(value, 10),
-                };
-              }
-              setCurrentItem(newCurrentItem);
-            }}
+            value={inputValue}
+            onChangeText={handleChangeText}
             placeholder={currentStep === 0 ? 'Nome do item' : 'Quantidade'}
             leftIcon={{
               name: 'arrow-back',
@@ -243,19 +253,19 @@ function CabeItemsList({ nextStep }: Props) {
                 width: 30,
                 height: 30,
                 borderRadius: 15,
-                backgroundColor: getAddButtonDisable()
+                backgroundColor: addButtonDisabled
                   ? 'transparent'
                   : colors.c200,
                 justifyContent: 'center',
                 alignItems: 'center',
               },
-              disabled: getAddButtonDisable(),
+              disabled: addButtonDisabled,
               disabledStyle: {
                 backgroundColor: 'transparent',
                 opacity: 0.2,
               },
               iconStyle: {
-                color: getAddButtonDisable() ? undefined : colors.n100,
+                color: addButtonDisabled ? undefined : colors.n100,
               },
             }}
           />
