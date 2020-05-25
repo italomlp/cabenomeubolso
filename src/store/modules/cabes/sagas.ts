@@ -35,7 +35,7 @@ export function* getCabe({ payload }: Action) {
 
     yield put(getCabeSuccess(response));
   } catch (error) {
-    // console.tron.log('error', error);
+    // console.tron.log('error', error.message);
     yield put(cabesFailure());
   }
 }
@@ -61,9 +61,12 @@ export function* createCabe({ payload }: Action) {
     const response = yield call(RealmAPI.createCabe, cabe);
 
     yield put(createCabeSuccess(response));
-    NavigationService.navigate('Main');
+    if (payload && payload.onCreateSuccess) {
+      payload.onCreateSuccess(response);
+    } else {
+      NavigationService.navigate('Main');
+    }
   } catch (error) {
-    // console.tron.log('error', error, error.message);
     yield put(cabesFailure());
   }
 }

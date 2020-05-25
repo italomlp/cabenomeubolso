@@ -40,7 +40,7 @@ export function cabesFailure() {
   };
 }
 
-export function getCabeRequest(id: number) {
+export function getCabeRequest(id: string) {
   return {
     type: TYPES.getCabeRequest,
     payload: { id },
@@ -54,10 +54,10 @@ export function getCabeSuccess(cabe: Cabe) {
   };
 }
 
-export function createCabeRequest(cabe: CanonCabe) {
+export function createCabeRequest(cabe: CanonCabe, onCreateSuccess?: Function) {
   return {
     type: TYPES.createCabeRequest,
-    payload: { cabe },
+    payload: { cabe, onCreateSuccess },
   };
 }
 
@@ -82,14 +82,14 @@ export function updateCabeSuccess(cabe: Cabe) {
   };
 }
 
-export function removeCabeRequest(id: number) {
+export function removeCabeRequest(id: string) {
   return {
     type: TYPES.removeCabeRequest,
     payload: { id },
   };
 }
 
-export function removeCabeSuccess(id: number) {
+export function removeCabeSuccess(id: string) {
   return {
     type: TYPES.removeCabeSuccess,
     payload: { id },

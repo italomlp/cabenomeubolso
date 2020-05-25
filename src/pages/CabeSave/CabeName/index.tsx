@@ -5,15 +5,18 @@ import { Button } from 'components';
 import { FloatingBottomContainer } from '../components';
 
 import { DescriptionContainer, DescriptionText, Input } from './styles';
+import { useCabeSave } from '../CabeSaveContext';
 
 type Props = {
-  name: string;
-  setName: (value: string) => void;
   nextStep: () => void;
   backStep: () => void;
 };
 
-export default function CabeName({ name, setName, nextStep, backStep }: Props) {
+export default function CabeName({ nextStep, backStep }: Props) {
+  const {
+    cabeValue: { name },
+    setName,
+  } = useCabeSave();
   return (
     <>
       <DescriptionContainer>
