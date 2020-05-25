@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Button as DefaultButton, ButtonProps } from 'react-native-elements';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -34,7 +34,7 @@ type Props = ButtonProps & {
   gradient?: 'primary' | 'secondary' | 'tertiary' | 'quaternary';
 };
 
-export default function Button({
+function Button({
   color,
   iconButton,
   buttonStyle,
@@ -86,3 +86,5 @@ export default function Button({
     />
   );
 }
+
+export default memo(Button);

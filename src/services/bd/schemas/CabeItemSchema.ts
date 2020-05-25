@@ -5,7 +5,7 @@ export default class CabeItemSchema {
     name: 'CabeItem',
     primaryKey: 'id',
     properties: {
-      id: { type: 'int', indexed: true },
+      id: { type: 'string', indexed: true },
       name: 'string',
       quantity: 'int',
       value: { type: 'float', default: 0 },

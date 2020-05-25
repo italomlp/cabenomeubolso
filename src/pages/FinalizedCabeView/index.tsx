@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { SectionList, Alert } from 'react-native';
 import { MaskService } from 'react-native-masked-text';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigationParam, useNavigation } from 'react-navigation-hooks';
 import { format } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   getCabeRequest,
@@ -11,7 +12,7 @@ import {
   createCabeRequest,
 } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
-import { Header, Button } from 'components';
+import { Header, Button, ShimmerLoading } from 'components';
 
 import {
   ValueItemContainer,
@@ -27,21 +28,23 @@ import {
   FinalizedAtText,
 } from './styles';
 
-const generateId = () => {
-  const now = Date.now();
-  const random = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-  return now + random;
-};
-
 export default function FinalizedCabeView() {
   const dispatch = useDispatch();
   const cabeId = useNavigationParam('cabeId');
   const { goBack, navigate } = useNavigation();
   const cabe = useSelector((state: RootStore) => state.cabes.current);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     dispatch(getCabeRequest(cabeId));
   }, []);
+
+  useEffect(() => {
+    if (cabe) {
+      setTimeout(() => setLoading(false), 400);
+    }
+  }, [cabe]);
 
   const makeSections = useMemo(() => {
     if (cabe) {
@@ -64,13 +67,14 @@ export default function FinalizedCabeView() {
 
   const newCabeFromThis = useCallback(() => {
     if (cabe) {
+      setLoading(true);
       const items = cabe.items.map(item => ({
         ...item,
         done: false,
         value: 0,
-        id: generateId(),
+        id: uuidv4(),
       }));
-      const newCabeId = Date.now() + Math.random();
+      const newCabeId = uuidv4();
       dispatch(
         createCabeRequest(
           {
@@ -80,10 +84,11 @@ export default function FinalizedCabeView() {
             id: newCabeId,
           },
           () => {
-            navigate('CabeInfo', { cabeId: Math.trunc(newCabeId) });
+            navigate('CabeSave', { cabeId: newCabeId });
           }
         )
       );
+      setTimeout(() => setLoading(false), 400);
     }
   }, [cabe]);
 
@@ -116,11 +121,15 @@ export default function FinalizedCabeView() {
         )
       : 0;
 
+  if (loading) {
+    return <ShimmerLoading />;
+  }
+
   return (
     <>
       <Header
         leftIcon={{ name: 'arrow-back', onPress: goBack }}
-        title={cabe ? cabe.name : 'Ver Cabe'}
+        title={cabe?.name ?? 'Ver Cabe'}
       />
       <SectionList
         ListHeaderComponent={

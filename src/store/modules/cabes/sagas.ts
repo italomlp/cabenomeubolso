@@ -35,7 +35,7 @@ export function* getCabe({ payload }: Action) {
 
     yield put(getCabeSuccess(response));
   } catch (error) {
-    // console.tron.log('error', error);
+    // console.tron.log('error', error.message);
     yield put(cabesFailure());
   }
 }

@@ -2,7 +2,7 @@ import { CabeItem } from './CabeItem';
 
 export interface CanonCabe {
   name: string;
-  id: number;
+  id: string;
   value: number;
   items: CabeItem[];
 }

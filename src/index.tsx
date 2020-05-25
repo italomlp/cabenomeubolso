@@ -2,6 +2,7 @@ import React from 'react';
 
 import 'react-native-gesture-handler';
 import 'config/ReactotronConfig';
+import 'react-native-get-random-values';
 
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'react-native-elements';

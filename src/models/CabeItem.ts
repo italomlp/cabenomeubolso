@@ -1,5 +1,5 @@
 export interface CanonCabeItem {
-  id: number;
+  id: string;
   quantity: number;
   name: string;
 }

@@ -7,7 +7,7 @@ import { AndroidBackHandler } from 'react-navigation-backhandler';
 import { CabeItem } from 'models/CabeItem';
 import { getCabeRequest, updateCabeRequest } from 'store/modules/cabes/actions';
 import { RootStore } from 'store/modules/rootReducer';
-import { Header, Button } from 'components';
+import { Header, Button, ShimmerLoading } from 'components';
 
 import { Cabe } from 'models/Cabe';
 import CabeItems from './CabeItems';
@@ -16,13 +16,14 @@ import CabeItemValue from './CabeItemValue';
 
 // import { Container } from './styles';
 
-export default function CabeDetails() {
+export default function CabeProcess() {
   const id = useNavigationParam('id');
   const { goBack } = useNavigation();
   const [step, setStep] = useState(0);
   const [currentItem, setCurrentItem] = useState<CabeItem | null>(null);
   const [items, setItems] = useState<CabeItem[]>([]);
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
   const cabe = useSelector((state: RootStore) => state.cabes.current);
 
   const saveItem = () => {
@@ -97,11 +98,13 @@ export default function CabeDetails() {
   };
 
   useEffect(() => {
+    setLoading(true);
     dispatch(getCabeRequest(id));
   }, []);
 
   useEffect(() => {
     if (cabe) {
+      setTimeout(() => setLoading(false), 400);
       setItems(cabe.items);
     }
   }, [cabe]);
@@ -109,6 +112,10 @@ export default function CabeDetails() {
   useEffect(() => {
     saveItem();
   }, [currentItem]);
+
+  if (loading) {
+    return <ShimmerLoading />;
+  }
 
   return (
     <>

@@ -40,7 +40,7 @@ export function cabesFailure() {
   };
 }
 
-export function getCabeRequest(id: number) {
+export function getCabeRequest(id: string) {
   return {
     type: TYPES.getCabeRequest,
     payload: { id },
@@ -82,14 +82,14 @@ export function updateCabeSuccess(cabe: Cabe) {
   };
 }
 
-export function removeCabeRequest(id: number) {
+export function removeCabeRequest(id: string) {
   return {
     type: TYPES.removeCabeRequest,
     payload: { id },
   };
 }
 
-export function removeCabeSuccess(id: number) {
+export function removeCabeSuccess(id: string) {
   return {
     type: TYPES.removeCabeSuccess,
     payload: { id },
