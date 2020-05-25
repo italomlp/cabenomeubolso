@@ -35,25 +35,34 @@ const CabeSaveProvider: React.FC<Props> = ({ children }: Props) => {
   const [value, setValue] = useState(0);
   const [items, setItems] = useState<CabeItem[]>([]);
 
-  const addItem = useCallback((item: CabeItem) => {
-    setItems([...items, item]);
-  }, []);
+  const addItem = useCallback(
+    (item: CabeItem) => {
+      setItems([...items, item]);
+    },
+    [items]
+  );
 
-  const editItem = useCallback((i: number, item: CabeItem) => {
-    if (i >= 0) {
-      const itemsCopy = [...items];
-      itemsCopy[i] = item;
-      setItems(itemsCopy);
-    }
-  }, []);
+  const editItem = useCallback(
+    (i: number, item: CabeItem) => {
+      if (i >= 0) {
+        const itemsCopy = [...items];
+        itemsCopy[i] = item;
+        setItems(itemsCopy);
+      }
+    },
+    [items]
+  );
 
-  const removeItem = useCallback((i: number) => {
-    if (i >= 0) {
-      const itemsCopy = [...items];
-      itemsCopy.splice(i, 1);
-      setItems(itemsCopy);
-    }
-  }, []);
+  const removeItem = useCallback(
+    (i: number) => {
+      if (i >= 0) {
+        const itemsCopy = [...items];
+        itemsCopy.splice(i, 1);
+        setItems(itemsCopy);
+      }
+    },
+    [items]
+  );
 
   const contextValue = useMemo(
     () => ({

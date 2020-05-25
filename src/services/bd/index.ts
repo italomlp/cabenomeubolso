@@ -13,7 +13,6 @@ class RealmAPI {
       schema: [CabeItemSchema, CabeSchema],
       schemaVersion: 2,
       migration: (oldRealm, newRealm) => {
-        console.tron.log('schema version', oldRealm.schemaVersion);
         if (oldRealm.schemaVersion < 2) {
           const oldCabeItems = oldRealm.objects<CabeItem & { id: number }>(
             'CabeItem'
