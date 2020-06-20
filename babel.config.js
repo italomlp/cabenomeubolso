@@ -17,7 +17,7 @@ module.exports = {
           '.json',
         ],
         alias: {
-          '@user': './src/',
+          '@app': './src/',
         },
       },
     ],

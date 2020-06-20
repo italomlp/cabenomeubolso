@@ -18,6 +18,7 @@
     "date-fns": "^2.8.1",
     "eslint-import-resolver-babel-module": "^5.1.0",
     "immer": "^5.0.0",
+    "polished": "^3.6.5",
     "react": "16.9.0",
     "react-native": "0.61.4",
     "react-native-app-intro-slider": "^3.0.0",

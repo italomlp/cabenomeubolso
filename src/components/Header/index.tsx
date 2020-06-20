@@ -8,7 +8,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Platform } from 'react-native';
 
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 import { HeaderTitleContainer } from './styles';
 

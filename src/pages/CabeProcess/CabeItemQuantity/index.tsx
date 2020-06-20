@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 
-import { Button } from 'components';
+import { Button } from '@app/components';
 
 import { ScrollView } from 'react-native-gesture-handler';
 import { DescriptionContainer, DescriptionText, Input } from './styles';

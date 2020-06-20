@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Button as DefaultButton, ButtonProps } from 'react-native-elements';
 import LinearGradient from 'react-native-linear-gradient';
 
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 const gradients = {
   primary: {

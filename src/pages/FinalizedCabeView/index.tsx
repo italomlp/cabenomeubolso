@@ -5,15 +5,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useTypedRoute, useStackNavigation } from 'hooks/useTypedNavigaiton';
+import {
+  useTypedRoute,
+  useStackNavigation,
+} from '@app/hooks/useTypedNavigaiton';
 
 import {
   getCabeRequest,
   removeCabeRequest,
   createCabeRequest,
-} from 'store/modules/cabes/actions';
-import { RootStore } from 'store/modules/rootReducer';
-import { Header, Button, ShimmerLoading } from 'components';
+} from '@app/store/modules/cabes/actions';
+import { RootStore } from '@app/store/modules/rootReducer';
+import { Header, Button, ShimmerLoading } from '@app/components';
 
 import {
   ValueItemContainer,

@@ -3,7 +3,7 @@ import styled from 'styled-components/native';
 
 import Color from 'color';
 
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 export const Container = styled.View`
   background-color: ${Color(colors.c200).lighten(0.4).hex()};

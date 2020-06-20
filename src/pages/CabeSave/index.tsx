@@ -3,14 +3,17 @@ import { Alert, BackHandler } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useStackNavigation, useTypedRoute } from 'hooks/useTypedNavigaiton';
+import {
+  useStackNavigation,
+  useTypedRoute,
+} from '@app/hooks/useTypedNavigaiton';
 import {
   createCabeRequest,
   getCabeRequest,
   updateCabeRequest,
-} from 'store/modules/cabes/actions';
-import { RootStore } from 'store/modules/rootReducer';
-import { Header, ShimmerLoading } from 'components';
+} from '@app/store/modules/cabes/actions';
+import { RootStore } from '@app/store/modules/rootReducer';
+import { Header, ShimmerLoading } from '@app/components';
 
 import { useFocusEffect } from '@react-navigation/native';
 import CabeItemsList from './CabeItemsList';

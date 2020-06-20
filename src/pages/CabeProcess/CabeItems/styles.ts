@@ -1,6 +1,6 @@
 import styled from 'styled-components/native';
 import Color from 'color';
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 import { DefaultTheme } from 'styled-components';
 import { ListItem as DefaultListItem } from 'react-native-elements';
 

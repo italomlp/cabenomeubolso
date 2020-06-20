@@ -1,5 +1,5 @@
-import { CabeItem } from 'models/CabeItem';
-import { Cabe } from 'models/Cabe';
+import { CabeItem } from '@app/models/CabeItem';
+import { Cabe } from '@app/models/Cabe';
 import Realm from 'realm';
 
 import CabeItemSchema from './schemas/CabeItemSchema';

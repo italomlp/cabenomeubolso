@@ -1,4 +1,4 @@
-import { Cabe, CanonCabe } from 'models/Cabe';
+import { Cabe, CanonCabe } from '@app/models/Cabe';
 
 const PREFIX = '@cabes';
 

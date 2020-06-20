@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Input } from 'react-native-elements';
 
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 const emptyValue = {
   name: '',

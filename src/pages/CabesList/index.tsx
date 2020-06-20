@@ -6,15 +6,15 @@ import { SwipeRow } from 'react-native-swipe-list-view';
 import { Alert } from 'react-native';
 import Accordion from 'react-native-collapsible/Accordion';
 
-import { useStackNavigation } from 'hooks/useTypedNavigaiton';
+import { useStackNavigation } from '@app/hooks/useTypedNavigaiton';
 import {
   listCabesRequest,
   removeCabeRequest,
-} from 'store/modules/cabes/actions';
-import { RootStore } from 'store/modules/rootReducer';
-import { Header, Button } from 'components';
-import colors from 'styles/colors';
-import { Cabe } from 'models/Cabe';
+} from '@app/store/modules/cabes/actions';
+import { RootStore } from '@app/store/modules/rootReducer';
+import { Header, Button } from '@app/components';
+import colors from '@app/styles/colors';
+import { Cabe } from '@app/models/Cabe';
 
 import {
   FloatingButtonContainer,

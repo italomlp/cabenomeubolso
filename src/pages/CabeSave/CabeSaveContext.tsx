@@ -6,7 +6,7 @@ import React, {
   useMemo,
 } from 'react';
 
-import { CabeItem } from 'models/CabeItem';
+import { CabeItem } from '@app/models/CabeItem';
 
 type CabeSaveContextType = {
   cabeValue: {

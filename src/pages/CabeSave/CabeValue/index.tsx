@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextInputMask, MaskService } from 'react-native-masked-text';
 
-import { Button } from 'components';
+import { Button } from '@app/components';
 
 import { FloatingBottomContainer } from '../components';
 

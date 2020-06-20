@@ -1,7 +1,7 @@
 import produce from 'immer';
 import { Action } from 'redux';
 
-import { Cabe } from 'models/Cabe';
+import { Cabe } from '@app/models/Cabe';
 
 import { TYPES } from './actions';
 

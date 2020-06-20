@@ -5,7 +5,7 @@ import {
   ParamListBase,
   Route,
 } from '@react-navigation/native';
-import RouteParams from 'models/RouteParams';
+import RouteParams from '@app/models/RouteParams';
 
 export function useStackNavigation<
   ParamList extends ParamListBase,

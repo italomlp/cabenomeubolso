@@ -1,4 +1,4 @@
-export default {
+const colors = {
   c100: '#2088D0',
   c200: '#FFA348',
   c300: '#D4328C',
@@ -8,3 +8,5 @@ export default {
   n100: '#fff',
   n900: '#000',
 };
+
+export default colors;

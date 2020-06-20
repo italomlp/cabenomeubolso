@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Icon } from 'react-native-elements';
 
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 import { Container, Row, Key, KeyText, LinearGradient } from './styles';
 

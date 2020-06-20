@@ -1,8 +1,8 @@
 import { all, takeLatest, call, put } from 'redux-saga/effects';
 import { Action } from 'redux';
 
-import NavigationService from 'services/NavigationService';
-import RealmAPI from 'services/bd';
+import NavigationService from '@app/services/NavigationService';
+import RealmAPI from '@app/services/bd';
 
 import {
   TYPES,

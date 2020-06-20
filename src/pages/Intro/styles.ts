@@ -1,6 +1,6 @@
 import styled from 'styled-components/native';
 import LinearGradient from 'react-native-linear-gradient';
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 export const SlideContainer = styled(LinearGradient)`
   flex: 1;

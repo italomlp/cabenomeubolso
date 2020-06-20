@@ -3,8 +3,8 @@ import { ListItem, Icon } from 'react-native-elements';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import { v4 as uuidv4 } from 'uuid';
 
-import { CabeItem } from 'models/CabeItem';
-import { Button, CabeItemInput } from 'components';
+import { CabeItem } from '@app/models/CabeItem';
+import { Button, CabeItemInput } from '@app/components';
 
 import { FloatingBottomContainer } from '../components';
 

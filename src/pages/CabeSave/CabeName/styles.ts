@@ -2,7 +2,7 @@ import { Input as DefaultInput } from 'react-native-elements';
 import styled from 'styled-components/native';
 import Color from 'color';
 
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 export const DescriptionContainer = styled.View`
   margin: 15px;

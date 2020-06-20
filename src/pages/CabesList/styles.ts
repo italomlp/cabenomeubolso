@@ -3,7 +3,7 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import LinearGradient from 'react-native-linear-gradient';
 import Color from 'color';
 
-import colors from 'styles/colors';
+import colors from '@app/styles/colors';
 
 export const FloatingButtonContainer = styled.SafeAreaView`
   position: absolute;

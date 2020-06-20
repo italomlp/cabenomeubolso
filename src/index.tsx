@@ -1,7 +1,7 @@
 import React from 'react';
 
 import 'react-native-gesture-handler';
-import 'config/ReactotronConfig';
+import '@app/config/ReactotronConfig';
 import 'react-native-get-random-values';
 
 import { Provider } from 'react-redux';
@@ -10,9 +10,9 @@ import CodePush from 'react-native-code-push';
 import { PersistGate } from 'redux-persist/integration/react';
 import { NavigationContainer } from '@react-navigation/native';
 
-import { store, persistor } from 'store';
-import Routes from 'routes';
-import NavigationService from 'services/NavigationService';
+import { store, persistor } from '@app/store';
+import Routes from '@app/routes';
+import NavigationService from '@app/services/NavigationService';
 
 const App = () => (
   <Provider store={store}>

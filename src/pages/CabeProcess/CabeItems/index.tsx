@@ -2,7 +2,7 @@ import React from 'react';
 import { SectionList } from 'react-native';
 import { MaskService } from 'react-native-masked-text';
 
-import { CabeItem } from 'models/CabeItem';
+import { CabeItem } from '@app/models/CabeItem';
 
 import {
   ValueItemContainer,
