@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-// import { AndroidBackHandler } from 'react-navigation-backhandler';
 import { v4 as uuidv4 } from 'uuid';
 
+import { useStackNavigation, useTypedRoute } from 'hooks/useTypedNavigaiton';
 import {
   createCabeRequest,
   getCabeRequest,
@@ -21,8 +20,8 @@ import { CabeSaveProvider, useCabeSave } from './CabeSaveContext';
 // import { Container } from './styles';
 
 function CabeSave() {
-  const { goBack } = useNavigation();
-  const { params } = useRoute();
+  const { goBack } = useStackNavigation();
+  const { params } = useTypedRoute<'CabeSave'>();
   const cabeId = params ? params.cabeId : null;
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -59,7 +58,7 @@ function CabeSave() {
   }, [isEditing, cabe]);
 
   const saveCabe = useCallback(() => {
-    if (isEditing) {
+    if (isEditing && cabeId) {
       dispatch(updateCabeRequest({ name, value, items, id: cabeId }));
     } else {
       dispatch(

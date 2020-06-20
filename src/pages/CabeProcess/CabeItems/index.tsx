@@ -55,7 +55,7 @@ export default function CabeItems({
 
     return `Você gastou ${MaskService.toMask(
       'money',
-      diff.toFixed(2)
+      diff.toFixed(2),
     )} a mais que o previsto`;
   };
 

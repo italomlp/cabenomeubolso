@@ -80,7 +80,7 @@ export default function CabeItemValue({
               onChangeText={newV => {
                 const newValue =
                   Number.parseFloat(
-                    MaskService.toRawValue('money', newV)
+                    MaskService.toRawValue('money', newV),
                   ).toFixed(2) || '0';
                 const v = Number.parseFloat(newValue || '');
 
@@ -90,7 +90,7 @@ export default function CabeItemValue({
                   setValue({
                     toShow: realValue,
                     toUse: Number.parseFloat(
-                      MaskService.toRawValue('money', realValue) // we need to make this transform again to ensure that we have correct float precision
+                      MaskService.toRawValue('money', realValue), // we need to make this transform again to ensure that we have correct float precision
                     ),
                   });
                 } else {
@@ -107,7 +107,7 @@ export default function CabeItemValue({
               <Text style={{ fontWeight: 'bold' }}>
                 {MaskService.toMask(
                   'money',
-                  (value.toUse * quantity).toFixed(2)
+                  (value.toUse * quantity).toFixed(2),
                 )}
               </Text>
             </TotalValue>

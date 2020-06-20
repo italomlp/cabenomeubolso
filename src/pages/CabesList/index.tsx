@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ListItem, Text, Icon } from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { MaskService } from 'react-native-masked-text';
 import { SwipeRow } from 'react-native-swipe-list-view';
 import { Alert } from 'react-native';
 import Accordion from 'react-native-collapsible/Accordion';
 
+import { useStackNavigation } from 'hooks/useTypedNavigaiton';
 import {
   listCabesRequest,
   removeCabeRequest,
@@ -33,7 +33,7 @@ import {
 } from './styles';
 
 export default function CabesList() {
-  const { navigate } = useNavigation();
+  const { navigate } = useStackNavigation();
   const dispatch = useDispatch();
   const [list] = useSelector((state: RootStore) => [state.cabes.list]);
   const [showFinalized, setShowFinalized] = useState(false);
@@ -67,7 +67,7 @@ export default function CabesList() {
             name: 'add',
             color: colors.n100,
           }}
-          onPress={() => navigate('CabeSave')}
+          onPress={() => navigate('CabeSave', {})}
         />
       </FloatingButtonContainer>
       <List

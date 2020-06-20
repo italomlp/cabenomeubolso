@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { SectionList, Alert } from 'react-native';
 import { MaskService } from 'react-native-masked-text';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
+
+import { useTypedRoute, useStackNavigation } from 'hooks/useTypedNavigaiton';
 
 import {
   getCabeRequest,
@@ -32,8 +33,8 @@ export default function FinalizedCabeView() {
   const dispatch = useDispatch();
   const {
     params: { cabeId },
-  } = useRoute();
-  const { goBack, navigate } = useNavigation();
+  } = useTypedRoute<'FinalizedCabeView'>();
+  const { goBack, navigate } = useStackNavigation();
   const cabe = useSelector((state: RootStore) => state.cabes.current);
   const [loading, setLoading] = useState(true);
 

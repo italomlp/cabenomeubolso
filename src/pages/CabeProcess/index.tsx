@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useTypedRoute, useStackNavigation } from 'hooks/useTypedNavigaiton';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, Alert } from 'react-native';
 // import { AndroidBackHandler } from 'react-navigation-backhandler';
@@ -19,8 +19,8 @@ import CabeItemValue from './CabeItemValue';
 export default function CabeProcess() {
   const {
     params: { id },
-  } = useRoute();
-  const { goBack } = useNavigation();
+  } = useTypedRoute<'CabeProcess'>();
+  const { goBack } = useStackNavigation();
   const [step, setStep] = useState(0);
   const [currentItem, setCurrentItem] = useState<CabeItem | null>(null);
   const [items, setItems] = useState<CabeItem[]>([]);
