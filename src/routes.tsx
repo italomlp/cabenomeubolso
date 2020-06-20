@@ -1,5 +1,4 @@
 import React from 'react';
-// import { createAppContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Main from 'pages/Main';
@@ -8,15 +7,6 @@ import CabeProcess from 'pages/CabeProcess';
 import FinalizedCabeView from 'pages/FinalizedCabeView';
 
 const MainStack = createStackNavigator();
-// {
-//   Main,
-//   CabeSave,
-//   CabeProcess,
-//   FinalizedCabeView,
-// },
-// {
-//   headerMode: 'none',
-// }
 
 const MainNavigator = () => (
   <MainStack.Navigator headerMode="none">

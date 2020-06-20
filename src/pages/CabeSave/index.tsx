@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { Alert, BackHandler } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,6 +12,7 @@ import {
 import { RootStore } from 'store/modules/rootReducer';
 import { Header, ShimmerLoading } from 'components';
 
+import { useFocusEffect } from '@react-navigation/native';
 import CabeItemsList from './CabeItemsList';
 import CabeName from './CabeName';
 import CabeValue from './CabeValue';
@@ -94,6 +95,14 @@ function CabeSave() {
     return true;
   }, [isEditing, cabe, name, value, items, goBack]);
 
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', cancel);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', cancel);
+    }, [cancel]),
+  );
+
   if (loading) {
     return <ShimmerLoading />;
   }
@@ -104,7 +113,6 @@ function CabeSave() {
         leftIcon={{ name: 'arrow-back', onPress: cancel }}
         title={isEditing ? `${cabe?.name}` : 'Novo Cabe'}
       />
-      {/* <AndroidBackHandler onBackPress={() => cancel()} /> */}
       {currentStep === 0 && (
         <CabeItemsList nextStep={() => setCurrentStep(1)} />
       )}

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTypedRoute, useStackNavigation } from 'hooks/useTypedNavigaiton';
 import { useDispatch, useSelector } from 'react-redux';
-import { SafeAreaView, Alert } from 'react-native';
-// import { AndroidBackHandler } from 'react-navigation-backhandler';
+import { SafeAreaView, Alert, BackHandler } from 'react-native';
 
 import { CabeItem } from 'models/CabeItem';
 import { getCabeRequest, updateCabeRequest } from 'store/modules/cabes/actions';
@@ -10,6 +9,7 @@ import { RootStore } from 'store/modules/rootReducer';
 import { Header, Button, ShimmerLoading } from 'components';
 
 import { Cabe } from 'models/Cabe';
+import { useFocusEffect } from '@react-navigation/native';
 import CabeItems from './CabeItems';
 import CabeItemQuantity from './CabeItemQuantity';
 import CabeItemValue from './CabeItemValue';
@@ -49,8 +49,10 @@ export default function CabeProcess() {
     );
   };
 
-  const notFinalizedItemsCount = () =>
-    items.filter(i => i.done === false).length;
+  const notFinalizedItemsCount = useCallback(
+    () => items.filter(i => i.done === false).length,
+    [items],
+  );
 
   const saveCabe = () => {
     if (cabe) {
@@ -76,7 +78,7 @@ export default function CabeProcess() {
     }
   };
 
-  const backFromCabe = () => {
+  const backFromCabe = useCallback(() => {
     switch (step) {
       case 0:
         if (cabe && cabe.items.length !== notFinalizedItemsCount()) {
@@ -97,7 +99,7 @@ export default function CabeProcess() {
         break;
     }
     return true;
-  };
+  }, [cabe, goBack, notFinalizedItemsCount, step]);
 
   useEffect(() => {
     setLoading(true);
@@ -115,6 +117,15 @@ export default function CabeProcess() {
     saveItem();
   }, [currentItem]);
 
+  useFocusEffect(
+    useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', backFromCabe);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', backFromCabe);
+    }, [backFromCabe]),
+  );
+
   if (loading) {
     return <ShimmerLoading />;
   }
@@ -127,7 +138,6 @@ export default function CabeProcess() {
         }
         title={cabe?.name}
       />
-      {/* <AndroidBackHandler onBackPress={() => backFromCabe()} /> */}
       {step === 0 && (
         <>
           <CabeItems
