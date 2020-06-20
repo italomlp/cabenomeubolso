@@ -8,6 +8,7 @@ module.exports = {
     'plugin:react/recommended',
     'airbnb',
     'plugin:prettier/recommended',
+    'prettier/react',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
   ],
@@ -58,6 +59,10 @@ module.exports = {
     ],
     'jsx-a11y/anchor-is-valid': 'off',
     'react/jsx-one-expression-per-line': 'off',
+    'react/jsx-wrap-multilines': [
+      'error',
+      { declaration: false, assignment: false },
+    ],
   },
   settings: {
     'import/resolver': {
