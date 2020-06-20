@@ -58,7 +58,7 @@ const CabeItemInput: React.FC<Props> = ({
       }
       setInputValue(newInputValue);
     },
-    [currentStep, inputValue]
+    [currentStep, inputValue],
   );
 
   const addButtonDisabled = useMemo(() => {

@@ -13,9 +13,7 @@ export const FinalizedAtText = styled.Text`
   text-align: center;
   font-size: 14px;
   font-weight: 500;
-  color: ${Color(colors.n100)
-    .darken(0.8)
-    .hex()};
+  color: ${Color(colors.n100).darken(0.8).hex()};
 `;
 
 export const ValuesContainer = styled.View`
@@ -23,9 +21,7 @@ export const ValuesContainer = styled.View`
   margin: 0 15px;
   flex-direction: row;
   border-bottom-width: 1px;
-  border-bottom-color: ${Color(colors.c200)
-    .lighten(0.3)
-    .hex()};
+  border-bottom-color: ${Color(colors.c200).lighten(0.3).hex()};
 `;
 
 export const ValueItemContainer = styled.View`
@@ -35,9 +31,7 @@ export const ValueItemContainer = styled.View`
 
 export const ValueItemTitle = styled.Text`
   font-size: 12px;
-  color: ${Color(colors.n100)
-    .darken(0.5)
-    .hex()};
+  color: ${Color(colors.n100).darken(0.5).hex()};
 `;
 
 export const ValueItemText = styled.Text<
@@ -47,11 +41,7 @@ export const ValueItemText = styled.Text<
 >`
   font-size: 28px;
   color: ${props =>
-    props.healthy
-      ? Color(colors.c500)
-          .darken(0.4)
-          .hex()
-      : colors.c300};
+    props.healthy ? Color(colors.c500).darken(0.4).hex() : colors.c300};
 `;
 
 export const ValueRestText = styled.Text`
@@ -59,9 +49,7 @@ export const ValueRestText = styled.Text`
   text-align: center;
   font-size: 12px;
   font-weight: 400;
-  color: ${Color(colors.n100)
-    .darken(0.8)
-    .hex()};
+  color: ${Color(colors.n100).darken(0.8).hex()};
 `;
 
 export const SectionHeader = styled.Text`

@@ -15,7 +15,7 @@ class RealmAPI {
       migration: (oldRealm, newRealm) => {
         if (oldRealm.schemaVersion < 2) {
           const oldCabeItems = oldRealm.objects<CabeItem & { id: number }>(
-            'CabeItem'
+            'CabeItem',
           );
           const newCabeItems = newRealm.objects<CabeItem>('CabeItem');
 
@@ -55,7 +55,7 @@ class RealmAPI {
           createdAt,
           finalized,
           finalizedAt,
-        })
+        }),
       ),
     ];
   };

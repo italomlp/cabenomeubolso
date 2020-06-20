@@ -8,15 +8,11 @@ export const DescriptionContainer = styled.View`
   margin: 15px;
   padding-bottom: 15px;
   border-bottom-width: 1px;
-  border-bottom-color: ${Color(colors.c200)
-    .lighten(0.3)
-    .hex()};
+  border-bottom-color: ${Color(colors.c200).lighten(0.3).hex()};
 `;
 
 export const DescriptionText = styled.Text`
-  color: ${Color(colors.n100)
-    .darken(0.7)
-    .hex()};
+  color: ${Color(colors.n100).darken(0.7).hex()};
   font-size: 16px;
   margin-bottom: 5px;
 `;
@@ -32,9 +28,7 @@ export const QuantityText = styled.Text`
   text-align: center;
   font-size: 12px;
   font-weight: 400;
-  color: ${Color(colors.n100)
-    .darken(0.8)
-    .hex()};
+  color: ${Color(colors.n100).darken(0.8).hex()};
 `;
 
 export const TotalValue = styled.Text`
@@ -43,7 +37,5 @@ export const TotalValue = styled.Text`
   padding: 5px 0;
   font-size: 16px;
   font-weight: 500;
-  color: ${Color(colors.n100)
-    .darken(0.8)
-    .hex()};
+  color: ${Color(colors.n100).darken(0.8).hex()};
 `;

@@ -8,15 +8,11 @@ export const DescriptionContainer = styled.View`
   margin: 15px;
   padding-bottom: 15px;
   border-bottom-width: 1px;
-  border-bottom-color: ${Color(colors.c200)
-    .lighten(0.3)
-    .hex()};
+  border-bottom-color: ${Color(colors.c200).lighten(0.3).hex()};
 `;
 
 export const DescriptionText = styled.Text`
-  color: ${Color(colors.n100)
-    .darken(0.7)
-    .hex()};
+  color: ${Color(colors.n100).darken(0.7).hex()};
   font-size: 16px;
   margin-bottom: 5px;
   text-align: center;

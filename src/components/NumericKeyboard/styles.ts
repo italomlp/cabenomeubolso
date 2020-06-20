@@ -6,9 +6,7 @@ import Color from 'color';
 import colors from 'styles/colors';
 
 export const Container = styled.View`
-  background-color: ${Color(colors.c200)
-    .lighten(0.4)
-    .hex()};
+  background-color: ${Color(colors.c200).lighten(0.4).hex()};
   max-height: 40%;
   padding-bottom: 1px;
 `;

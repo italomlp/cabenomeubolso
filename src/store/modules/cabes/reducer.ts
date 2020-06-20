@@ -53,7 +53,7 @@ export default function cabes(state = INITIAL_STATE, action: Action) {
       case TYPES.updateCabeSuccess: {
         draft.loading = false;
         const index = draft.list.findIndex(
-          c => c.id === action.payload.cabe.id
+          c => c.id === action.payload.cabe.id,
         );
         draft.list[index] = { ...draft.list[index], ...action.payload.cabe };
         break;

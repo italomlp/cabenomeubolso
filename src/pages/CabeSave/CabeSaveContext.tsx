@@ -23,7 +23,7 @@ type CabeSaveContextType = {
 };
 
 const CabeSaveContext = createContext<CabeSaveContextType>(
-  {} as CabeSaveContextType
+  {} as CabeSaveContextType,
 );
 
 type Props = {
@@ -39,7 +39,7 @@ const CabeSaveProvider: React.FC<Props> = ({ children }: Props) => {
     (item: CabeItem) => {
       setItems([...items, item]);
     },
-    [items]
+    [items],
   );
 
   const editItem = useCallback(
@@ -50,7 +50,7 @@ const CabeSaveProvider: React.FC<Props> = ({ children }: Props) => {
         setItems(itemsCopy);
       }
     },
-    [items]
+    [items],
   );
 
   const removeItem = useCallback(
@@ -61,7 +61,7 @@ const CabeSaveProvider: React.FC<Props> = ({ children }: Props) => {
         setItems(itemsCopy);
       }
     },
-    [items]
+    [items],
   );
 
   const contextValue = useMemo(
@@ -78,7 +78,7 @@ const CabeSaveProvider: React.FC<Props> = ({ children }: Props) => {
       setValue,
       setItems,
     }),
-    [name, value, items, addItem, removeItem, editItem]
+    [name, value, items, addItem, removeItem, editItem],
   );
 
   return (

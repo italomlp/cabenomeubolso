@@ -36,7 +36,7 @@ function CabeItemsList({ nextStep }: Props) {
     (name, quantity) => {
       addItem({ name, quantity, done: false, value: 0, id: uuidv4() });
     },
-    [addItem]
+    [addItem],
   );
 
   const handleEditItem = useCallback(
@@ -49,7 +49,7 @@ function CabeItemsList({ nextStep }: Props) {
         }
       }
     },
-    [editingValue, items, editItem]
+    [editingValue, items, editItem],
   );
 
   const handleSaveItem = useCallback(
@@ -60,7 +60,7 @@ function CabeItemsList({ nextStep }: Props) {
         handleAddItem(name, quantity);
       }
     },
-    [editingValue, handleEditItem, handleAddItem]
+    [editingValue, handleEditItem, handleAddItem],
   );
 
   const handleRemoveItem = useCallback(
@@ -70,7 +70,7 @@ function CabeItemsList({ nextStep }: Props) {
         removeItem(i);
       }
     },
-    [items, removeItem]
+    [items, removeItem],
   );
 
   const renderItem = useCallback(
@@ -104,7 +104,7 @@ function CabeItemsList({ nextStep }: Props) {
         <ListItem title={`${item.quantity}x ${item.name}`} bottomDivider />
       </SwipeRow>
     ),
-    [handleRemoveItem]
+    [handleRemoveItem],
   );
 
   return (

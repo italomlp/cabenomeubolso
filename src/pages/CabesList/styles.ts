@@ -46,13 +46,7 @@ export const SwipeableItemContent = styled.TouchableOpacity`
 `;
 
 export const RightSwipeableItem = styled(LinearGradient).attrs({
-  colors: [
-    colors.c500,
-    Color(colors.c500)
-      .darken(0.2)
-      .hex(),
-    colors.c300,
-  ],
+  colors: [colors.c500, Color(colors.c500).darken(0.2).hex(), colors.c300],
   start: { x: 0, y: 0 },
   end: { x: 1, y: 0 },
   locations: [0.1, 0.7, 1],
@@ -74,12 +68,8 @@ export const EmptyListText = styled.Text`
 
 export const FinalizedHeader = styled(LinearGradient).attrs({
   colors: [
-    Color(colors.c300)
-      .lighten(0.5)
-      .hex(),
-    Color(colors.c400)
-      .lighten(0.5)
-      .hex(),
+    Color(colors.c300).lighten(0.5).hex(),
+    Color(colors.c400).lighten(0.5).hex(),
   ],
   start: { x: 0, y: 0 },
   end: { x: 1, y: 0 },
@@ -107,12 +97,8 @@ export const FinalizedHeaderText = styled.Text<{
 
 export const FinalizedContent = styled(LinearGradient).attrs({
   colors: [
-    Color(colors.c300)
-      .lighten(0.5)
-      .hex(),
-    Color(colors.c400)
-      .lighten(0.5)
-      .hex(),
+    Color(colors.c300).lighten(0.5).hex(),
+    Color(colors.c400).lighten(0.5).hex(),
   ],
   start: { x: 0, y: 0 },
   end: { x: 1, y: 0 },
