@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { SectionList, Alert } from 'react-native';
 import { MaskService } from 'react-native-masked-text';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigationParam, useNavigation } from 'react-navigation-hooks';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -30,7 +30,9 @@ import {
 
 export default function FinalizedCabeView() {
   const dispatch = useDispatch();
-  const cabeId = useNavigationParam('cabeId');
+  const {
+    params: { cabeId },
+  } = useRoute();
   const { goBack, navigate } = useNavigation();
   const cabe = useSelector((state: RootStore) => state.cabes.current);
   const [loading, setLoading] = useState(true);
@@ -85,8 +87,8 @@ export default function FinalizedCabeView() {
           },
           () => {
             navigate('CabeSave', { cabeId: newCabeId });
-          }
-        )
+          },
+        ),
       );
       setTimeout(() => setLoading(false), 400);
     }
@@ -106,7 +108,7 @@ export default function FinalizedCabeView() {
               goBack();
             },
           },
-        ]
+        ],
       );
     }
   };
@@ -117,7 +119,7 @@ export default function FinalizedCabeView() {
       ? cabe.items.reduce(
           (previousValue, currentValue) =>
             currentValue.value * currentValue.quantity + previousValue,
-          0
+          0,
         )
       : 0;
 
@@ -157,7 +159,7 @@ export default function FinalizedCabeView() {
               Quanto restou:{' '}
               {MaskService.toMask(
                 'money',
-                (getMaxValue() - getCurrentValue()).toFixed(2)
+                (getMaxValue() - getCurrentValue()).toFixed(2),
               )}
             </ValueRestText>
             <Button

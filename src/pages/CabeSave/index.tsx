@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { AndroidBackHandler } from 'react-navigation-backhandler';
+// import { AndroidBackHandler } from 'react-navigation-backhandler';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -22,7 +22,8 @@ import { CabeSaveProvider, useCabeSave } from './CabeSaveContext';
 
 function CabeSave() {
   const { goBack } = useNavigation();
-  const cabeId = useNavigationParam('cabeId');
+  const { params } = useRoute();
+  const cabeId = params ? params.cabeId : null;
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -67,7 +68,7 @@ function CabeSave() {
           value,
           items,
           id: uuidv4(),
-        })
+        }),
       );
     }
   }, [dispatch, isEditing, name, value, items, cabeId]);
@@ -86,7 +87,7 @@ function CabeSave() {
       Alert.alert(
         'Cancelar Cabe?',
         `Deseja cancelar a ${isEditing ? 'edição' : 'criação'} do seu Cabe?`,
-        [{ text: 'Não' }, { text: 'Sim', onPress: goBack }]
+        [{ text: 'Não' }, { text: 'Sim', onPress: goBack }],
       );
     } else {
       goBack();
@@ -104,7 +105,7 @@ function CabeSave() {
         leftIcon={{ name: 'arrow-back', onPress: cancel }}
         title={isEditing ? `${cabe?.name}` : 'Novo Cabe'}
       />
-      <AndroidBackHandler onBackPress={() => cancel()} />
+      {/* <AndroidBackHandler onBackPress={() => cancel()} /> */}
       {currentStep === 0 && (
         <CabeItemsList nextStep={() => setCurrentStep(1)} />
       )}

@@ -1,23 +1,18 @@
 import {
-  NavigationActions,
-  NavigationParams,
-  NavigationContainerComponent,
-} from 'react-navigation';
+  CommonActions,
+  ParamListBase,
+  NavigationContainerRef,
+} from '@react-navigation/native';
 
-let navigator: NavigationContainerComponent;
+let navigator: NavigationContainerRef;
 
-function setTopLevelNavigator(navigatorRef: NavigationContainerComponent) {
+function setTopLevelNavigator(navigatorRef: NavigationContainerRef) {
   navigator = navigatorRef;
 }
 
-function navigate(routeName: string, params?: NavigationParams) {
+function navigate(routeName: string, params?: ParamListBase) {
   if (navigator) {
-    navigator.dispatch(
-      NavigationActions.navigate({
-        routeName,
-        params,
-      })
-    );
+    navigator.dispatch(CommonActions.navigate(routeName, params));
   }
 }
 

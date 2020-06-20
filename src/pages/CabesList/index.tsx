@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ListItem, Text, Icon } from 'react-native-elements';
-import { useNavigation } from 'react-navigation-hooks';
+import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { MaskService } from 'react-native-masked-text';
 import { SwipeRow } from 'react-native-swipe-list-view';

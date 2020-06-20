@@ -1,23 +1,30 @@
-import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import React from 'react';
+// import { createAppContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import Main from 'pages/Main';
 import CabeSave from 'pages/CabeSave';
 import CabeProcess from 'pages/CabeProcess';
 import FinalizedCabeView from 'pages/FinalizedCabeView';
 
-const Routes = createAppContainer(
-  createStackNavigator(
-    {
-      Main,
-      CabeSave,
-      CabeProcess,
-      FinalizedCabeView,
-    },
-    {
-      headerMode: 'none',
-    }
-  )
+const MainStack = createStackNavigator();
+// {
+//   Main,
+//   CabeSave,
+//   CabeProcess,
+//   FinalizedCabeView,
+// },
+// {
+//   headerMode: 'none',
+// }
+
+const MainNavigator = () => (
+  <MainStack.Navigator headerMode="none">
+    <MainStack.Screen name="Main" component={Main} />
+    <MainStack.Screen name="CabeSave" component={CabeSave} />
+    <MainStack.Screen name="CabeProcess" component={CabeProcess} />
+    <MainStack.Screen name="FinalizedCabeView" component={FinalizedCabeView} />
+  </MainStack.Navigator>
 );
 
-export default Routes;
+export default MainNavigator;

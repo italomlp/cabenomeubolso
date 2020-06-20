@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation, useNavigationParam } from 'react-navigation-hooks';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, Alert } from 'react-native';
-import { AndroidBackHandler } from 'react-navigation-backhandler';
+// import { AndroidBackHandler } from 'react-navigation-backhandler';
 
 import { CabeItem } from 'models/CabeItem';
 import { getCabeRequest, updateCabeRequest } from 'store/modules/cabes/actions';
@@ -17,7 +17,9 @@ import CabeItemValue from './CabeItemValue';
 // import { Container } from './styles';
 
 export default function CabeProcess() {
-  const id = useNavigationParam('id');
+  const {
+    params: { id },
+  } = useRoute();
   const { goBack } = useNavigation();
   const [step, setStep] = useState(0);
   const [currentItem, setCurrentItem] = useState<CabeItem | null>(null);
@@ -43,7 +45,7 @@ export default function CabeProcess() {
     return items.reduce(
       (previousValue, currentValue) =>
         currentValue.value * currentValue.quantity + previousValue,
-      0
+      0,
     );
   };
 
@@ -67,7 +69,7 @@ export default function CabeProcess() {
       Alert.alert(
         'Finalizar Cabe?',
         'Vemos que você não concluiu todos os itens deste Cabe. Deseja finalizar mesmo assim?',
-        [{ text: 'Não' }, { text: 'Sim', onPress: saveCabe }]
+        [{ text: 'Não' }, { text: 'Sim', onPress: saveCabe }],
       );
     } else {
       saveCabe();
@@ -81,7 +83,7 @@ export default function CabeProcess() {
           Alert.alert(
             'Cancelar Cabe?',
             'Vemos que você começou esse Cabe, mas não finalizou. Seu progresso será perdido caso volte. Deseja voltar mesmo assim?',
-            [{ text: 'Não' }, { text: 'Sim', onPress: goBack }]
+            [{ text: 'Não' }, { text: 'Sim', onPress: goBack }],
           );
         } else {
           goBack();
@@ -125,7 +127,7 @@ export default function CabeProcess() {
         }
         title={cabe?.name}
       />
-      <AndroidBackHandler onBackPress={() => backFromCabe()} />
+      {/* <AndroidBackHandler onBackPress={() => backFromCabe()} /> */}
       {step === 0 && (
         <>
           <CabeItems
