@@ -9,7 +9,7 @@ export default (reducers: Reducer) => {
       storage: AsyncStorage,
       whitelist: ['meta'],
     },
-    reducers
+    reducers,
   );
   return persistedReducer;
 };
