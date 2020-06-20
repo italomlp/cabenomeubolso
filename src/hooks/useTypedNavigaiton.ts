@@ -1,10 +1,11 @@
-import { StackNavigationProp } from '@react-navigation/stack';
 import {
   useNavigation,
   useRoute,
   ParamListBase,
   Route,
 } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
 import RouteParams from '@app/models/RouteParams';
 
 export function useStackNavigation<

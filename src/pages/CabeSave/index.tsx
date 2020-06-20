@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Alert, BackHandler } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { useFocusEffect } from '@react-navigation/native';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Header, ShimmerLoading } from '@app/components';
 import {
   useStackNavigation,
   useTypedRoute,
@@ -13,13 +16,11 @@ import {
   updateCabeRequest,
 } from '@app/store/modules/cabes/actions';
 import { RootStore } from '@app/store/modules/rootReducer';
-import { Header, ShimmerLoading } from '@app/components';
 
-import { useFocusEffect } from '@react-navigation/native';
 import CabeItemsList from './CabeItemsList';
 import CabeName from './CabeName';
-import CabeValue from './CabeValue';
 import { CabeSaveProvider, useCabeSave } from './CabeSaveContext';
+import CabeValue from './CabeValue';
 
 // import { Container } from './styles';
 

@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { ListItem, Text, Icon } from 'react-native-elements';
-import { useDispatch, useSelector } from 'react-redux';
-import { MaskService } from 'react-native-masked-text';
-import { SwipeRow } from 'react-native-swipe-list-view';
 import { Alert } from 'react-native';
 import Accordion from 'react-native-collapsible/Accordion';
+import { ListItem, Text, Icon } from 'react-native-elements';
+import { MaskService } from 'react-native-masked-text';
+import { SwipeRow } from 'react-native-swipe-list-view';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { Header, Button } from '@app/components';
 import { useStackNavigation } from '@app/hooks/useTypedNavigaiton';
+import { Cabe } from '@app/models/Cabe';
 import {
   listCabesRequest,
   removeCabeRequest,
 } from '@app/store/modules/cabes/actions';
 import { RootStore } from '@app/store/modules/rootReducer';
-import { Header, Button } from '@app/components';
 import colors from '@app/styles/colors';
-import { Cabe } from '@app/models/Cabe';
 
 import {
   FloatingButtonContainer,

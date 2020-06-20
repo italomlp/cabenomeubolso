@@ -1,10 +1,11 @@
 import React from 'react';
+
 import { createStackNavigator } from '@react-navigation/stack';
 
-import Main from '@app/pages/Main';
-import CabeSave from '@app/pages/CabeSave';
 import CabeProcess from '@app/pages/CabeProcess';
+import CabeSave from '@app/pages/CabeSave';
 import FinalizedCabeView from '@app/pages/FinalizedCabeView';
+import Main from '@app/pages/Main';
 
 const MainStack = createStackNavigator();
 

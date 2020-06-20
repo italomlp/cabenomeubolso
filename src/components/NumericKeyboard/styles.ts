@@ -1,7 +1,7 @@
 import DefaultLinearGradient from 'react-native-linear-gradient';
-import styled from 'styled-components/native';
 
 import Color from 'color';
+import styled from 'styled-components/native';
 
 import colors from '@app/styles/colors';
 

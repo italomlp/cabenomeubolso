@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, Alert, BackHandler } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { useFocusEffect } from '@react-navigation/native';
+
+import { Header, Button, ShimmerLoading } from '@app/components';
 import {
   useTypedRoute,
   useStackNavigation,
 } from '@app/hooks/useTypedNavigaiton';
-
+import { Cabe } from '@app/models/Cabe';
 import { CabeItem } from '@app/models/CabeItem';
 import {
   getCabeRequest,
   updateCabeRequest,
 } from '@app/store/modules/cabes/actions';
 import { RootStore } from '@app/store/modules/rootReducer';
-import { Header, Button, ShimmerLoading } from '@app/components';
 
-import { Cabe } from '@app/models/Cabe';
-import { useFocusEffect } from '@react-navigation/native';
-import CabeItems from './CabeItems';
 import CabeItemQuantity from './CabeItemQuantity';
+import CabeItems from './CabeItems';
 import CabeItemValue from './CabeItemValue';
 
 // import { Container } from './styles';

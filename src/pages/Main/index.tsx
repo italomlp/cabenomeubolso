@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootStore } from '@app/store/modules/rootReducer';
-import Intro from '@app/pages/Intro';
-import CabesList from '@app/pages/CabesList';
 import RNBootSplash from 'react-native-bootsplash';
+import { useSelector } from 'react-redux';
+
+import CabesList from '@app/pages/CabesList';
+import Intro from '@app/pages/Intro';
+import { RootStore } from '@app/store/modules/rootReducer';
 
 // import { Container } from './styles';
 

@@ -1,18 +1,20 @@
+// eslint-disable-next-line import-helpers/order-imports
 import React from 'react';
 
 import 'react-native-gesture-handler';
 import '@app/config/ReactotronConfig';
 import 'react-native-get-random-values';
 
-import { Provider } from 'react-redux';
-import { ThemeProvider } from 'react-native-elements';
 import CodePush from 'react-native-code-push';
-import { PersistGate } from 'redux-persist/integration/react';
-import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider } from 'react-native-elements';
+import { Provider } from 'react-redux';
 
-import { store, persistor } from '@app/store';
+import { NavigationContainer } from '@react-navigation/native';
+import { PersistGate } from 'redux-persist/integration/react';
+
 import Routes from '@app/routes';
 import NavigationService from '@app/services/NavigationService';
+import { store, persistor } from '@app/store';
 
 const App = () => (
   <Provider store={store}>

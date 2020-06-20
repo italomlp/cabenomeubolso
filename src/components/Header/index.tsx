@@ -1,12 +1,12 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import {
   HeaderProps,
   Header as DefaultHeader,
   Icon,
 } from 'react-native-elements';
-import LinearGradient from 'react-native-linear-gradient';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Platform } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
 import colors from '@app/styles/colors';
 

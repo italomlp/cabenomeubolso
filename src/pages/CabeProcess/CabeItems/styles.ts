@@ -1,8 +1,10 @@
-import styled from 'styled-components/native';
-import Color from 'color';
-import colors from '@app/styles/colors';
-import { DefaultTheme } from 'styled-components';
 import { ListItem as DefaultListItem } from 'react-native-elements';
+
+import Color from 'color';
+import { DefaultTheme } from 'styled-components';
+import styled from 'styled-components/native';
+
+import colors from '@app/styles/colors';
 
 export const ListHeaderContainer = styled.View`
   margin-bottom: 10px;

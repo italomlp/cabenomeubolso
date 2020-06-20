@@ -3,10 +3,9 @@ import { TextInputMask, MaskService } from 'react-native-masked-text';
 
 import { Button } from '@app/components';
 
-import { FloatingBottomContainer } from '../components';
-
-import { DescriptionContainer, DescriptionText, Input } from './styles';
 import { useCabeSave } from '../CabeSaveContext';
+import { FloatingBottomContainer } from '../components';
+import { DescriptionContainer, DescriptionText, Input } from './styles';
 
 type Props = {
   nextStep: () => void;

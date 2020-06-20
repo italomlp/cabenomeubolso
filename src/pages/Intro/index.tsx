@@ -1,11 +1,12 @@
 import React from 'react';
+import { StatusBar } from 'react-native';
 import AppIntroSlider from 'react-native-app-intro-slider';
+import { Icon } from 'react-native-elements';
 import { useDispatch } from 'react-redux';
+
 import { markIntroAsViewed } from '@app/store/modules/meta/actions';
 import colors from '@app/styles/colors';
 
-import { Icon } from 'react-native-elements';
-import { StatusBar } from 'react-native';
 import {
   SlideContainer,
   SlideContent,

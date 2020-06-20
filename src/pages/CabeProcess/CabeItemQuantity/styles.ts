@@ -1,6 +1,7 @@
-import styled from 'styled-components/native';
-import Color from 'color';
 import { Input as DefaultInput } from 'react-native-elements';
+
+import Color from 'color';
+import styled from 'styled-components/native';
 
 import colors from '@app/styles/colors';
 

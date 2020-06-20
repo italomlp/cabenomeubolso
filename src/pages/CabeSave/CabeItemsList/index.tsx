@@ -1,13 +1,14 @@
 import React, { useState, useCallback, memo } from 'react';
 import { ListItem, Icon } from 'react-native-elements';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+
 import { v4 as uuidv4 } from 'uuid';
 
-import { CabeItem } from '@app/models/CabeItem';
 import { Button, CabeItemInput } from '@app/components';
+import { CabeItem } from '@app/models/CabeItem';
 
+import { useCabeSave } from '../CabeSaveContext';
 import { FloatingBottomContainer } from '../components';
-
 import {
   DescriptionContainer,
   DescriptionLine,
@@ -17,7 +18,6 @@ import {
   RightSwipeableItem,
   SwipeableItemContent,
 } from './styles';
-import { useCabeSave } from '../CabeSaveContext';
 
 type Props = {
   nextStep: () => void;

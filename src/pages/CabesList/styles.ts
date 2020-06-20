@@ -1,7 +1,8 @@
-import styled from 'styled-components/native';
-import { SwipeListView } from 'react-native-swipe-list-view';
 import LinearGradient from 'react-native-linear-gradient';
+import { SwipeListView } from 'react-native-swipe-list-view';
+
 import Color from 'color';
+import styled from 'styled-components/native';
 
 import colors from '@app/styles/colors';
 

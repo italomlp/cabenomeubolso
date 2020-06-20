@@ -6,10 +6,10 @@ import {
   Platform,
   Text,
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 import { Button } from '@app/components';
 
-import { ScrollView } from 'react-native-gesture-handler';
 import { DescriptionContainer, DescriptionText, Input } from './styles';
 
 type Props = {
