@@ -26,7 +26,7 @@
     "react-native-get-random-values": "^1.4.0",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-masked-text": "^1.13.0",
-    "react-native-reanimated": "^1.4.0",
+    "react-native-reanimated": "^2.10.0",
     "react-native-screens": "^1.0.0-alpha.23",
     "react-native-shimmer": "^0.6.0",
     "react-native-swipe-list-view": "^2.0.6",
