@@ -8,12 +8,18 @@ describe('i18n bundle', () => {
 
     expect(i18n.t('app.readyTitle')).toBe('Base do Expo pronta');
     expect(i18n.t('preferences.currencyUsd')).toBe('dólar americano');
+    expect(i18n.t('app.designPreviewTitle')).toBe('Prévia do design system');
+    expect(i18n.t('form.searchPlaceholder')).toBe('Mantimentos do orçamento');
     expect(i18n.t('app.loading')).toBe('Carregando a base do app…');
 
     await i18n.changeLanguage('en');
 
     expect(i18n.t('app.readyTitle')).toBe('Expo foundation ready');
     expect(i18n.t('preferences.currencyUsd')).toBe('US dollar');
+    expect(i18n.t('app.designPreviewBody')).toBe(
+      'Semantic tokens, adapters, and theme resolution are wired up.'
+    );
+    expect(i18n.t('form.searchPlaceholder')).toBe('Budget groceries');
     expect(i18n.t('app.error')).toBe('Unable to start the app shell.');
   });
 });

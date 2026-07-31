@@ -2,6 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { resolveThemeMode } from '@/design-system/theme';
+
+export { resolveThemeMode };
+
 export type ThemePreference = 'system' | 'light' | 'dark';
 
 export type ThemeMode = 'light' | 'dark';
@@ -12,17 +16,6 @@ type ThemePreferencesState = {
 };
 
 export const THEME_PREFERENCES_STORAGE_KEY = 'theme-preferences-v1';
-
-export function resolveThemeMode(
-  themePreference: ThemePreference,
-  systemScheme: ThemeMode | 'unspecified' | null | undefined
-): ThemeMode {
-  if (themePreference !== 'system') {
-    return themePreference;
-  }
-
-  return systemScheme === 'dark' ? 'dark' : 'light';
-}
 
 export const useThemePreferencesStore = create<ThemePreferencesState>()(
   persist(

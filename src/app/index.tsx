@@ -1,33 +1,78 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
 
+import { AppButton, AppColumn, AppHost, AppRow, AppSelect, AppSheet, AppText, AppTextField, AdSlot } from '@/components/ui';
+import { useAppTheme } from '@/design-system/theme-context';
 import { i18n } from '@/lib/localization/i18n';
 
 export default function HomeScreen() {
+  const theme = useAppTheme();
+  const [currency, setCurrency] = useState('BRL');
+  const [isSheetVisible, setIsSheetVisible] = useState(false);
+
+  const currencyOptions = [
+    { label: i18n.t('preferences.currencyBrl'), value: 'BRL' },
+    { label: i18n.t('preferences.currencyUsd'), value: 'USD' },
+  ];
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{i18n.t('app.readyTitle')}</Text>
-      <Text style={styles.body}>{i18n.t('app.readyBody')}</Text>
-    </View>
+    <AppHost>
+      <AppColumn spacing={theme.space.lg} style={{ padding: theme.space.content, backgroundColor: theme.colors.surface }}>
+        <AppColumn spacing={theme.space.xs}>
+          <AppText
+            textStyle={{
+              ...theme.typography.title,
+              color: theme.colors.onSurface,
+            }}
+          >
+            {i18n.t('app.readyTitle')}
+          </AppText>
+          <AppText
+            textStyle={{
+              ...theme.typography.body,
+              color: theme.colors.muted,
+            }}
+          >
+            {i18n.t('app.designPreviewBody')}
+          </AppText>
+        </AppColumn>
+
+        <AppTextField
+          helperText={i18n.t('form.searchHelper')}
+          label={i18n.t('form.searchLabel')}
+          placeholder={i18n.t('form.searchPlaceholder')}
+        />
+
+        <AppSelect
+          helperText={i18n.t('app.readyBody')}
+          label={i18n.t('form.currencyLabel')}
+          onValueChange={setCurrency}
+          options={currencyOptions}
+          placeholder={i18n.t('preferences.currencySystem')}
+          value={currency}
+        />
+
+        <AppRow spacing={theme.space.sm}>
+          <AppButton label={i18n.t('form.openSheet')} onPress={() => setIsSheetVisible(true)} />
+          <AppButton disabled label={i18n.t('app.designPreviewTitle')} variant="secondary" />
+        </AppRow>
+
+        <AppSheet
+          onClose={() => setIsSheetVisible(false)}
+          title={i18n.t('app.designPreviewTitle')}
+          visible={isSheetVisible}
+        >
+          <AppText
+            textStyle={{
+              ...theme.typography.body,
+              color: theme.colors.onSurface,
+            }}
+          >
+            {i18n.t('app.designPreviewBody')}
+          </AppText>
+        </AppSheet>
+
+        <AdSlot />
+      </AppColumn>
+    </AppHost>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    padding: 24,
-    backgroundColor: '#FFFFFF',
-  },
-  title: {
-    color: '#172B4D',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  body: {
-    color: '#44546F',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-});
