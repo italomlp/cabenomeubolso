@@ -5,10 +5,12 @@
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { resolveThemeMode, useThemePreferencesStore } from '@/stores/theme-preferences';
 
 export function useTheme() {
   const scheme = useColorScheme();
-  const theme = scheme === 'unspecified' ? 'light' : scheme;
+  const themePreference = useThemePreferencesStore((state) => state.themePreference);
+  const theme = resolveThemeMode(themePreference, scheme);
 
   return Colors[theme];
 }
