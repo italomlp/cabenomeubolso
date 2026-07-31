@@ -20,6 +20,7 @@ export function createSQLiteBootstrap({
   const initializeDatabase = async () => {
     const database = await openDatabaseAsync(databaseName);
     await database.execAsync('PRAGMA journal_mode = WAL;');
+    await database.execAsync('PRAGMA foreign_keys = ON;');
 
     const currentVersionRow = await database.getFirstAsync<{ user_version: number }>(
       'PRAGMA user_version;'
