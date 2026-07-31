@@ -7,9 +7,11 @@ This file is the persistent status record for V2 work across sessions. The roadm
 | Epic | Status | Branch / PR | Validation |
 |---|---|---|---|
 | 01 Expo stack foundation | Complete | `epic/01-expo-stack-foundation` / #40 | Expo Doctor, lint, typecheck, 12 Jest tests |
-| 02 Design-system foundations | Ready | — | Can run in parallel with Epic 3 |
-| 03 Domain and persistence | Ready | — | Can run in parallel with Epic 2 |
-| 04–09 | Blocked by roadmap dependencies | — | See `roadmap.md` |
+| 02 Design-system foundations | Complete | `epic/02-design-system-foundations` / #42 | 14 Jest suites, lint, typecheck, review |
+| 03 Domain and persistence | Complete | `epic/03-domain-and-persistence` / #43 | 32 Jest tests, lint, typecheck, review |
+| 04 List planning | Ready | — | Epics 2–3 complete |
+| 08 Monetization foundation | Ready | — | Epic 2 complete; placements remain blocked by Home/Summary flows |
+| 05–07, 09 | Blocked by roadmap dependencies | — | See `roadmap.md` |
 
 ## Completed work
 
@@ -20,14 +22,26 @@ This file is the persistent status record for V2 work across sessions. The roadm
 - Added Expo Router, versioned SQLite WAL bootstrap, persisted preferences, `pt-BR`/`en` localization, BRL/USD default resolution, and development-build configuration.
 - Follow-up commits included transactional migrations and localized shell copy.
 
+### Epic 2 — Design-system foundations
+
+- Merged into `v2` on 2026-07-31 via #42.
+- Added semantic Light/Dark/System theme resolution, a project-owned `@expo/ui` adapter boundary, and isolated ad-slot platform adapters.
+- Added adapter, accessibility-semantics, and theme smoke coverage; centralized the `@expo/ui` Jest mock helper.
+
+### Epic 3 — Domain and persistence
+
+- Merged into `v2` on 2026-07-31 via #43.
+- Added integer-safe money/unit domain rules, ordered SQLite migrations, repositories, and transactional use cases.
+- Added real upgrade-fixture, atomic-write, soft-delete-preservation, and currency-lock coverage.
+
 ## Next work
 
-Start separate branches from the latest `v2`:
+Start the next eligible branches from the latest `v2`:
 
-- `epic/02-design-system-foundations`
-- `epic/03-domain-and-persistence`
+- `epic/04-list-planning`
+- `epic/08-monetization-foundation` (boundary only; do not add placements until Home and Summary exist)
 
-Both may proceed in parallel. Read their roadmap files, the architecture, and decision log before implementation.
+Epic 4 and Epic 8's foundation work may proceed in parallel. Read their roadmap files, the architecture, and decision log before implementation.
 
 ## Update procedure
 
