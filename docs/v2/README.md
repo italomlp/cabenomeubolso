@@ -13,6 +13,7 @@ V2 revives **Cabe no Meu Bolso** as an offline-first grocery-budget app. It star
 7. [Design system](./design-system.md) — tokens, adapters, `@expo/ui`, and accessibility.
 8. [Decisions and open questions](./decisions-and-open-questions.md) — confirmed direction and owner inputs.
 9. [Roadmap](./roadmap.md) — critical path and detailed epics.
+10. [Development builds](./development-builds.md) — Expo Go vs development/release build boundaries.
 
 ## Scope guardrails
 
