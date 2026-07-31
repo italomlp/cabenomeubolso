@@ -1,10 +1,14 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router/react-navigation';
 import { Stack } from 'expo-router/stack';
+import { getLocales } from 'expo-localization';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Text, useColorScheme, View } from 'react-native';
 
 import { ensureSQLiteBootstrapped } from '@/lib/sqlite/bootstrap';
+import { i18n } from '@/lib/localization/i18n';
+import { resolveLocalizationPreferences } from '@/lib/localization/resolution';
+import { useLocalizationPreferencesStore } from '@/stores/localization-preferences';
 import { resolveThemeMode, useThemePreferencesStore } from '@/stores/theme-preferences';
 
 export default function RootLayout() {
@@ -19,7 +23,17 @@ export default function RootLayout() {
 
     const initializeShell = async () => {
       try {
-        await Promise.all([ensureSQLiteBootstrapped(), useThemePreferencesStore.persist.rehydrate()]);
+        await Promise.all([
+          ensureSQLiteBootstrapped(),
+          useLocalizationPreferencesStore.persist.rehydrate(),
+          useThemePreferencesStore.persist.rehydrate(),
+        ]);
+
+        const locales = getLocales();
+        const preferences = useLocalizationPreferencesStore.getState();
+        const { language } = resolveLocalizationPreferences(preferences, locales);
+
+        await i18n.changeLanguage(language);
 
         if (isActive) {
           setIsReady(true);
