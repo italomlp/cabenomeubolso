@@ -1,45 +1,13 @@
-import React from 'react';
-import { Text, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Text } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { i18n } from '@/lib/localization/i18n';
+import * as mockExpoUi from '@/components/ui/expo-ui.mock';
 
 import HomeScreen from './index';
 
-jest.mock('@/components/ui/expo-ui', () => {
-  const { Pressable, Text: RNText, TextInput: RNTextInput, View } = jest.requireActual('react-native') as typeof import('react-native');
-
-  return {
-    BottomSheet: ({ children }: { children: React.ReactNode }) => <View>{children}</View>,
-    Button: ({ children, label, variant: _variant, ...props }: { children?: React.ReactNode; label?: string; variant?: string }) => (
-      <Pressable {...props}>{children ?? <RNText>{label}</RNText>}</Pressable>
-    ),
-    Host: ({ children, colorScheme: _colorScheme, style, ...props }: { children: React.ReactNode; colorScheme?: string; style?: StyleProp<ViewStyle> }) => (
-      <View {...props} style={style}>
-        {children}
-      </View>
-    ),
-    Column: ({ children, spacing, style, ...props }: { children: React.ReactNode; spacing?: number; style?: StyleProp<ViewStyle> }) => (
-      <View {...props} style={[style, spacing != null ? { gap: spacing } : null]}>
-        {children}
-      </View>
-    ),
-    Row: ({ children, spacing, style, ...props }: { children: React.ReactNode; spacing?: number; style?: StyleProp<ViewStyle> }) => (
-      <View {...props} style={[style, spacing != null ? { gap: spacing } : null]}>
-        {children}
-      </View>
-    ),
-    Text: ({ children, textStyle, style, ...props }: { children: React.ReactNode; textStyle?: StyleProp<TextStyle>; style?: StyleProp<TextStyle> }) => (
-      <RNText {...props} style={[style, textStyle]}>
-        {children}
-      </RNText>
-    ),
-    TextInput: ({ style, textStyle, ...props }: { style?: StyleProp<ViewStyle>; textStyle?: StyleProp<TextStyle> }) => (
-      <RNTextInput {...props} style={[style, textStyle]} />
-    ),
-  };
-});
+jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
 
 describe('HomeScreen', () => {
   it('renders initialized i18n copy', async () => {

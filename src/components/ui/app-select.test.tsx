@@ -1,32 +1,12 @@
-import React from 'react';
-import { type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { AppThemeProvider } from '@/design-system/theme-context';
+import * as mockExpoUi from './expo-ui.mock';
 import { BottomSheet, Button } from './expo-ui';
 import { AppSelect } from './app-select';
 
-jest.mock('./expo-ui', () => {
-  const { Pressable: RNPressable, Text: RNText, View: RNView } = jest.requireActual('react-native') as typeof import('react-native');
-
-  return {
-    BottomSheet: ({ children }: { children: React.ReactNode }) => <RNView>{children}</RNView>,
-    Button: ({ children, label, variant: _variant, ...props }: { children?: React.ReactNode; label?: string; variant?: string }) => (
-      <RNPressable {...props}>{children ?? <RNText>{label}</RNText>}</RNPressable>
-    ),
-    Column: ({ children, spacing, style, ...props }: { children: React.ReactNode; spacing?: number; style?: StyleProp<ViewStyle> }) => (
-      <RNView {...props} style={[style, spacing != null ? { gap: spacing } : null]}>
-        {children}
-      </RNView>
-    ),
-    Text: ({ children, textStyle, style, ...props }: { children: React.ReactNode; textStyle?: StyleProp<TextStyle>; style?: StyleProp<TextStyle> }) => (
-      <RNText {...props} style={[style, textStyle]}>
-        {children}
-      </RNText>
-    ),
-  };
-});
+jest.mock('./expo-ui', () => mockExpoUi);
 
 describe('AppSelect', () => {
   it('marks selection and disabled state accessibly', () => {
