@@ -21,6 +21,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-dev-client",
       [
         "expo-splash-screen",
         {
@@ -30,7 +31,12 @@
         }
       ],
       "expo-sqlite",
-      "expo-localization",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": ["pt-BR", "en"]
+        }
+      ],
       [
         "react-native-google-mobile-ads",
         {
