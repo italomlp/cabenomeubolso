@@ -28,7 +28,6 @@ export function createSQLiteBootstrap({
 
     if (currentVersion < SQLITE_DATABASE_VERSION) {
       await applySQLiteMigrations(database, currentVersion);
-      await database.execAsync(`PRAGMA user_version = ${SQLITE_DATABASE_VERSION};`);
     }
 
     return database;

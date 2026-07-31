@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { i18n } from '@/lib/localization/i18n';
+
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home placeholder</Text>
-      <Text style={styles.body}>Router, SQLite, and persisted preferences are ready.</Text>
+      <Text style={styles.title}>{i18n.t('app.readyTitle')}</Text>
+      <Text style={styles.body}>{i18n.t('app.readyBody')}</Text>
     </View>
   );
 }

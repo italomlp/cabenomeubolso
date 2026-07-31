@@ -55,7 +55,7 @@ export default function RootLayout() {
   if (bootError !== null) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <Text>Unable to start the app shell.</Text>
+        <Text>{i18n.t('app.error')}</Text>
       </View>
     );
   }
@@ -63,7 +63,7 @@ export default function RootLayout() {
   if (!isReady) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <Text>Loading app shell…</Text>
+        <Text>{i18n.t('app.loading')}</Text>
       </View>
     );
   }

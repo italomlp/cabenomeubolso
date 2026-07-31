@@ -15,11 +15,19 @@ const MIGRATIONS: readonly SQLiteMigration[] = [
 ];
 
 export async function applySQLiteMigrations(database: SQLiteDatabase, currentVersion: number) {
-  for (const migration of MIGRATIONS) {
-    if (migration.version <= currentVersion) {
-      continue;
+  if (currentVersion >= SQLITE_DATABASE_VERSION) {
+    return;
+  }
+
+  await database.withTransactionAsync(async () => {
+    for (const migration of MIGRATIONS) {
+      if (migration.version <= currentVersion) {
+        continue;
+      }
+
+      await migration.up(database);
     }
 
-    await migration.up(database);
-  }
+    await database.execAsync(`PRAGMA user_version = ${SQLITE_DATABASE_VERSION};`);
+  });
 }
