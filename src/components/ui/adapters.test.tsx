@@ -1,24 +1,18 @@
-import React from 'react';
-import { Text, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
 import { describe, expect, it, jest } from '@jest/globals';
 
-import { i18n } from '@/lib/localization/i18n';
+import { AppThemeProvider } from '@/design-system/theme-context';
 
-import HomeScreen from './index';
+import { AdSlot, AppButton, AppSelect, AppSheet, AppTextField } from './index';
 
-jest.mock('@/components/ui/expo-ui', () => {
+jest.mock('./expo-ui', () => {
   const { Pressable, Text: RNText, TextInput: RNTextInput, View } = jest.requireActual('react-native') as typeof import('react-native');
 
   return {
     BottomSheet: ({ children }: { children: React.ReactNode }) => <View>{children}</View>,
     Button: ({ children, label, variant: _variant, ...props }: { children?: React.ReactNode; label?: string; variant?: string }) => (
       <Pressable {...props}>{children ?? <RNText>{label}</RNText>}</Pressable>
-    ),
-    Host: ({ children, colorScheme: _colorScheme, style, ...props }: { children: React.ReactNode; colorScheme?: string; style?: StyleProp<ViewStyle> }) => (
-      <View {...props} style={style}>
-        {children}
-      </View>
     ),
     Column: ({ children, spacing, style, ...props }: { children: React.ReactNode; spacing?: number; style?: StyleProp<ViewStyle> }) => (
       <View {...props} style={[style, spacing != null ? { gap: spacing } : null]}>
@@ -41,38 +35,37 @@ jest.mock('@/components/ui/expo-ui', () => {
   };
 });
 
-describe('HomeScreen', () => {
-  it('renders initialized i18n copy', async () => {
-    await i18n.changeLanguage('en');
-
+describe('universal adapters', () => {
+  it('renders the button, field, select, sheet, and ad slot boundaries', () => {
     let tree: renderer.ReactTestRenderer;
 
-    await act(async () => {
-      tree = renderer.create(<HomeScreen />);
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <View>
+            <AppButton label="Confirm" onPress={() => undefined} />
+            <AppTextField label="Search" helperText="Semantic tokens" placeholder="Type here" />
+            <AppSelect
+              label="Currency"
+              onValueChange={() => undefined}
+              options={[{ label: 'Brazilian real', value: 'BRL' }]}
+              placeholder="Choose"
+              value="BRL"
+            />
+            <AppSheet visible={false} onClose={() => undefined} title="Sheet">
+              <Text>Content</Text>
+            </AppSheet>
+            <AdSlot />
+          </View>
+        </AppThemeProvider>
+      );
     });
 
     const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
 
-    expect(texts).toContain('Expo foundation ready');
-    expect(texts).toContain('Semantic tokens, adapters, and theme resolution are wired up.');
-    expect(texts).toContain('Router, SQLite, and preferences are initialized.');
-    expect(texts).toContain('Open sheet');
-  });
-
-  it('renders the home placeholder copy', async () => {
-    await i18n.changeLanguage('pt-BR');
-
-    let tree: renderer.ReactTestRenderer;
-
-    await act(async () => {
-      tree = renderer.create(<HomeScreen />);
-    });
-
-    const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
-
-    expect(texts).toContain('Base do Expo pronta');
-    expect(texts).toContain('Tokens semânticos, adapters e resolução de tema já estão conectados.');
-    expect(texts).toContain('Router, SQLite e preferências estão inicializados.');
-    expect(texts).toContain('Abrir painel');
+    expect(texts).toContain('Confirm');
+    expect(texts).toContain('Search');
+    expect(texts).toContain('Currency');
+    expect(texts).toContain('Semantic tokens');
   });
 });

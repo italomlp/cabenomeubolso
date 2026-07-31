@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Text, useColorScheme, View } from 'react-native';
 
+import { AppThemeProvider } from '@/design-system/theme-context';
 import { ensureSQLiteBootstrapped } from '@/lib/sqlite/bootstrap';
 import { i18n } from '@/lib/localization/i18n';
 import { resolveLocalizationPreferences } from '@/lib/localization/resolution';
@@ -69,9 +70,11 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={themeMode === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }} />
-      <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
-    </ThemeProvider>
+    <AppThemeProvider systemScheme={scheme} themePreference={themePreference}>
+      <ThemeProvider value={themeMode === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }} />
+        <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </AppThemeProvider>
   );
 }

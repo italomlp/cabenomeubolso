@@ -18,6 +18,7 @@ describe('theme preferences store', () => {
       default: { getItem, setItem, removeItem },
     }));
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { resolveThemeMode, useThemePreferencesStore } = require('./theme-preferences') as typeof import('./theme-preferences');
 
     await useThemePreferencesStore.persist.rehydrate();
@@ -36,6 +37,7 @@ describe('theme preferences store', () => {
       default: { getItem, setItem, removeItem },
     }));
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { THEME_PREFERENCES_STORAGE_KEY, useThemePreferencesStore } = require(
       './theme-preferences'
     ) as typeof import('./theme-preferences');
