@@ -27,6 +27,7 @@ export const useThemePreferencesStore = create<ThemePreferencesState>()(
     }),
     {
       name: THEME_PREFERENCES_STORAGE_KEY,
+      skipHydration: true,
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

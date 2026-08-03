@@ -6,8 +6,9 @@ import type { ThemeMode, ThemePreference } from '@/stores/theme-preferences';
 
 import { AppThemeProvider } from '@/design-system/theme-context';
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
+import { i18n } from '@/lib/localization/i18n';
 
-import HomeScreen from './index';
+import HomeScreen from '@/app/index';
 
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
 
@@ -19,12 +20,13 @@ describe('HomeScreen theme smoke', () => {
     ['dark override', 'dark', 'light', 'dark'],
   ];
 
-  it.each(themeCases)('resolves %s to the expected host color scheme', (label, themePreference, systemScheme, expected) => {
+  it.each(themeCases)('resolves %s to the expected host color scheme', async (label, themePreference, systemScheme, expected) => {
     void label;
 
     let tree: renderer.ReactTestRenderer;
 
-    act(() => {
+    await act(async () => {
+      await i18n.changeLanguage('en');
       tree = renderer.create(
         <AppThemeProvider systemScheme={systemScheme} themePreference={themePreference}>
           <HomeScreen />

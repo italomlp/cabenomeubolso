@@ -5,17 +5,16 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { i18n } from '@/lib/localization/i18n';
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
 
-import HomeScreen from './index';
+import HomeScreen from '@/app/index';
 
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
 
 describe('HomeScreen', () => {
   it('renders initialized i18n copy', async () => {
-    await i18n.changeLanguage('en');
-
     let tree: renderer.ReactTestRenderer;
 
     await act(async () => {
+      await i18n.changeLanguage('en');
       tree = renderer.create(<HomeScreen />);
     });
 
@@ -28,11 +27,10 @@ describe('HomeScreen', () => {
   });
 
   it('renders the home placeholder copy', async () => {
-    await i18n.changeLanguage('pt-BR');
-
     let tree: renderer.ReactTestRenderer;
 
     await act(async () => {
+      await i18n.changeLanguage('pt-BR');
       tree = renderer.create(<HomeScreen />);
     });
 

@@ -1,4 +1,3 @@
-export { AdSlot } from './ad-slot';
 export { AppColumn } from './app-column';
 export { AppButton } from './app-button';
 export { AppHost } from './app-host';

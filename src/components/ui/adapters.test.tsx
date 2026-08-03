@@ -5,12 +5,12 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { AppThemeProvider } from '@/design-system/theme-context';
 
 import * as mockExpoUi from './expo-ui.mock';
-import { AdSlot, AppButton, AppSelect, AppSheet, AppTextField } from './index';
+import { AppButton, AppSelect, AppSheet, AppTextField } from './index';
 
 jest.mock('./expo-ui', () => mockExpoUi);
 
 describe('universal adapters', () => {
-  it('renders the button, field, select, sheet, and ad slot boundaries', () => {
+  it('renders the button, field, select, and sheet boundaries', () => {
     let tree: renderer.ReactTestRenderer;
 
     act(() => {
@@ -29,7 +29,6 @@ describe('universal adapters', () => {
             <AppSheet visible={false} onClose={() => undefined} title="Sheet">
               <Text>Content</Text>
             </AppSheet>
-            <AdSlot />
           </View>
         </AppThemeProvider>
       );

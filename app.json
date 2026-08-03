@@ -8,6 +8,7 @@
     "scheme": "cabenomeubolso",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.italomlp.cabenomeubolso",
       "icon": "./assets/expo.icon"
     },
     "android": {

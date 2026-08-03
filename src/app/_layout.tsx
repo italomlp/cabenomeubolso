@@ -14,6 +14,7 @@ import { resolveThemeMode, useThemePreferencesStore } from '@/stores/theme-prefe
 
 export default function RootLayout() {
   const scheme = useColorScheme();
+  const languagePreference = useLocalizationPreferencesStore((state) => state.languagePreference);
   const themePreference = useThemePreferencesStore((state) => state.themePreference);
   const themeMode = resolveThemeMode(themePreference, scheme);
   const [isReady, setIsReady] = useState(false);
@@ -52,6 +53,19 @@ export default function RootLayout() {
       isActive = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+
+    const { language } = resolveLocalizationPreferences(
+      { currencyPreference: 'system', languagePreference },
+      getLocales()
+    );
+
+    void i18n.changeLanguage(language);
+  }, [isReady, languagePreference]);
 
   if (bootError !== null) {
     return (

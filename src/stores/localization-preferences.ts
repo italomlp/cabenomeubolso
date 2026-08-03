@@ -30,6 +30,7 @@ export const useLocalizationPreferencesStore = create<LocalizationPreferencesSta
     }),
     {
       name: LOCALIZATION_PREFERENCES_STORAGE_KEY,
+      skipHydration: true,
       storage: createJSONStorage(() => AsyncStorage),
       version: 1,
     }

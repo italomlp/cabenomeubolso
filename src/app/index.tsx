@@ -1,17 +1,19 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppColumn, AppHost, AppRow, AppSelect, AppSheet, AppText, AppTextField, AdSlot } from '@/components/ui';
+import { AppButton, AppColumn, AppHost, AppRow, AppSelect, AppSheet, AppText, AppTextField } from '@/components/ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import { i18n } from '@/lib/localization/i18n';
 
 export default function HomeScreen() {
   const theme = useAppTheme();
+  const { t } = useTranslation(undefined, { i18n });
   const [currency, setCurrency] = useState('BRL');
   const [isSheetVisible, setIsSheetVisible] = useState(false);
 
   const currencyOptions = [
-    { label: i18n.t('preferences.currencyBrl'), value: 'BRL' },
-    { label: i18n.t('preferences.currencyUsd'), value: 'USD' },
+    { label: t('preferences.currencyBrl'), value: 'BRL' },
+    { label: t('preferences.currencyUsd'), value: 'USD' },
   ];
 
   return (
@@ -24,7 +26,7 @@ export default function HomeScreen() {
               color: theme.colors.onSurface,
             }}
           >
-            {i18n.t('app.readyTitle')}
+            {t('app.readyTitle')}
           </AppText>
           <AppText
             textStyle={{
@@ -32,33 +34,33 @@ export default function HomeScreen() {
               color: theme.colors.muted,
             }}
           >
-            {i18n.t('app.designPreviewBody')}
+            {t('app.designPreviewBody')}
           </AppText>
         </AppColumn>
 
         <AppTextField
-          helperText={i18n.t('form.searchHelper')}
-          label={i18n.t('form.searchLabel')}
-          placeholder={i18n.t('form.searchPlaceholder')}
+          helperText={t('form.searchHelper')}
+          label={t('form.searchLabel')}
+          placeholder={t('form.searchPlaceholder')}
         />
 
         <AppSelect
-          helperText={i18n.t('app.readyBody')}
-          label={i18n.t('form.currencyLabel')}
+          helperText={t('app.readyBody')}
+          label={t('form.currencyLabel')}
           onValueChange={setCurrency}
           options={currencyOptions}
-          placeholder={i18n.t('preferences.currencySystem')}
+          placeholder={t('preferences.currencySystem')}
           value={currency}
         />
 
         <AppRow spacing={theme.space.sm}>
-          <AppButton label={i18n.t('form.openSheet')} onPress={() => setIsSheetVisible(true)} />
-          <AppButton disabled label={i18n.t('app.designPreviewTitle')} variant="secondary" />
+          <AppButton label={t('form.openSheet')} onPress={() => setIsSheetVisible(true)} />
+          <AppButton disabled label={t('app.designPreviewTitle')} variant="secondary" />
         </AppRow>
 
         <AppSheet
           onClose={() => setIsSheetVisible(false)}
-          title={i18n.t('app.designPreviewTitle')}
+          title={t('app.designPreviewTitle')}
           visible={isSheetVisible}
         >
           <AppText
@@ -67,11 +69,9 @@ export default function HomeScreen() {
               color: theme.colors.onSurface,
             }}
           >
-            {i18n.t('app.designPreviewBody')}
+            {t('app.designPreviewBody')}
           </AppText>
         </AppSheet>
-
-        <AdSlot />
       </AppColumn>
     </AppHost>
   );

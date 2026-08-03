@@ -25,6 +25,7 @@ export function AppSheet({ children, onClose, title, visible }: AppSheetProps) {
           ...styles.sheet,
           backgroundColor: theme.colors.surfaceRaised,
           borderColor: theme.colors.border,
+          borderRadius: theme.radius.xl,
           padding: theme.space.lg,
         }}
       >
@@ -48,8 +49,6 @@ export function AppSheet({ children, onClose, title, visible }: AppSheetProps) {
 
 const styles = {
   sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     borderWidth: 1,
   },
 } as const;

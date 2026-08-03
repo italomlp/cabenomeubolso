@@ -12,8 +12,6 @@
     "expo-dev-client": "~57.0.10",
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.1",
-    "expo-glass-effect": "~57.0.1",
-    "expo-image": "~57.0.1",
     "expo-linking": "~57.0.4",
     "expo-localization": "~57.0.1",
     "expo-router": "~57.0.9",
@@ -24,7 +22,6 @@
     "expo-system-ui": "~57.0.2",
     "expo-tracking-transparency": "~57.0.1",
     "expo-updates": "~57.0.11",
-    "expo-web-browser": "~57.0.2",
     "i18next": "^26.3.6",
     "jest-expo": "~57.0.3",
     "react": "19.2.3",
@@ -45,8 +42,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "lint": "expo lint",
     "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
