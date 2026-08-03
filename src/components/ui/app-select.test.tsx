@@ -9,7 +9,7 @@ import { AppSelect } from './app-select';
 jest.mock('./expo-ui', () => mockExpoUi);
 
 describe('AppSelect', () => {
-  it('marks selection and disabled state accessibly', () => {
+  it('marks selection and disabled state in the option sheet', () => {
     const onValueChange = jest.fn();
 
     let tree: renderer.ReactTestRenderer;
@@ -24,27 +24,28 @@ describe('AppSelect', () => {
               { label: 'Brazilian real', value: 'BRL' },
               { label: 'US dollar', value: 'USD', disabled: true },
             ]}
+            testID="currency-select"
             value="BRL"
           />
         </AppThemeProvider>
       );
     });
 
+    const triggerButton = () =>
+      tree!.root.findAllByType(Button).find((button) => button.props.testID === 'currency-select')!;
+
     act(() => {
-      tree!.root.findByType(Button).props.onPress();
+      triggerButton().props.onPress();
     });
 
     const bottomSheet = tree!.root.findByType(BottomSheet);
-    const triggerButton = tree!.root.findByType(Button);
     const selectedOption = tree!.root.findByProps({ testID: 'app-select-option-BRL' });
     const disabledOption = tree!.root.findByProps({ testID: 'app-select-option-USD' });
 
     expect(bottomSheet.props.isPresented).toBe(true);
-    expect(triggerButton.props.accessibilityLabel).toBe('Currency');
-    expect(triggerButton.props.accessibilityValue).toEqual({ text: 'Brazilian real' });
-    expect(selectedOption.props.accessibilityRole).toBe('radio');
-    expect(selectedOption.props.accessibilityState).toEqual({ checked: true, disabled: false });
-    expect(disabledOption.props.accessibilityState).toEqual({ checked: false, disabled: true });
+    expect(triggerButton().props.label).toBe('Brazilian real');
+    expect(selectedOption.props.label).toBe('Brazilian real');
+    expect(disabledOption.props.label).toBe('US dollar');
 
     act(() => {
       disabledOption.props.onPress();

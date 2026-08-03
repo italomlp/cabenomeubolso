@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Pressable } from 'react-native';
 
 import { useAppTheme } from '@/design-system/theme-context';
 
@@ -43,8 +42,6 @@ export function AppSelect({ helperText, label, onValueChange, options, placehold
         {label}
       </Text>
       <AppButton
-        accessibilityLabel={label}
-        accessibilityValue={{ text: triggerLabel }}
         label={triggerLabel}
         onPress={() => setIsOpen(true)}
         style={{
@@ -74,12 +71,12 @@ export function AppSelect({ helperText, label, onValueChange, options, placehold
             const isSelected = option.value === value;
 
             return (
-              <Pressable
+              <AppButton
                 accessibilityLabel={option.label}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: isSelected, disabled: option.disabled ?? false }}
+                accessibilitySelected={isSelected}
                 disabled={option.disabled}
                 key={option.value}
+                label={option.label}
                 onPress={() => {
                   if (option.disabled) {
                     return;
@@ -88,29 +85,18 @@ export function AppSelect({ helperText, label, onValueChange, options, placehold
                   onValueChange(option.value);
                   setIsOpen(false);
                 }}
-                style={[
-                  styles.option,
-                  {
-                    backgroundColor: isSelected ? theme.colors.backgroundSelected : theme.colors.surface,
-                    borderColor: theme.colors.border,
-                    opacity: option.disabled ? 0.5 : 1,
-                    paddingHorizontal: theme.space.md,
-                    paddingVertical: theme.space.sm,
-                  },
-                ]}
+                style={{
+                  backgroundColor: isSelected ? theme.colors.backgroundSelected : theme.colors.surfaceRaised,
+                  borderColor: theme.colors.border,
+                  borderRadius: theme.radius.md,
+                  borderWidth: 1,
+                  opacity: option.disabled ? 0.5 : 1,
+                  paddingHorizontal: theme.space.md,
+                  paddingVertical: theme.space.sm,
+                }}
                 testID={`app-select-option-${option.value}`}
-              >
-                <Text
-                  textStyle={{
-                    color: theme.colors.onSurface,
-                    fontSize: theme.typography.body.fontSize,
-                    fontWeight: isSelected ? '700' : '500',
-                    lineHeight: theme.typography.body.lineHeight,
-                  }}
-                >
-                  {option.label}
-                </Text>
-              </Pressable>
+                variant="secondary"
+              />
             );
           })}
         </Column>
@@ -122,11 +108,5 @@ export function AppSelect({ helperText, label, onValueChange, options, placehold
 const styles = {
   container: {
     width: '100%',
-  },
-  option: {
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
 } as const;

@@ -1,6 +1,7 @@
 import { DEFAULT_LANGUAGE, type SupportedLanguage } from './resources';
+import type { SupportedCurrency } from '@/domain/currency';
 
-export type SupportedCurrency = 'BRL' | 'USD';
+export type { SupportedCurrency } from '@/domain/currency';
 
 export type LanguagePreference = 'system' | SupportedLanguage;
 

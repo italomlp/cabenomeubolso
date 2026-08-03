@@ -9,7 +9,7 @@ import {
   type ShoppingListStatus,
 } from '@/domain/shopping-list';
 import type { ShoppingListQuery, ShoppingListRepository } from '@/domain/shopping-list-repository';
-import type { SupportedCurrency } from '@/lib/localization/resolution';
+import type { SupportedCurrency } from '@/domain/currency';
 
 export type SQLiteShoppingListRepositoryDatabase = {
   execAsync: (sql: string) => Promise<void>;

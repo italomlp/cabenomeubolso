@@ -1,30 +1,38 @@
 import { useState } from 'react';
-import type { ComponentPropsWithoutRef, ComponentType } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
+import { StyleSheet, type TextStyle } from 'react-native';
 import {
-  StyleSheet,
-  type NativeSyntheticEvent,
-  type TextInputFocusEventData,
-  type TextStyle,
-} from 'react-native';
+  accessibilityHint as accessibilityHintModifier,
+  accessibilityLabel as accessibilityLabelModifier,
+} from '@expo/ui/swift-ui/modifiers';
 
 import { useAppTheme } from '@/design-system/theme-context';
 
 import { Column, Text, TextInput } from './expo-ui';
 
 type ExpoTextInputProps = ComponentPropsWithoutRef<typeof TextInput>;
-const AccessibleTextInput = TextInput as unknown as ComponentType<ExpoTextInputProps & { accessibilityLabel?: string }>;
 
-type AppTextFieldEvent = NativeSyntheticEvent<TextInputFocusEventData>;
-
-export type AppTextFieldProps = ExpoTextInputProps & {
+export type AppTextFieldProps = Omit<ExpoTextInputProps, 'modifiers'> & {
+  accessibilityHint?: string;
+  accessibilityLabel?: string;
   helperText?: string;
   label: string;
-  onBlur?: (event: AppTextFieldEvent) => void;
-  onFocus?: (event: AppTextFieldEvent) => void;
+  onBlur?: () => void;
+  onFocus?: () => void;
   testID?: string;
 };
 
-export function AppTextField({ helperText, label, onBlur, onFocus, style, testID, ...props }: AppTextFieldProps) {
+export function AppTextField({
+  accessibilityHint,
+  accessibilityLabel,
+  helperText,
+  label,
+  onBlur,
+  onFocus,
+  style,
+  testID,
+  ...props
+}: AppTextFieldProps) {
   const theme = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
 
@@ -42,24 +50,27 @@ export function AppTextField({ helperText, label, onBlur, onFocus, style, testID
     lineHeight: theme.typography.body.lineHeight,
   } satisfies TextStyle;
 
-  const handleBlur = ((event: AppTextFieldEvent) => {
+  const handleBlur = () => {
     setIsFocused(false);
-    onBlur?.(event);
-  }) as ExpoTextInputProps['onBlur'];
+    onBlur?.();
+  };
 
-  const handleFocus = ((event: AppTextFieldEvent) => {
+  const handleFocus = () => {
     setIsFocused(true);
-    onFocus?.(event);
-  }) as ExpoTextInputProps['onFocus'];
+    onFocus?.();
+  };
 
   return (
     <Column spacing={theme.space.xs} style={styles.container}>
       <Text textStyle={labelStyle}>{label}</Text>
-      <AccessibleTextInput
-        accessibilityLabel={label}
+      <TextInput
         onBlur={handleBlur}
         onFocus={handleFocus}
         placeholderTextColor={theme.colors.muted}
+        modifiers={[
+          accessibilityLabelModifier(accessibilityLabel ?? label),
+          ...(accessibilityHint ?? helperText ? [accessibilityHintModifier(accessibilityHint ?? helperText!)] : []),
+        ]}
         style={{
           ...styles.input,
           backgroundColor: theme.colors.surfaceRaised,
@@ -86,8 +97,5 @@ const styles = {
   container: {
     width: '100%',
   },
-  input: {
-    borderRadius: 12,
-    borderWidth: 1,
-  },
+  input: { borderWidth: 1 },
 } as const;

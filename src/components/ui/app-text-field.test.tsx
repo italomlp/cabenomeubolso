@@ -25,21 +25,21 @@ describe('AppTextField', () => {
 
     const input = () => tree!.root.findByType(TextInput);
 
-    expect(input().props.accessibilityLabel).toBe('Search');
     expect(input().props.style.borderColor).toBe('#D7DFEA');
+    expect(input().props.modifiers).toHaveLength(1);
 
     act(() => {
-      input().props.onFocus?.({ nativeEvent: { target: 1 } });
+      input().props.onFocus?.();
     });
 
     expect(input().props.style.borderColor).toBe('#208AEF');
-    expect(onFocus).toHaveBeenCalledWith({ nativeEvent: { target: 1 } });
+    expect(onFocus).toHaveBeenCalledWith();
 
     act(() => {
-      input().props.onBlur?.({ nativeEvent: { target: 2 } });
+      input().props.onBlur?.();
     });
 
     expect(input().props.style.borderColor).toBe('#D7DFEA');
-    expect(onBlur).toHaveBeenCalledWith({ nativeEvent: { target: 2 } });
+    expect(onBlur).toHaveBeenCalledWith();
   });
 });

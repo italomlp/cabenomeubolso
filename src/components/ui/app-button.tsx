@@ -1,5 +1,10 @@
 import type { ComponentPropsWithoutRef } from 'react';
-import { StyleSheet, type AccessibilityProps, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  accessibilityHint as accessibilityHintModifier,
+  accessibilityLabel as accessibilityLabelModifier,
+  accessibilityAddTraits,
+} from '@expo/ui/swift-ui/modifiers';
 
 import { useAppTheme } from '@/design-system/theme-context';
 
@@ -9,13 +14,25 @@ type AppButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 type ExpoButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
-export type AppButtonProps = Omit<ExpoButtonProps, 'children' | 'label' | 'style' | 'variant'> & {
+export type AppButtonProps = Omit<ExpoButtonProps, 'children' | 'label' | 'modifiers' | 'style' | 'variant'> & {
+  accessibilityHint?: string;
+  accessibilityLabel?: string;
+  accessibilitySelected?: boolean;
   label: string;
   style?: StyleProp<ViewStyle>;
   variant?: AppButtonVariant;
-} & Pick<AccessibilityProps, 'accessibilityLabel' | 'accessibilityValue'>;
+};
 
-export function AppButton({ disabled, label, style, variant = 'primary', ...props }: AppButtonProps) {
+export function AppButton({
+  accessibilityHint,
+  accessibilityLabel,
+  accessibilitySelected = false,
+  disabled,
+  label,
+  style,
+  variant = 'primary',
+  ...props
+}: AppButtonProps) {
   const theme = useAppTheme();
   const buttonStyle = {
     borderRadius: theme.radius.pill,
@@ -38,6 +55,11 @@ export function AppButton({ disabled, label, style, variant = 'primary', ...prop
     <Button
       disabled={disabled}
       label={label}
+      modifiers={[
+        accessibilityLabelModifier(accessibilityLabel ?? label),
+        ...(accessibilityHint ? [accessibilityHintModifier(accessibilityHint)] : []),
+        ...(accessibilitySelected ? [accessibilityAddTraits(['isSelected'])] : []),
+      ]}
       style={buttonStyle}
       variant={variant === 'primary' ? 'filled' : variant === 'secondary' ? 'outlined' : 'text'}
       {...props}

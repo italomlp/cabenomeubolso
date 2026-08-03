@@ -1,4 +1,4 @@
-import type { SupportedCurrency } from '@/lib/localization/resolution';
+import type { SupportedCurrency } from './currency';
 
 export type ShoppingListUnitCode = 'piece' | 'pack' | 'kg' | 'g' | 'l' | 'ml';
 
