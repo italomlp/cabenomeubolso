@@ -18,11 +18,6 @@ jest.mock('react-native-google-mobile-ads', () => ({
   default: jest.fn(),
 }));
 
-jest.mock('./ios-tracking', () => ({
-  __esModule: true,
-  requestIosTrackingAuthorization: jest.fn(async () => 'granted'),
-}));
-
 type AdServiceDependencies = NonNullable<Parameters<typeof createAdService>[0]>;
 
 function createConsentInfo(overrides: Partial<AdsConsentInfo> = {}): AdsConsentInfo {
@@ -36,13 +31,12 @@ function createConsentInfo(overrides: Partial<AdsConsentInfo> = {}): AdsConsentI
 }
 
 describe('ad service', () => {
-  it('defaults the release flag off and keeps disabled state side-effect free', async () => {
+  it('keeps iOS as a no-op boundary even when ads are enabled elsewhere', async () => {
     const gatherConsent = jest.fn();
     const getConsentInfo = jest.fn();
     const showPrivacyOptionsForm = jest.fn();
     const setRequestConfiguration = jest.fn(async (_configuration: { testDeviceIdentifiers: string[] }) => undefined);
     const initialize = jest.fn(async () => [] as never[]);
-    const requestTrackingAuthorization = jest.fn();
     const service = createAdService({
       adsConsent: {
         gatherConsent,
@@ -52,12 +46,13 @@ describe('ad service', () => {
       isDevelopment: true,
       mobileAdsFactory: (() => ({ initialize, setRequestConfiguration })) as unknown as AdServiceDependencies['mobileAdsFactory'],
       platformOS: 'ios',
-      requestTrackingAuthorization: requestTrackingAuthorization as unknown as AdServiceDependencies['requestTrackingAuthorization'],
+      releaseEnabled: true,
     });
 
     expect(DEFAULT_ADS_RELEASE_FLAG).toBe(false);
 
     const snapshot = await service.prepare();
+    const privacySnapshot = await service.requestPrivacyOptions();
 
     expect(snapshot.eligibility).toEqual(
       expect.objectContaining({
@@ -67,15 +62,15 @@ describe('ad service', () => {
         shouldUseTestAds: false,
       })
     );
+    expect(privacySnapshot).toBe(snapshot);
     expect(gatherConsent).not.toHaveBeenCalled();
     expect(getConsentInfo).not.toHaveBeenCalled();
     expect(showPrivacyOptionsForm).not.toHaveBeenCalled();
     expect(setRequestConfiguration).not.toHaveBeenCalled();
-    expect(requestTrackingAuthorization).not.toHaveBeenCalled();
     expect(initialize).not.toHaveBeenCalled();
   });
 
-  it('waits for consent before configuring requests, requests ATT only on iOS, and uses test devices in development', async () => {
+  it('waits for consent before configuring requests on Android and uses test devices in development', async () => {
     const calls: string[] = [];
     const consentInfo = createConsentInfo();
     const gatherConsent = jest.fn(async () => {
@@ -91,10 +86,6 @@ describe('ad service', () => {
       calls.push('initialize');
       return [];
     });
-    const requestTrackingAuthorization = jest.fn(async () => {
-      calls.push('att');
-      return 'granted' as const;
-    });
     const service = createAdService({
       adsConsent: {
         gatherConsent,
@@ -103,25 +94,23 @@ describe('ad service', () => {
       } as unknown as AdServiceDependencies['adsConsent'],
       isDevelopment: true,
       mobileAdsFactory: (() => ({ initialize, setRequestConfiguration })) as unknown as AdServiceDependencies['mobileAdsFactory'],
-      platformOS: 'ios',
+      platformOS: 'android',
       releaseEnabled: true,
-      requestTrackingAuthorization: requestTrackingAuthorization as unknown as AdServiceDependencies['requestTrackingAuthorization'],
       testDeviceIdentifiers: ['custom-device', 'EMULATOR'],
     });
 
     const snapshot = await service.prepare();
 
-    expect(calls).toEqual(['consent', 'request-configuration', 'att', 'initialize']);
+    expect(calls).toEqual(['consent', 'request-configuration', 'initialize']);
     expect(gatherConsent).toHaveBeenCalledWith({ testDeviceIdentifiers: ['EMULATOR', 'custom-device'] });
     expect(setRequestConfiguration).toHaveBeenCalledWith({ testDeviceIdentifiers: ['EMULATOR', 'custom-device'] });
     expect(getConsentInfo).not.toHaveBeenCalled();
     expect(showPrivacyOptionsForm).not.toHaveBeenCalled();
-    expect(requestTrackingAuthorization).toHaveBeenCalledTimes(1);
     expect(initialize).toHaveBeenCalledTimes(1);
     expect(snapshot.eligibility).toEqual(
       expect.objectContaining({ canRender: true, reason: 'ready', shouldUseTestAds: true })
     );
-    expect(snapshot.trackingAuthorizationStatus).toBe('granted');
+    expect(snapshot.trackingAuthorizationStatus).toBeNull();
   });
 
   it('surfaces privacy options before initialization when required', async () => {
@@ -148,6 +137,7 @@ describe('ad service', () => {
       } as unknown as AdServiceDependencies['adsConsent'],
       isDevelopment: false,
       mobileAdsFactory: (() => ({ initialize, setRequestConfiguration })) as unknown as AdServiceDependencies['mobileAdsFactory'],
+      platformOS: 'android',
       releaseEnabled: true,
     });
 

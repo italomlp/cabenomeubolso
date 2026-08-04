@@ -8,7 +8,6 @@ import {
 import mobileAds from 'react-native-google-mobile-ads';
 
 import { resolveAdRequestConfiguration } from './ad-request-configuration';
-import { requestIosTrackingAuthorization, type TrackingAuthorizationStatus } from './ios-tracking';
 
 export const DEFAULT_ADS_RELEASE_FLAG = false;
 
@@ -26,7 +25,7 @@ export type AdSlotEligibility = {
 export type AdServiceSnapshot = {
   eligibility: AdSlotEligibility;
   initialized: boolean;
-  trackingAuthorizationStatus: TrackingAuthorizationStatus | null;
+  trackingAuthorizationStatus: null;
 };
 
 type AdsConsentClient = Pick<
@@ -41,7 +40,6 @@ type AdServiceDependencies = {
   mobileAdsFactory?: typeof mobileAds;
   platformOS?: typeof Platform.OS;
   releaseEnabled?: boolean;
-  requestTrackingAuthorization?: typeof requestIosTrackingAuthorization;
   testDeviceIdentifiers?: readonly string[];
 };
 
@@ -50,6 +48,20 @@ type AdService = {
   requestPrivacyOptions: () => Promise<AdServiceSnapshot>;
   getSnapshot: () => AdServiceSnapshot | null;
 };
+
+function createDisabledSnapshot(): AdServiceSnapshot {
+  return createSnapshot(
+    {
+      canRender: false,
+      consentInfo: null,
+      privacyOptionsRequired: false,
+      releaseEnabled: false,
+      reason: 'disabled-by-flag',
+      shouldUseTestAds: false,
+    },
+    null
+  );
+}
 
 function buildEligibility({
   consentInfo,
@@ -96,7 +108,7 @@ function buildEligibility({
   };
 }
 
-function createSnapshot(eligibility: AdSlotEligibility, trackingAuthorizationStatus: TrackingAuthorizationStatus | null): AdServiceSnapshot {
+function createSnapshot(eligibility: AdSlotEligibility, trackingAuthorizationStatus: null): AdServiceSnapshot {
   return {
     eligibility,
     initialized: eligibility.canRender,
@@ -105,29 +117,36 @@ function createSnapshot(eligibility: AdSlotEligibility, trackingAuthorizationSta
 }
 
 export function createAdService(dependencies: AdServiceDependencies = {}): AdService {
-  const adsConsent = dependencies.adsConsent ?? AdsConsent;
   const isDevelopment = dependencies.isDevelopment ?? __DEV__;
-  const mobileAdsClientFactory = dependencies.mobileAdsFactory ?? mobileAds;
   const platformOS = dependencies.platformOS ?? Platform.OS;
   const releaseEnabled = dependencies.releaseEnabled ?? DEFAULT_ADS_RELEASE_FLAG;
-  const requestTrackingAuthorization =
-    dependencies.requestTrackingAuthorization ?? requestIosTrackingAuthorization;
-  const testDeviceIdentifiers = dependencies.testDeviceIdentifiers ?? [];
 
   let snapshot: AdServiceSnapshot | null = null;
 
-  const markSnapshot = (
-    consentInfo: AdsConsentInfo | null,
-    trackingAuthorizationStatus: TrackingAuthorizationStatus | null
-  ): AdServiceSnapshot => {
+  if (platformOS === 'ios') {
+    const disabledSnapshot = createDisabledSnapshot();
+    snapshot = disabledSnapshot;
+
+    return {
+      getSnapshot: () => snapshot,
+      prepare: async () => disabledSnapshot,
+      requestPrivacyOptions: async () => disabledSnapshot,
+    };
+  }
+
+  const adsConsent = dependencies.adsConsent ?? AdsConsent;
+  const mobileAdsClientFactory = dependencies.mobileAdsFactory ?? mobileAds;
+  const testDeviceIdentifiers = dependencies.testDeviceIdentifiers ?? [];
+
+  const markSnapshot = (consentInfo: AdsConsentInfo | null): AdServiceSnapshot => {
     const eligibility = buildEligibility({ consentInfo, isDevelopment, releaseEnabled });
-    snapshot = createSnapshot(eligibility, trackingAuthorizationStatus);
+    snapshot = createSnapshot(eligibility, null);
     return snapshot;
   };
 
   const initialize = async (): Promise<AdServiceSnapshot> => {
     if (!releaseEnabled) {
-      return markSnapshot(null, null);
+      return markSnapshot(null);
     }
 
     let consentInfo: AdsConsentInfo;
@@ -149,7 +168,7 @@ export function createAdService(dependencies: AdServiceDependencies = {}): AdSer
     }
 
     if (!consentInfo.canRequestAds) {
-      return markSnapshot(consentInfo, null);
+      return markSnapshot(consentInfo);
     }
 
     const requestConfiguration = resolveAdRequestConfiguration({
@@ -161,15 +180,9 @@ export function createAdService(dependencies: AdServiceDependencies = {}): AdSer
 
     await mobileAdsClient.setRequestConfiguration(requestConfiguration);
 
-    let trackingAuthorizationStatus: TrackingAuthorizationStatus | null = null;
-
-    if (platformOS === 'ios') {
-      trackingAuthorizationStatus = await requestTrackingAuthorization();
-    }
-
     await mobileAdsClient.initialize();
 
-    return markSnapshot(consentInfo, trackingAuthorizationStatus);
+    return markSnapshot(consentInfo);
   };
 
   return {
@@ -177,17 +190,17 @@ export function createAdService(dependencies: AdServiceDependencies = {}): AdSer
     prepare: initialize,
     requestPrivacyOptions: async () => {
       if (!releaseEnabled) {
-        return markSnapshot(null, null);
+        return markSnapshot(null);
       }
 
       const consentInfo = await adsConsent.getConsentInfo();
 
       if (consentInfo.privacyOptionsRequirementStatus !== AdsConsentPrivacyOptionsRequirementStatus.REQUIRED) {
-        return markSnapshot(consentInfo, snapshot?.trackingAuthorizationStatus ?? null);
+        return markSnapshot(consentInfo);
       }
 
       const updatedConsentInfo = await adsConsent.showPrivacyOptionsForm();
-      return markSnapshot(updatedConsentInfo, snapshot?.trackingAuthorizationStatus ?? null);
+      return markSnapshot(updatedConsentInfo);
     },
   };
 }

@@ -38,14 +38,6 @@
           "supportedLocales": ["pt-BR", "en"]
         }
       ],
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "delayAppMeasurementInit": true,
-          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
-        }
-      ],
       "expo-tracking-transparency"
     ],
     "experiments": {

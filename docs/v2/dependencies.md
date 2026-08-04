@@ -34,7 +34,7 @@ SDK 57.0.0 uses React Native 0.86.0, React 19.2.3, and Node 22.13.x+. `react-nat
 ## Native configuration and builds
 
 - Add/configure the Router and localization plugins as implementation requires; supported native locales are `pt-BR` and `en`.
-- AdMob’s config plugin needs Android/iOS **App IDs**, not ad-unit IDs. Obtain consent before `mobileAds().initialize()`; request ATT on iOS where applicable.
+- AdMob’s config plugin needs Android/iOS **App IDs**, not ad-unit IDs. This V2 branch uses the public Google iOS test App ID only to satisfy the native startup requirement; the iOS ad boundary stays a no-op until ads are deliberately enabled there. Android remains the release target. Obtain consent before `mobileAds().initialize()`; request ATT on iOS where applicable in the future enabled path.
 - AdMob does not run in Expo Go. Test it with package `TestIds`/test devices in a development build; never click production ads during testing. Plugin, native-dependency, SDK, or App-ID changes require a rebuild.
 - Configure EAS Update only after choosing channels and a `runtimeVersion` policy. Updates are compatible only with matching native runtime; use a release build to test the full update path.
 
