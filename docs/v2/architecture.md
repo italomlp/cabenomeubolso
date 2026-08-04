@@ -74,7 +74,7 @@ Later sync can add a remote adapter and a sync/outbox port at the composition ro
 
 Install `react-native-google-mobile-ads` now, but expose it only through `AdService`, entitlement, and a release feature flag that defaults **off**. The only V2 placements are an adaptive banner on Home after list content and an inline banner in a finalized Summary. Never render ads in the active shopping flow; no interstitial or rewarded ads are in V2. Do not add purchases or analytics.
 
-AdMob requires its config plugin, platform App IDs, consent before initialization, test IDs/non-production configuration in development, and an Expo development or release build—not Expo Go. Native dependency or plugin changes require a rebuild. Epic 2 supplies the `AdSlot` adapter boundary; Epic 8 adds placements only after Home and Summary exist. See [dependencies](./dependencies.md) and [roadmap Epic 8](./roadmap/08-monetization-and-operations.md).
+AdMob requires its config plugin, platform App IDs, consent before initialization, test IDs/non-production configuration in development, and an Expo development or release build—not Expo Go. The iOS config carries Google's public test App ID only so the native SDK starts cleanly; the iOS ad boundary remains a no-op until a future deliberate enablement path swaps it in. Android remains the release target. Native dependency or plugin changes require a rebuild. Epic 2 supplies the `AdSlot` adapter boundary; Epic 8 adds placements only after Home and Summary exist. See [dependencies](./dependencies.md) and [roadmap Epic 8](./roadmap/08-monetization-and-operations.md).
 
 ## Operational constraints
 

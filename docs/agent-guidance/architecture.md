@@ -24,6 +24,7 @@ interface ShoppingListRepository {
 
 - Use Expo Router and the approved dependency catalog. Resolve Expo packages with `npx expo install`.
 - Isolate platform-only UI in `*.ios` and `*.android` adapters.
+- When a native SDK needs an iOS App ID only to avoid a startup crash, commit the public test App ID, keep the iOS runtime boundary no-op, and document the release scope as Android-only until an explicit enablement decision exists.
 - Treat web SQLite as alpha until separately validated.
 - A native dependency or config-plugin change requires a new native build; EAS Update ships compatible JS/assets only.
 
