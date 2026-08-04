@@ -1,6 +1,7 @@
 export { AppColumn } from './app-column';
 export { AppButton } from './app-button';
 export { AppHost } from './app-host';
+export { AdSlot } from './ad-slot';
 export { AppRow } from './app-row';
 export { AppSelect } from './app-select';
 export { AppSheet } from './app-sheet';
