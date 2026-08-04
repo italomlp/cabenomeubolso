@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
 import { AppButton, AppColumn, AppHost, AppRow, AppSelect, AppSheet, AppText, AppTextField } from '@/components/ui';
+import { PlannedItemEditorSheet } from '@/components/planning/planned-item-editor';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
 import {
@@ -10,6 +11,7 @@ import {
   type ShoppingList,
   type ShoppingListItem,
 } from '@/domain/shopping-list';
+import { formatCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
 
 export type CreateListDraftState = {
@@ -68,10 +70,7 @@ export function canPersistCreateListDraft(state: CreateListDraftState): boolean 
 }
 
 function formatMoney(locale: string, amountMinor: number, currencyCode: SupportedCurrency): string {
-  return new Intl.NumberFormat(locale, {
-    currency: currencyCode,
-    style: 'currency',
-  }).format(amountMinor / 100);
+  return formatCurrencyMinor(locale, amountMinor, currencyCode);
 }
 
 type SummaryCardProps = {
@@ -174,7 +173,8 @@ export default function HomeScreen() {
   const [draftBudgetText, setDraftBudgetText] = useState('');
   const [draftName, setDraftName] = useState('');
   const [currency, setCurrency] = useState<SupportedCurrency>('BRL');
-  const [itemCount, setItemCount] = useState(0);
+  const [plannedItemEditorVisible, setPlannedItemEditorVisible] = useState(false);
+  const [plannedItems, setPlannedItems] = useState<ShoppingListItem[]>([]);
 
   const currencyOptions = useMemo(
     () => [
@@ -184,19 +184,20 @@ export default function HomeScreen() {
     [t]
   );
 
-  const draftState = useMemo<CreateListDraftState>(
-    () => ({
-      budgetText: draftBudgetText,
-      currencyCode: currency,
-      itemCount,
-      name: draftName,
-    }),
-    [currency, draftBudgetText, draftName, itemCount]
-  );
+  const draftState: CreateListDraftState = {
+    budgetText: draftBudgetText,
+    currencyCode: currency,
+    itemCount: plannedItems.length,
+    name: draftName,
+  };
   const draftBudgetMinor = parseBudgetMinor(draftBudgetText);
   const canPersistDraft = validateShoppingListForSave(buildCreateListDraft(draftState)).success;
   const selectedCurrencyLabel = currency === 'BRL' ? t('preferences.currencyBrl') : t('preferences.currencyUsd');
   const draftBudgetPreview = formatMoney(locale, Number.isSafeInteger(draftBudgetMinor) ? draftBudgetMinor : 0, currency);
+  const closeCreateSheet = () => {
+    setCreateSheetVisible(false);
+    setPlannedItemEditorVisible(false);
+  };
 
   const activeSummary = {
     body: t('home.activeSummaryBody'),
@@ -264,14 +265,9 @@ export default function HomeScreen() {
           />
         </AppColumn>
 
-        <AppButton
-          accessibilityHint={t('home.openCreateListHint')}
-          label={t('home.openCreateList')}
-          onPress={() => setCreateSheetVisible(true)}
-          style={{ alignSelf: 'flex-start' }}
-        />
+        <AppButton accessibilityHint={t('home.openCreateListHint')} label={t('home.openCreateList')} onPress={() => setCreateSheetVisible(true)} style={{ alignSelf: 'flex-start' }} />
 
-        <AppSheet onClose={() => setCreateSheetVisible(false)} title={t('createList.title')} visible={createSheetVisible}>
+        <AppSheet onClose={closeCreateSheet} title={t('createList.title')} visible={createSheetVisible}>
           <AppColumn spacing={theme.space.md}>
             <AppColumn
               spacing={theme.space.xs}
@@ -354,12 +350,12 @@ export default function HomeScreen() {
                     lineHeight: theme.typography.body.lineHeight,
                   }}
                 >
-                  {t('createList.itemCount', { count: itemCount })}
+                  {t('createList.itemCount', { count: plannedItems.length })}
                 </AppText>
               </AppRow>
             </AppColumn>
 
-            {itemCount === 0 ? (
+            {plannedItems.length === 0 ? (
               <AppSelect
                 helperText={t('createList.currencyHint')}
                 label={t('createList.currencyLabel')}
@@ -445,20 +441,20 @@ export default function HomeScreen() {
                 {t('createList.itemsHint')}
               </AppText>
               <AppRow spacing={theme.space.sm}>
+              <AppButton
+                accessibilityHint={t('createList.addItemHint')}
+                label={t('createList.addItem')}
+                onPress={() => setPlannedItemEditorVisible(true)}
+                testID="create-list-add-item"
+              />
+              {plannedItems.length > 0 ? (
                 <AppButton
-                  accessibilityHint={t('createList.addItemHint')}
-                  label={t('createList.addItem')}
-                  onPress={() => setItemCount((currentCount) => currentCount + 1)}
-                  testID="create-list-add-item"
+                  accessibilityHint={t('createList.clearItemsHint')}
+                  label={t('createList.clearItems')}
+                  onPress={() => setPlannedItems([])}
+                  testID="create-list-clear-items"
+                  variant="ghost"
                 />
-                {itemCount > 0 ? (
-                  <AppButton
-                    accessibilityHint={t('createList.clearItemsHint')}
-                    label={t('createList.clearItems')}
-                    onPress={() => setItemCount(0)}
-                    testID="create-list-clear-items"
-                    variant="ghost"
-                  />
                 ) : null}
               </AppRow>
             </AppColumn>
@@ -468,7 +464,7 @@ export default function HomeScreen() {
                 accessibilityHint={t('createList.saveHint')}
                 disabled={!canPersistDraft}
                 label={t('createList.save')}
-                onPress={() => setCreateSheetVisible(false)}
+                onPress={closeCreateSheet}
                 testID="create-list-save"
                 variant="secondary"
               />
@@ -476,18 +472,46 @@ export default function HomeScreen() {
                 accessibilityHint={t('createList.finalizeHint')}
                 disabled={!canPersistDraft}
                 label={t('createList.finalize')}
-                onPress={() => setCreateSheetVisible(false)}
+                onPress={closeCreateSheet}
                 testID="create-list-finalize"
               />
               <AppButton
                 accessibilityHint={t('createList.closeHint')}
                 label={t('createList.close')}
-                onPress={() => setCreateSheetVisible(false)}
+                onPress={closeCreateSheet}
                 variant="ghost"
               />
             </AppRow>
           </AppColumn>
         </AppSheet>
+
+        <PlannedItemEditorSheet
+          currencyCode={currency}
+          onCancel={() => setPlannedItemEditorVisible(false)}
+          onSave={(draft) => {
+            const timestamp = new Date().toISOString();
+
+            setPlannedItems((currentItems) => [
+              ...currentItems,
+              {
+                actualUnitMinor: null,
+                createdAt: timestamp,
+                deletedAt: null,
+                id: `draft-item-${currentItems.length + 1}`,
+                listId: DRAFT_LIST_ID,
+                name: draft.name,
+                plannedUnitMinor: draft.plannedUnitMinor,
+                purchasedAt: null,
+                quantityMilli: draft.quantityMilli,
+                sortOrder: currentItems.length + 1,
+                unitCode: draft.unitCode,
+                updatedAt: timestamp,
+              },
+            ]);
+            setPlannedItemEditorVisible(false);
+          }}
+          visible={plannedItemEditorVisible}
+        />
       </AppColumn>
     </AppHost>
   );

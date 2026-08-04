@@ -85,10 +85,27 @@ describe('create list shell rules', () => {
 
     const addItemButton = tree!.root
       .findAllByType(mockExpoUi.Button)
-      .find((button) => button.props.label === 'Add item')!;
+      .find((button) => button.props.label === 'Add planned item')!;
 
     act(() => {
       addItemButton.props.onPress();
+    });
+
+    expect(tree!.root.findAllByType(Text).map((node) => node.props.children)).toContain('Planned item');
+
+    const nameInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-name')!;
+    const quantityInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-quantity')!;
+    const priceInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-price')!;
+
+    act(() => {
+      nameInput.props.onChangeText?.('Milk');
+      quantityInput.props.onFocus?.();
+      quantityInput.props.onChangeText?.('2');
+      quantityInput.props.onBlur?.();
+      priceInput.props.onFocus?.();
+      priceInput.props.onChangeText?.('3.50');
+      priceInput.props.onBlur?.();
+      tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
     });
 
     expect(
