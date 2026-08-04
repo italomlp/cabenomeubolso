@@ -1,5 +1,6 @@
 import { Text } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
+import type { ComponentProps } from 'react';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { i18n } from '@/lib/localization/i18n';
@@ -7,7 +8,36 @@ import * as mockExpoUi from '@/components/ui/expo-ui.mock';
 
 import HomeScreen from '@/app/index';
 
+type HomeScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof HomeScreen>>['dependencies']>;
+
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: { getItem: jest.fn(), removeItem: jest.fn(), setItem: jest.fn() },
+}));
+jest.mock('expo-localization', () => ({
+  getLocales: () => [{ currencyCode: 'BRL', languageTag: 'pt-BR', regionCode: 'BR' }],
+}));
+
+function createRuntime(): HomeScreenDependencies {
+  return {
+    repository: {
+      get: jest.fn(async () => null),
+      list: jest.fn(async () => []),
+      save: jest.fn(async () => undefined),
+    },
+    useCases: {
+      finalizeList: jest.fn(async () => {
+        throw new Error('not expected');
+      }),
+      loadList: jest.fn(async () => null),
+      reopenList: jest.fn(async () => {
+        throw new Error('not expected');
+      }),
+      saveList: jest.fn(async () => undefined),
+    },
+  } as const;
+}
 
 describe('HomeScreen', () => {
   it('renders the localized home and create-list shell copy', async () => {
@@ -15,7 +45,7 @@ describe('HomeScreen', () => {
 
     await act(async () => {
       await i18n.changeLanguage('en');
-      tree = renderer.create(<HomeScreen />);
+      tree = renderer.create(<HomeScreen dependencies={createRuntime()} />);
     });
 
     const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
@@ -32,7 +62,7 @@ describe('HomeScreen', () => {
 
     await act(async () => {
       await i18n.changeLanguage('pt-BR');
-      tree = renderer.create(<HomeScreen />);
+      tree = renderer.create(<HomeScreen dependencies={createRuntime()} />);
     });
 
     const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);

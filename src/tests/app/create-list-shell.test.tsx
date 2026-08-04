@@ -1,119 +1,196 @@
-import { Text } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
+import type { ComponentProps } from 'react';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
+import HomeScreen, { buildCreateListDraft, canPersistCreateListDraft } from '@/app/index';
+import type { ShoppingList } from '@/domain/shopping-list';
 import { i18n } from '@/lib/localization/i18n';
 
-import HomeScreen, { buildCreateListDraft, canPersistCreateListDraft } from '@/app/index';
+type HomeScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof HomeScreen>>['dependencies']>;
 
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: { getItem: jest.fn(), removeItem: jest.fn(), setItem: jest.fn() },
+}));
+jest.mock('expo-localization', () => ({
+  getLocales: () => [{ currencyCode: 'BRL', languageTag: 'pt-BR', regionCode: 'BR' }],
+}));
+
+function createRuntime(): HomeScreenDependencies {
+  let savedList: ShoppingList | null = null;
+
+  const runtime = {
+    repository: {
+      get: jest.fn(async () => savedList),
+      list: jest.fn(async () => (savedList === null ? [] : [savedList])),
+      save: jest.fn(async (list) => {
+        savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
+      }),
+    },
+    useCases: {
+      finalizeList: jest.fn(async (listId: string) => {
+        if (savedList === null || savedList.id !== listId) {
+          throw new Error(`Shopping list not found: ${listId}`);
+        }
+
+        savedList = {
+          ...savedList,
+          finalizedAt: '2026-08-04T12:00:00.000Z',
+          status: 'finalized',
+        };
+
+        return JSON.parse(JSON.stringify(savedList));
+      }),
+      loadList: jest.fn(async (listId: string) => {
+        if (savedList === null || savedList.id !== listId) {
+          return null;
+        }
+
+        return JSON.parse(JSON.stringify(savedList));
+      }),
+      reopenList: jest.fn(async (listId: string) => {
+        if (savedList === null || savedList.id !== listId) {
+          throw new Error(`Shopping list not found: ${listId}`);
+        }
+
+        savedList = {
+          ...savedList,
+          finalizedAt: null,
+          status: 'draft',
+        };
+
+        return JSON.parse(JSON.stringify(savedList));
+      }),
+      saveList: jest.fn(async (list) => {
+        savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
+      }),
+    },
+  } as const;
+
+  return runtime;
+}
 
 describe('create list shell rules', () => {
-  it('keeps currency selection independent from save/finalize readiness', () => {
-    expect(
-      canPersistCreateListDraft({
-        budgetText: '',
-        currencyCode: 'USD',
-        itemCount: 0,
-        name: '',
-      })
-    ).toBe(false);
-
-    expect(
-      canPersistCreateListDraft({
-        budgetText: '4000',
-        currencyCode: 'USD',
-        itemCount: 0,
-        name: 'Weekly groceries',
-      })
-    ).toBe(false);
-
-    expect(
-      canPersistCreateListDraft({
-        budgetText: '4000',
-        currencyCode: 'USD',
-        itemCount: 1,
-        name: 'Weekly groceries',
-      })
-    ).toBe(true);
-  });
-
-  it('builds a draft list shell with placeholder items for validation', () => {
+  it('parses localized budget input at the UI boundary', () => {
     const draft = buildCreateListDraft(
       {
-        budgetText: '2500',
+        budgetText: 'R$ 40,00',
         currencyCode: 'BRL',
-        itemCount: 2,
+        itemCount: 1,
+        items: [
+          {
+            actualUnitMinor: null,
+            createdAt: '2026-08-04T12:00:00.000Z',
+            deletedAt: null,
+            id: 'item-1',
+            listId: 'list-1',
+            name: 'Milk',
+            plannedUnitMinor: 350,
+            purchasedAt: null,
+            quantityMilli: 1000,
+            sortOrder: 1,
+            unitCode: 'piece',
+            updatedAt: '2026-08-04T12:00:00.000Z',
+          },
+        ],
+        listId: 'list-1',
         name: 'Weekly groceries',
+        status: 'draft',
       },
-      '2026-08-04T12:00:00.000Z'
+      '2026-08-04T12:00:00.000Z',
+      'pt-BR'
     );
 
     expect(draft).toMatchObject({
-      budgetMinor: 2500,
+      budgetMinor: 4000,
       currencyCode: 'BRL',
-      id: 'create-list-shell-draft',
-      items: [
-        { id: 'create-list-shell-draft-item-1', listId: 'create-list-shell-draft', sortOrder: 1, unitCode: 'piece' },
-        { id: 'create-list-shell-draft-item-2', listId: 'create-list-shell-draft', sortOrder: 2, unitCode: 'piece' },
-      ],
+      id: 'list-1',
       name: 'Weekly groceries',
       status: 'draft',
     });
+    expect(
+      canPersistCreateListDraft(
+        {
+          budgetText: 'R$ 40,00',
+          currencyCode: 'BRL',
+          itemCount: 1,
+          items: draft.items,
+          listId: 'list-1',
+          name: 'Weekly groceries',
+          status: 'draft',
+        },
+        'pt-BR'
+      )
+    ).toBe(true);
   });
 
-  it('shows the currency selector before items exist and locks it after the first item', async () => {
+  it('wires create/save through the repository-backed home flow and locks currency after the first item', async () => {
+    const runtime = createRuntime();
     let tree: renderer.ReactTestRenderer;
 
     await act(async () => {
-      await i18n.changeLanguage('en');
-      tree = renderer.create(<HomeScreen />);
+      await i18n.changeLanguage('pt-BR');
+      tree = renderer.create(<HomeScreen dependencies={runtime} />);
     });
 
-    const openCreateList = tree!.root
-      .findAllByType(mockExpoUi.Button)
-      .find((button) => button.props.label === 'Create list')!;
-
-    act(() => {
-      openCreateList.props.onPress();
+    await act(async () => {
+      tree!.root
+        .findAllByType(mockExpoUi.Button)
+        .find((button) => button.props.label === 'Criar lista')!
+        .props.onPress();
     });
 
-    expect(
-      tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'create-list-currency')
-    ).toHaveLength(1);
+    expect(tree!.root.findAllByProps({ testID: 'create-list-currency' }).length).toBeGreaterThan(0);
 
-    const addItemButton = tree!.root
-      .findAllByType(mockExpoUi.Button)
-      .find((button) => button.props.label === 'Add planned item')!;
+    const nameInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'create-list-name')!;
+    const budgetInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'create-list-budget')!;
+    const addItemButton = tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'create-list-add-item')!;
 
-    act(() => {
+    await act(async () => {
+      nameInput.props.onChangeText?.('Compra semanal');
+      budgetInput.props.onChangeText?.('R$ 40,00');
       addItemButton.props.onPress();
     });
 
-    expect(tree!.root.findAllByType(Text).map((node) => node.props.children)).toContain('Planned item');
-
-    const nameInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-name')!;
+    const itemNameInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-name')!;
     const quantityInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-quantity')!;
     const priceInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-price')!;
 
-    act(() => {
-      nameInput.props.onChangeText?.('Milk');
+    await act(async () => {
+      itemNameInput.props.onChangeText?.('Milk');
       quantityInput.props.onFocus?.();
       quantityInput.props.onChangeText?.('2');
       quantityInput.props.onBlur?.();
       priceInput.props.onFocus?.();
-      priceInput.props.onChangeText?.('3.50');
+      priceInput.props.onChangeText?.('3,50');
       priceInput.props.onBlur?.();
       tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
     });
 
-    expect(
-      tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'create-list-currency')
-    ).toHaveLength(0);
+    expect(tree!.root.findAllByProps({ testID: 'create-list-currency' })).toHaveLength(0);
 
-    const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
+    await act(async () => {
+      tree!.root.findAllByProps({ testID: 'create-list-save' })[0].props.onPress();
+    });
 
-    expect(texts).toContain('Currency is locked after the first item exists.');
+    expect(runtime.useCases.saveList).toHaveBeenCalledTimes(1);
+    expect(runtime.useCases.saveList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        budgetMinor: 4000,
+        currencyCode: 'BRL',
+        name: 'Compra semanal',
+        status: 'draft',
+        items: [
+          expect.objectContaining({
+            name: 'Milk',
+            plannedUnitMinor: 350,
+            quantityMilli: 2000,
+            unitCode: 'piece',
+          }),
+        ],
+      })
+    );
   });
 });
