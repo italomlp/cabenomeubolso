@@ -36,7 +36,7 @@ describe('HomeScreen theme smoke', () => {
 
     expect(tree!.root.findByProps({ colorScheme: expected })).toBeTruthy();
     expect(tree!.root.findAllByType(Text).map((node) => node.props.children)).toContain(
-      'Expo foundation ready'
+      'Home'
     );
   });
 });

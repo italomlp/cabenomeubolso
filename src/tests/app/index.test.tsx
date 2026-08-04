@@ -10,7 +10,7 @@ import HomeScreen from '@/app/index';
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
 
 describe('HomeScreen', () => {
-  it('renders initialized i18n copy', async () => {
+  it('renders the localized home and create-list shell copy', async () => {
     let tree: renderer.ReactTestRenderer;
 
     await act(async () => {
@@ -20,13 +20,14 @@ describe('HomeScreen', () => {
 
     const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
 
-    expect(texts).toContain('Expo foundation ready');
-    expect(texts).toContain('Semantic tokens, adapters, and theme resolution are wired up.');
-    expect(texts).toContain('Router, SQLite, and preferences are initialized.');
-    expect(texts).toContain('Open sheet');
+    expect(texts).toContain('Home');
+    expect(texts).toContain('Plan the next list offline before you shop.');
+    expect(texts).toContain('Active summaries');
+    expect(texts).toContain('Finalized summaries');
+    expect(texts).toContain('Create list');
   });
 
-  it('renders the home placeholder copy', async () => {
+  it('renders the pt-BR shell copy', async () => {
     let tree: renderer.ReactTestRenderer;
 
     await act(async () => {
@@ -36,9 +37,10 @@ describe('HomeScreen', () => {
 
     const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
 
-    expect(texts).toContain('Base do Expo pronta');
-    expect(texts).toContain('Tokens semânticos, adapters e resolução de tema já estão conectados.');
-    expect(texts).toContain('Router, SQLite e preferências estão inicializados.');
-    expect(texts).toContain('Abrir painel');
+    expect(texts).toContain('Início');
+    expect(texts).toContain('Planeje a próxima lista offline antes de comprar.');
+    expect(texts).toContain('Resumos ativos');
+    expect(texts).toContain('Resumos finalizados');
+    expect(texts).toContain('Criar lista');
   });
 });
