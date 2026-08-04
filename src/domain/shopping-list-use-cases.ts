@@ -2,7 +2,7 @@ import type { ShoppingList } from './shopping-list';
 import {
   markShoppingListItemPurchased,
   markShoppingListItemUnpurchased,
-  validateShoppingList,
+  validateShoppingListForSave,
 } from './shopping-list';
 import type { ShoppingListRepository } from './shopping-list-repository';
 
@@ -30,7 +30,7 @@ export function createShoppingListUseCases({ now = () => new Date().toISOString(
   return {
     loadList: async (id, includeDeleted = false) => repository.get(id, { includeDeleted }),
     saveList: async (list) => {
-      const validation = validateShoppingList(list);
+      const validation = validateShoppingListForSave(list);
 
       if (!validation.success) {
         throw new Error(validation.errors.map((issue) => `${issue.field}: ${issue.message}`).join('; '));

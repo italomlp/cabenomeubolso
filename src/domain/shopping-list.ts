@@ -221,6 +221,28 @@ export function validateShoppingList(list: ShoppingList): ValidationResult<Shopp
   return issues.length > 0 ? { success: false, errors: issues } : { success: true, value: list };
 }
 
+export function validateShoppingListForSave(list: ShoppingList): ValidationResult<ShoppingList> {
+  const validation = validateShoppingList(list);
+
+  if (!validation.success) {
+    return validation;
+  }
+
+  if (list.items.every((item) => item.deletedAt !== null)) {
+    return {
+      errors: [
+        {
+          field: 'items',
+          message: 'At least one non-deleted item is required.',
+        },
+      ],
+      success: false,
+    };
+  }
+
+  return validation;
+}
+
 export function roundMinorUnits(quantityMilli: number, unitMinor: number): number {
   if (!Number.isSafeInteger(quantityMilli) || !Number.isSafeInteger(unitMinor)) {
     throw new Error('Quantity and unit price must be safe integers.');

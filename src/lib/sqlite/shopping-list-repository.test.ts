@@ -396,6 +396,37 @@ describe('createSQLiteShoppingListRepository', () => {
     expect(runAsync).not.toHaveBeenCalled();
   });
 
+  it('rejects saving an empty list graph', async () => {
+    const database = {
+      getAllAsync: jest.fn(async () => []),
+      getFirstAsync: jest.fn(async () => undefined),
+      runAsync: jest.fn(async () => undefined),
+      withExclusiveTransactionAsync: jest.fn(async () => undefined),
+      withTransactionAsync: jest.fn(async () => undefined),
+    } as unknown as SQLiteShoppingListRepositoryDatabase;
+
+    const repository = createSQLiteShoppingListRepository(database);
+
+    await expect(
+      repository.save({
+        budgetMinor: 4000,
+        createdAt: '2026-07-31T00:00:00.000Z',
+        currencyCode: 'BRL',
+        deletedAt: null,
+        finalizedAt: null,
+        id: 'list-1',
+        items: [],
+        name: 'Weekly groceries',
+        status: 'draft',
+        updatedAt: '2026-07-31T00:00:00.000Z',
+      })
+    ).rejects.toThrow('items: At least one non-deleted item is required.');
+
+    expect(database.withExclusiveTransactionAsync).not.toHaveBeenCalled();
+    expect(database.withTransactionAsync).not.toHaveBeenCalled();
+    expect(database.runAsync).not.toHaveBeenCalled();
+  });
+
   it('re-checks the saved list currency lock inside the exclusive write transaction', async () => {
     let currencyCode = 'BRL';
     const getFirstAsync = jest.fn(async () => ({

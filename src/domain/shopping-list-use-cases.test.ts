@@ -90,4 +90,21 @@ describe('createShoppingListUseCases', () => {
     );
     expect(repository.save).not.toHaveBeenCalled();
   });
+
+  it('refuses to save an empty list', async () => {
+    const list = createShoppingList();
+    list.items = [];
+
+    const repository: ShoppingListRepository = {
+      get: jest.fn(async () => list),
+      list: jest.fn(async () => [list]),
+      save: jest.fn(async () => undefined),
+    };
+    const useCases = createShoppingListUseCases({
+      repository,
+    });
+
+    await expect(useCases.saveList(list)).rejects.toThrow('items: At least one non-deleted item is required.');
+    expect(repository.save).not.toHaveBeenCalled();
+  });
 });
