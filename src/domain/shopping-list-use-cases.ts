@@ -1,7 +1,10 @@
 import type { ShoppingList } from './shopping-list';
 import {
+  finalizeShoppingList,
   markShoppingListItemPurchased,
+  markShoppingListItemDeleted,
   markShoppingListItemUnpurchased,
+  reopenShoppingList,
   validateShoppingListForSave,
 } from './shopping-list';
 import type { ShoppingListRepository } from './shopping-list-repository';
@@ -13,6 +16,9 @@ export type ShoppingListUseCaseDependencies = {
 
 export type ShoppingListUseCases = {
   loadList: (id: string, includeDeleted?: boolean) => Promise<ShoppingList | null>;
+  finalizeList: (listId: string) => Promise<ShoppingList>;
+  reopenList: (listId: string) => Promise<ShoppingList>;
+  removeItem: (listId: string, itemId: string) => Promise<ShoppingList>;
   saveList: (list: ShoppingList) => Promise<void>;
   setItemPurchased: (listId: string, itemId: string, actualUnitMinor: number) => Promise<ShoppingList>;
   setItemUnpurchased: (listId: string, itemId: string) => Promise<ShoppingList>;
@@ -27,9 +33,45 @@ function requireLoadedList(list: ShoppingList | null, listId: string): ShoppingL
 }
 
 export function createShoppingListUseCases({ now = () => new Date().toISOString(), repository }: ShoppingListUseCaseDependencies): ShoppingListUseCases {
+  function assertListCanBeEdited(list: ShoppingList): void {
+    if (list.status === 'finalized') {
+      throw new Error('Finalized shopping lists must be reopened before editing.');
+    }
+  }
+
   return {
     loadList: async (id, includeDeleted = false) => repository.get(id, { includeDeleted }),
+    finalizeList: async (listId) => {
+      const list = requireLoadedList(await repository.get(listId), listId);
+      const updated = finalizeShoppingList(list, now());
+
+      await repository.save(updated);
+      return updated;
+    },
+    reopenList: async (listId) => {
+      const list = requireLoadedList(await repository.get(listId), listId);
+      const updated = reopenShoppingList(list, now());
+
+      await repository.save(updated);
+      return updated;
+    },
+    removeItem: async (listId, itemId) => {
+      const list = requireLoadedList(await repository.get(listId), listId);
+      assertListCanBeEdited(list);
+
+      const updated = markShoppingListItemDeleted(list, itemId, now());
+      const validation = validateShoppingListForSave(updated);
+
+      if (!validation.success) {
+        throw new Error(validation.errors.map((issue) => `${issue.field}: ${issue.message}`).join('; '));
+      }
+
+      await repository.save(updated);
+      return updated;
+    },
     saveList: async (list) => {
+      assertListCanBeEdited(list);
+
       const validation = validateShoppingListForSave(list);
 
       if (!validation.success) {

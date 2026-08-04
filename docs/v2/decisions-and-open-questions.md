@@ -19,6 +19,9 @@
 | Supported transaction currencies: `BRL` and `USD` | V2 has a bounded, explicit currency scope without conversion or multi-currency lists. |
 | Currency stored on monetary domain records | ISO code plus integer minor units keeps money correct independently of UI locale. |
 | Per-list currency locks after items or actual spending | Avoids silent value conversion and historical ambiguity; new/clone lists are the V2 path. |
+| Empty lists cannot be saved or finalized | Keeps the persisted lifecycle anchored to at least one planned item. |
+| Finalized lists can be reopened and edited | Preserves history while still allowing planning corrections without cloning. |
+| Pre-item currency change window | Currency may change until the first non-deleted item exists and before actual spending occurs; then it locks. |
 | V2 units and quantity precision | Store `unit_code` from `piece`, `pack`, `kg`, `g`, `l`, `ml`; whole positive quantities for `piece`/`pack`/`g`/`ml`, and up to three decimals for `kg`/`l`. This supports practical weight/volume entry without fractional grams or millilitres. |
 | `quantity_milli` meaning | Integer thousandths of the selected unit, never money: `1.5 kg` → `1500`; monetary fields remain currency minor units. |
 | Unit-price semantics | Planned/actual unit minor amounts are prices per selected unit; V2 does not convert units or prices. |
@@ -54,7 +57,7 @@ Remote sync, API, accounts, authentication, collaboration, cloud backup, backend
 | Gate | Question | Why input is needed |
 |---|---|---|
 | 1. Store identity | Retain the existing Android app identity/listing, or create a new V2 listing? | Explicitly deferred; needed before Android release credentials/configuration are created. |
-| 2. Product rules | May an empty list be saved or finalized? May a finalized list be reopened? | Before list lifecycle validation is implemented. |
+| 2. Product rules | **Confirmed:** empty lists cannot be saved or finalized; finalized lists can be reopened and edited. | Implemented in list lifecycle validation. |
 | 3. Quantity and prices | **Confirmed:** use `piece`, `pack`, `kg`, `g`, `l`, `ml`; decimal `kg`/`l` up to three places only; whole `piece`/`pack`/`g`/`ml`; price is per selected unit and no conversion. **Open:** on uncomplete, retain or clear actual price? | The price-retention choice is needed before purchase-toggle behavior is implemented. |
 | 4. Trash | Is manual permanent deletion required, and which foreground event must trigger expired-record cleanup? | Before Trash repository and UX work is completed. |
 | 5. Recurrence | Is manual “Generate now” sufficient for V2? If not, what cadences and missed-occurrence behavior are required? | Before template generation/scheduling work begins. |
@@ -62,4 +65,4 @@ Remote sync, API, accounts, authentication, collaboration, cloud backup, backend
 | 7. Monetization | **Confirmed:** installed AdMob is flag-disabled by default; Home-after-content and finalized-Summary banners only; no active-shopping, interstitial, or rewarded ads. | Before enabling ads for a release. |
 | 8. Release policy | Which EAS Update channels and runtime-version policy should be used? | Before production delivery configuration. |
 | 9. Internationalization defaults | **Confirmed:** System language resolution and locale/region/BRL fallback currency proposal; users may explicitly choose BRL/USD independently of language. | Implement in preferences/create-list behavior. |
-| 10. Internationalization product behavior | What English store descriptor/market positioning should accompany the Portuguese product name? May an empty list change currency, or must users always start/clone a new list? | Before store assets and currency-change UX are finalized. |
+| 10. Internationalization product behavior | What English store descriptor/market positioning should accompany the Portuguese product name? | Before store assets are finalized. |

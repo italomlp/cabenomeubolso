@@ -321,8 +321,16 @@ function assertShoppingListIsMutable(list: ShoppingList): void {
   }
 }
 
-function assertShoppingListItemIsMutable(list: ShoppingList, item: ShoppingListItem): void {
+function assertShoppingListIsEditable(list: ShoppingList): void {
   assertShoppingListIsMutable(list);
+
+  if (list.status === 'finalized') {
+    throw new Error('Cannot mutate a finalized shopping list.');
+  }
+}
+
+function assertShoppingListItemIsMutable(list: ShoppingList, item: ShoppingListItem): void {
+  assertShoppingListIsEditable(list);
 
   if (item.deletedAt !== null) {
     throw new Error('Cannot mutate a deleted shopping list item.');
@@ -335,7 +343,7 @@ export function markShoppingListItemPurchased(
   actualUnitMinor: number,
   purchasedAt: string
 ): ShoppingList {
-  assertShoppingListIsMutable(list);
+  assertShoppingListIsEditable(list);
 
   if (!isSafeNonNegativeInteger(actualUnitMinor)) {
     throw new Error('Actual unit price must be a non-negative integer.');
@@ -374,7 +382,7 @@ export function markShoppingListItemPurchased(
 }
 
 export function markShoppingListItemUnpurchased(list: ShoppingList, itemId: string, updatedAt: string): ShoppingList {
-  assertShoppingListIsMutable(list);
+  assertShoppingListIsEditable(list);
 
   if (!isValidTimestamp(updatedAt)) {
     throw new Error('Updated timestamp is required.');
@@ -404,5 +412,77 @@ export function markShoppingListItemUnpurchased(list: ShoppingList, itemId: stri
     ...list,
     items,
     updatedAt,
+  };
+}
+
+export function markShoppingListItemDeleted(list: ShoppingList, itemId: string, deletedAt: string): ShoppingList {
+  assertShoppingListIsEditable(list);
+
+  if (!isValidTimestamp(deletedAt)) {
+    throw new Error('Deleted timestamp is required.');
+  }
+
+  let itemFound = false;
+  const items = list.items.map((item) => {
+    if (item.id !== itemId) {
+      return item;
+    }
+
+    assertShoppingListItemIsMutable(list, item);
+    itemFound = true;
+
+    return {
+      ...item,
+      deletedAt,
+      updatedAt: deletedAt,
+    };
+  });
+
+  if (!itemFound) {
+    throw new Error(`Shopping list item not found: ${itemId}`);
+  }
+
+  return {
+    ...list,
+    items,
+    updatedAt: deletedAt,
+  };
+}
+
+export function finalizeShoppingList(list: ShoppingList, finalizedAt: string): ShoppingList {
+  assertShoppingListIsMutable(list);
+
+  if (!isValidTimestamp(finalizedAt)) {
+    throw new Error('Finalized timestamp is required.');
+  }
+
+  if (list.status === 'finalized') {
+    throw new Error('Shopping list is already finalized.');
+  }
+
+  return {
+    ...list,
+    finalizedAt,
+    status: 'finalized',
+    updatedAt: finalizedAt,
+  };
+}
+
+export function reopenShoppingList(list: ShoppingList, reopenedAt: string): ShoppingList {
+  assertShoppingListIsMutable(list);
+
+  if (!isValidTimestamp(reopenedAt)) {
+    throw new Error('Reopened timestamp is required.');
+  }
+
+  if (list.status !== 'finalized') {
+    throw new Error('Only finalized shopping lists can be reopened.');
+  }
+
+  return {
+    ...list,
+    finalizedAt: null,
+    status: 'draft',
+    updatedAt: reopenedAt,
   };
 }

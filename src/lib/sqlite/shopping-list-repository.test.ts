@@ -32,6 +32,64 @@ function createShoppingListItem(): Parameters<typeof mapShoppingListItemRow>[0] 
   };
 }
 
+function createCompraSemanalShoppingList() {
+  return {
+    budgetMinor: 12_345,
+    createdAt: '2026-07-31T00:00:00.000Z',
+    currencyCode: 'BRL' as const,
+    deletedAt: null,
+    finalizedAt: null,
+    id: 'list-compra-semanal',
+    items: [
+      {
+        actualUnitMinor: null,
+        createdAt: '2026-07-31T00:00:00.000Z',
+        deletedAt: null,
+        id: 'item-1',
+        listId: 'list-compra-semanal',
+        name: 'Eggs',
+        plannedUnitMinor: 350,
+        purchasedAt: null,
+        quantityMilli: 2000,
+        sortOrder: 1,
+        unitCode: 'piece' as const,
+        updatedAt: '2026-07-31T00:00:00.000Z',
+      },
+      {
+        actualUnitMinor: null,
+        createdAt: '2026-07-31T00:00:00.000Z',
+        deletedAt: null,
+        id: 'item-2',
+        listId: 'list-compra-semanal',
+        name: 'Rice',
+        plannedUnitMinor: 1000,
+        purchasedAt: null,
+        quantityMilli: 500000,
+        sortOrder: 2,
+        unitCode: 'g' as const,
+        updatedAt: '2026-07-31T00:00:00.000Z',
+      },
+      {
+        actualUnitMinor: null,
+        createdAt: '2026-07-31T00:00:00.000Z',
+        deletedAt: null,
+        id: 'item-3',
+        listId: 'list-compra-semanal',
+        name: 'Potatoes',
+        plannedUnitMinor: 200,
+        purchasedAt: null,
+        quantityMilli: 1500,
+        sortOrder: 3,
+        unitCode: 'kg' as const,
+        updatedAt: '2026-07-31T00:00:00.000Z',
+      },
+    ],
+    name: 'Compra semanal',
+    status: 'draft' as const,
+    updatedAt: '2026-07-31T00:00:00.000Z',
+  };
+}
+
 describe('createSQLiteShoppingListRepository', () => {
   it('filters deleted rows by default and maps legacy rows without losing currency or quantity data', async () => {
     const getFirstAsync = jest.fn(async () => createShoppingList());
@@ -504,5 +562,95 @@ describe('createSQLiteShoppingListRepository', () => {
     expect(getAllAsync).toHaveBeenCalledTimes(1);
     expect(runAsync).not.toHaveBeenCalled();
     expect(database.withExclusiveTransactionAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('round-trips Compra semanal exact quantities and units through the SQLite adapter', async () => {
+    const state = {
+      items: new Map<string, Record<string, unknown>>(),
+      list: undefined as Record<string, unknown> | undefined,
+    };
+
+    const runAsync = jest.fn(async (sql: string, ...params: readonly unknown[]) => {
+      const normalizedSql = sql.trim().replace(/\s+/g, ' ');
+
+      if (normalizedSql.startsWith('INSERT INTO shopping_lists')) {
+        state.list = {
+          budget_minor: params[3],
+          created_at: params[7],
+          currency_code: params[2],
+          deleted_at: params[6],
+          finalized_at: params[5],
+          id: params[0],
+          name: params[1],
+          status: params[4],
+          updated_at: params[8],
+        };
+      }
+
+      if (normalizedSql.startsWith('INSERT INTO shopping_list_items')) {
+        state.items.set(String(params[0]), {
+          actual_unit_minor: params[6],
+          created_at: params[10],
+          deleted_at: params[9],
+          id: params[0],
+          list_id: params[1],
+          name: params[2],
+          planned_unit_minor: params[5],
+          purchased_at: params[7],
+          quantity_milli: params[4],
+          sort_order: params[8],
+          unit_code: params[3],
+          updated_at: params[11],
+        });
+      }
+
+      return undefined;
+    });
+    const database = {
+      getAllAsync: jest.fn(async <T>(sql: string, ...params: readonly unknown[]) => {
+        if (sql.includes('FROM shopping_lists')) {
+          return state.list === undefined ? [] : ([state.list] as readonly T[]);
+        }
+
+        if (sql.includes('FROM shopping_list_items')) {
+          return [...state.items.values()]
+            .filter((row) => row.list_id === params[0])
+            .map((row) => row as T) as readonly T[];
+        }
+
+        return [];
+      }),
+      getFirstAsync: jest.fn(async <T>(sql: string, ...params: readonly unknown[]) => {
+        if (sql.includes('FROM shopping_lists')) {
+          return state.list !== undefined && state.list.id === params[0] ? (state.list as T) : undefined;
+        }
+
+        return undefined;
+      }),
+      runAsync,
+      withExclusiveTransactionAsync: jest.fn(async (task: TransactionTask) => task(database as never)),
+      withTransactionAsync: jest.fn(async (task: TransactionTask) => task(database as never)),
+    } as unknown as SQLiteShoppingListRepositoryDatabase;
+
+    const repository = createSQLiteShoppingListRepository(database);
+    const shoppingList = createCompraSemanalShoppingList();
+
+    await repository.save(shoppingList);
+
+    expect(runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO shopping_list_items'), 'item-1', 'list-compra-semanal', 'Eggs', 'piece', 2000, 350, null, null, 1, null, '2026-07-31T00:00:00.000Z', '2026-07-31T00:00:00.000Z');
+
+    const loaded = await repository.get('list-compra-semanal');
+
+    expect(loaded).toMatchObject({
+      budgetMinor: 12_345,
+      currencyCode: 'BRL',
+      items: [
+        { quantityMilli: 2000, unitCode: 'piece' },
+        { quantityMilli: 500000, unitCode: 'g' },
+        { quantityMilli: 1500, unitCode: 'kg' },
+      ],
+      name: 'Compra semanal',
+      status: 'draft',
+    });
   });
 });

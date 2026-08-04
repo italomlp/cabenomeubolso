@@ -4,8 +4,10 @@ import {
   calculateShoppingListItemActualMinor,
   calculateShoppingListItemPlannedMinor,
   calculateShoppingListTotals,
+  finalizeShoppingList,
   markShoppingListItemPurchased,
   markShoppingListItemUnpurchased,
+  reopenShoppingList,
   validateShoppingList,
   validateShoppingListItem,
   type ShoppingList,
@@ -128,6 +130,26 @@ describe('shopping list domain', () => {
       remainingMinor: 2700,
       varianceMinor: -2400,
     });
+  });
+
+  it('reopens finalized lists and blocks edits until they are reopened', () => {
+    const finalized = finalizeShoppingList(createShoppingList(), '2026-07-31T10:00:00.000Z');
+
+    expect(() => markShoppingListItemPurchased(finalized, 'item-1', 650, '2026-07-31T10:00:01.000Z')).toThrow(
+      'Cannot mutate a finalized shopping list.'
+    );
+    expect(() => reopenShoppingList(createShoppingList(), '2026-07-31T10:00:00.000Z')).toThrow(
+      'Only finalized shopping lists can be reopened.'
+    );
+
+    const reopened = reopenShoppingList(finalized, '2026-07-31T10:00:01.000Z');
+
+    expect(reopened).toMatchObject({
+      finalizedAt: null,
+      status: 'draft',
+      updatedAt: '2026-07-31T10:00:01.000Z',
+    });
+    expect(() => markShoppingListItemPurchased(reopened, 'item-1', 650, '2026-07-31T10:00:02.000Z')).not.toThrow();
   });
 
   it('rejects mutations on soft-deleted lists and items', () => {
