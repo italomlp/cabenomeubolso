@@ -1,4 +1,4 @@
-import { createAdMobPluginConfig } from './src/config/admob';
+import { createAdMobPluginConfig } from './admob.config.js';
 
 type ExpoAppConfig = {
   plugins?: unknown[];
