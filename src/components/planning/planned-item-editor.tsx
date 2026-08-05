@@ -30,6 +30,8 @@ type PlannedItemEditorSheetProps = {
   visible: boolean;
 };
 
+type PlannedItemEditorContentProps = Omit<PlannedItemEditorSheetProps, 'visible'>;
+
 function isFractionalQuantityUnit(unitCode: ShoppingListUnitCode): boolean {
   return unitCode === 'kg' || unitCode === 'l';
 }
@@ -53,7 +55,7 @@ function parseErrorMessage(code: LocaleInputParseError['code'], t: (key: string)
   }
 }
 
-export function PlannedItemEditorSheet({ currencyCode, initialUnitCode = 'piece', onCancel, onSave, visible }: PlannedItemEditorSheetProps) {
+function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCancel, onSave }: PlannedItemEditorContentProps) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -196,98 +198,110 @@ export function PlannedItemEditorSheet({ currencyCode, initialUnitCode = 'piece'
     priceState.set(priceDisplayValue);
   }, [priceDisplayValue, priceState]);
 
+  return (
+    <AppColumn spacing={theme.space.md}>
+      <AppTextField
+        accessibilityHint={t('plannedItem.nameHint')}
+        helperText={t('plannedItem.nameHint')}
+        label={t('plannedItem.nameLabel')}
+        onChangeText={(nextName) => {
+          nameTextRef.current = nextName;
+          setName(nextName);
+        }}
+        placeholder={t('plannedItem.namePlaceholder')}
+        testID="planned-item-name"
+        value={nameState}
+      />
+
+      <AppSelect
+        helperText={t('plannedItem.unitHint')}
+        label={t('plannedItem.unitLabel')}
+        onValueChange={(nextUnit) => {
+          const nextValue = nextUnit as ShoppingListUnitCode;
+
+          setUnitCode(nextValue);
+          setQuantityText('');
+          quantityTextRef.current = '';
+          setQuantityMilli(null);
+          setQuantityError(null);
+          setQuantityFocused(false);
+          setPriceText('');
+          priceTextRef.current = '';
+          setPlannedUnitMinor(null);
+          setPriceError(null);
+          setPriceFocused(false);
+        }}
+        options={unitOptions}
+        testID="planned-item-unit"
+        value={unitCode}
+      />
+
+      <AppTextField
+        accessibilityHint={quantityError ?? quantityHint}
+        helperText={quantityError ?? quantityHint}
+        keyboardType="decimal-pad"
+        label={t('plannedItem.quantityLabel')}
+        onBlur={() => {
+          setQuantityFocused(false);
+          commitQuantity();
+        }}
+        onChangeText={(nextQuantityText) => {
+          quantityTextRef.current = nextQuantityText;
+          setQuantityText(nextQuantityText);
+        }}
+        onFocus={() => {
+          setQuantityFocused(true);
+          setQuantityError(null);
+        }}
+        placeholder={isFractionalQuantityUnit(unitCode) ? '1.5' : '2'}
+        testID="planned-item-quantity"
+        value={quantityState}
+      />
+
+      <AppTextField
+        accessibilityHint={priceError ?? priceHint}
+        helperText={priceError ?? priceHint}
+        keyboardType="decimal-pad"
+        label={priceLabel}
+        onBlur={() => {
+          setPriceFocused(false);
+          commitPrice();
+        }}
+        onChangeText={(nextPriceText) => {
+          priceTextRef.current = nextPriceText;
+          setPriceText(nextPriceText);
+        }}
+        onFocus={() => {
+          setPriceFocused(true);
+          setPriceError(null);
+        }}
+        placeholder={currencyCode === 'BRL' ? '12,34' : '12.34'}
+        testID="planned-item-price"
+        value={priceState}
+      />
+
+      <AppRow spacing={theme.space.sm}>
+        <AppButton label={t('plannedItem.save')} onPress={handleSave} testID="planned-item-save" />
+        <AppButton label={t('plannedItem.close')} onPress={resetAndClose} testID="planned-item-close" variant="ghost" />
+      </AppRow>
+    </AppColumn>
+  );
+}
+
+export function PlannedItemEditorContent(props: PlannedItemEditorContentProps) {
+  return <PlannedItemEditorFields {...props} />;
+}
+
+export function PlannedItemEditorSheet({ visible, ...props }: PlannedItemEditorSheetProps) {
+  const { t } = useTranslation(undefined, { i18n });
+
   if (!visible) {
     return null;
   }
 
   return (
-    <AppSheet onClose={resetAndClose} title={t('plannedItem.title')} visible={visible}>
-      <AppColumn spacing={theme.space.md}>
-        <AppTextField
-          accessibilityHint={t('plannedItem.nameHint')}
-          helperText={t('plannedItem.nameHint')}
-          label={t('plannedItem.nameLabel')}
-          onChangeText={(nextName) => {
-            nameTextRef.current = nextName;
-            setName(nextName);
-          }}
-          placeholder={t('plannedItem.namePlaceholder')}
-          testID="planned-item-name"
-          value={nameState}
-        />
-
-        <AppSelect
-          helperText={t('plannedItem.unitHint')}
-          label={t('plannedItem.unitLabel')}
-          onValueChange={(nextUnit) => {
-            const nextValue = nextUnit as ShoppingListUnitCode;
-
-            setUnitCode(nextValue);
-            setQuantityText('');
-            quantityTextRef.current = '';
-            setQuantityMilli(null);
-            setQuantityError(null);
-            setQuantityFocused(false);
-            setPriceText('');
-            priceTextRef.current = '';
-            setPlannedUnitMinor(null);
-            setPriceError(null);
-            setPriceFocused(false);
-          }}
-          options={unitOptions}
-          testID="planned-item-unit"
-          value={unitCode}
-        />
-
-        <AppTextField
-          accessibilityHint={quantityError ?? quantityHint}
-          helperText={quantityError ?? quantityHint}
-          keyboardType="decimal-pad"
-          label={t('plannedItem.quantityLabel')}
-          onBlur={() => {
-            setQuantityFocused(false);
-            commitQuantity();
-          }}
-          onChangeText={(nextQuantityText) => {
-            quantityTextRef.current = nextQuantityText;
-            setQuantityText(nextQuantityText);
-          }}
-          onFocus={() => {
-            setQuantityFocused(true);
-            setQuantityError(null);
-          }}
-          placeholder={isFractionalQuantityUnit(unitCode) ? '1.5' : '2'}
-          testID="planned-item-quantity"
-          value={quantityState}
-        />
-
-        <AppTextField
-          accessibilityHint={priceError ?? priceHint}
-          helperText={priceError ?? priceHint}
-          keyboardType="decimal-pad"
-          label={priceLabel}
-          onBlur={() => {
-            setPriceFocused(false);
-            commitPrice();
-          }}
-          onChangeText={(nextPriceText) => {
-            priceTextRef.current = nextPriceText;
-            setPriceText(nextPriceText);
-          }}
-          onFocus={() => {
-            setPriceFocused(true);
-            setPriceError(null);
-          }}
-          placeholder={currencyCode === 'BRL' ? '12,34' : '12.34'}
-          testID="planned-item-price"
-          value={priceState}
-        />
-
-        <AppRow spacing={theme.space.sm}>
-          <AppButton label={t('plannedItem.save')} onPress={handleSave} testID="planned-item-save" />
-          <AppButton label={t('plannedItem.close')} onPress={resetAndClose} testID="planned-item-close" variant="ghost" />
-        </AppRow>
-      </AppColumn>
+    <AppSheet onClose={props.onCancel} title={t('plannedItem.title')} visible>
+      <PlannedItemEditorFields {...props} />
     </AppSheet>
   );
 }

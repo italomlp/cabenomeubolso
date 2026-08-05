@@ -5,7 +5,7 @@ import { StyleSheet } from 'react-native';
 
 import { AppButton, AppColumn, AppHost, AppRow, AppSelect, AppSheet, AppText, AppTextField } from '@/components/ui';
 import { useNativeState } from '@/components/ui/expo-ui';
-import { PlannedItemEditorSheet } from '@/components/planning/planned-item-editor';
+import { PlannedItemEditorContent } from '@/components/planning/planned-item-editor';
 import { useAppTheme } from '@/design-system/theme-context';
 import { createShoppingListUseCases, type ShoppingListUseCases } from '@/domain/shopping-list-use-cases';
 import type { ShoppingListRepository } from '@/domain/shopping-list-repository';
@@ -314,6 +314,8 @@ export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
     [t]
   );
 
+  const createSheetTitle = plannedItemEditorVisible ? t('plannedItem.title') : t('createList.title');
+
   const summaryLists = useMemo(
     () => ({
       active: lists.filter((list) => list.status !== 'finalized' && list.deletedAt === null),
@@ -550,109 +552,209 @@ export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
             setCreateSheetVisible(false);
             setPlannedItemEditorVisible(false);
           }}
-          title={t('createList.title')}
+          title={createSheetTitle}
           visible={createSheetVisible}
         >
-          <AppColumn spacing={theme.space.md}>
-            <AppColumn
-              spacing={theme.space.xs}
-              style={{
-                ...styles.previewCard,
-                backgroundColor: theme.colors.backgroundElement,
-                borderColor: theme.colors.border,
+          {plannedItemEditorVisible ? (
+            <PlannedItemEditorContent
+              currencyCode={draft?.currencyCode ?? resolvedCurrency}
+              initialUnitCode="piece"
+              onCancel={() => setPlannedItemEditorVisible(false)}
+              onSave={(plannedItemDraft) => {
+                const timestamp = new Date().toISOString();
+
+                setDraft((current) => {
+                  if (current === null) {
+                    return null;
+                  }
+
+                  return {
+                    ...current,
+                    itemCount: current.items.length + 1,
+                    items: [
+                      ...current.items,
+                      {
+                        actualUnitMinor: null,
+                        createdAt: timestamp,
+                        deletedAt: null,
+                        id: `${current.listId}-item-${current.items.length + 1}`,
+                        listId: current.listId,
+                        name: plannedItemDraft.name,
+                        plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
+                        purchasedAt: null,
+                        quantityMilli: plannedItemDraft.quantityMilli,
+                        sortOrder: current.items.length + 1,
+                        unitCode: plannedItemDraft.unitCode,
+                        updatedAt: timestamp,
+                      },
+                    ],
+                  };
+                });
+                setPlannedItemEditorVisible(false);
               }}
-            >
-              <AppText
-                textStyle={{
-                  color: theme.colors.onSurface,
-                  fontSize: theme.typography.label.fontSize,
-                  fontWeight: theme.typography.label.fontWeight,
-                  lineHeight: theme.typography.label.lineHeight,
+            />
+          ) : (
+            <AppColumn spacing={theme.space.md}>
+              <AppColumn
+                spacing={theme.space.xs}
+                style={{
+                  ...styles.previewCard,
+                  backgroundColor: theme.colors.backgroundElement,
+                  borderColor: theme.colors.border,
                 }}
               >
-                {t('createList.summaryTitle')}
-              </AppText>
-              <AppRow spacing={theme.space.sm}>
                 <AppText
                   textStyle={{
-                    color: theme.colors.muted,
+                    color: theme.colors.onSurface,
                     fontSize: theme.typography.label.fontSize,
                     fontWeight: theme.typography.label.fontWeight,
                     lineHeight: theme.typography.label.lineHeight,
                   }}
                 >
-                  {t('createList.summaryCurrencyLabel')}
+                  {t('createList.summaryTitle')}
                 </AppText>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.onSurface,
-                    fontSize: theme.typography.body.fontSize,
-                    fontWeight: theme.typography.body.fontWeight,
-                    lineHeight: theme.typography.body.lineHeight,
-                  }}
-                >
-                  {selectedCurrencyLabel}
-                </AppText>
-              </AppRow>
-              <AppRow spacing={theme.space.sm}>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.muted,
-                    fontSize: theme.typography.label.fontSize,
-                    fontWeight: theme.typography.label.fontWeight,
-                    lineHeight: theme.typography.label.lineHeight,
-                  }}
-                >
-                  {t('createList.summaryBudgetLabel')}
-                </AppText>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.onSurface,
-                    fontSize: theme.typography.numeric.fontSize,
-                    fontWeight: theme.typography.numeric.fontWeight,
-                    lineHeight: theme.typography.numeric.lineHeight,
-                  }}
-                >
-                  {draftBudgetPreview}
-                </AppText>
-              </AppRow>
-              <AppRow spacing={theme.space.sm}>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.muted,
-                    fontSize: theme.typography.label.fontSize,
-                    fontWeight: theme.typography.label.fontWeight,
-                    lineHeight: theme.typography.label.lineHeight,
-                  }}
-                >
-                  {t('createList.summaryItemsLabel')}
-                </AppText>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.onSurface,
-                    fontSize: theme.typography.body.fontSize,
-                    fontWeight: theme.typography.body.fontWeight,
-                    lineHeight: theme.typography.body.lineHeight,
-                  }}
-                >
-                  {t('createList.itemCount', { count: draft?.items.length ?? 0 })}
-                </AppText>
-              </AppRow>
-            </AppColumn>
+                <AppRow spacing={theme.space.sm}>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.muted,
+                      fontSize: theme.typography.label.fontSize,
+                      fontWeight: theme.typography.label.fontWeight,
+                      lineHeight: theme.typography.label.lineHeight,
+                    }}
+                  >
+                    {t('createList.summaryCurrencyLabel')}
+                  </AppText>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.onSurface,
+                      fontSize: theme.typography.body.fontSize,
+                      fontWeight: theme.typography.body.fontWeight,
+                      lineHeight: theme.typography.body.lineHeight,
+                    }}
+                  >
+                    {selectedCurrencyLabel}
+                  </AppText>
+                </AppRow>
+                <AppRow spacing={theme.space.sm}>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.muted,
+                      fontSize: theme.typography.label.fontSize,
+                      fontWeight: theme.typography.label.fontWeight,
+                      lineHeight: theme.typography.label.lineHeight,
+                    }}
+                  >
+                    {t('createList.summaryBudgetLabel')}
+                  </AppText>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.onSurface,
+                      fontSize: theme.typography.numeric.fontSize,
+                      fontWeight: theme.typography.numeric.fontWeight,
+                      lineHeight: theme.typography.numeric.lineHeight,
+                    }}
+                  >
+                    {draftBudgetPreview}
+                  </AppText>
+                </AppRow>
+                <AppRow spacing={theme.space.sm}>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.muted,
+                      fontSize: theme.typography.label.fontSize,
+                      fontWeight: theme.typography.label.fontWeight,
+                      lineHeight: theme.typography.label.lineHeight,
+                    }}
+                  >
+                    {t('createList.summaryItemsLabel')}
+                  </AppText>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.onSurface,
+                      fontSize: theme.typography.body.fontSize,
+                      fontWeight: theme.typography.body.fontWeight,
+                      lineHeight: theme.typography.body.lineHeight,
+                    }}
+                  >
+                    {t('createList.itemCount', { count: draft?.items.length ?? 0 })}
+                  </AppText>
+                </AppRow>
+              </AppColumn>
 
-            {draftItemCount === 0 ? (
-              <AppSelect
-                helperText={t('createList.currencyHint')}
-                label={t('createList.currencyLabel')}
-                onValueChange={(value) => {
-                  setDraft((current) => (current === null ? null : { ...current, currencyCode: value as SupportedCurrency }));
+              {draftItemCount === 0 ? (
+                <AppSelect
+                  helperText={t('createList.currencyHint')}
+                  label={t('createList.currencyLabel')}
+                  onValueChange={(value) => {
+                    setDraft((current) => (current === null ? null : { ...current, currencyCode: value as SupportedCurrency }));
+                  }}
+                  options={currencyOptions}
+                  placeholder={t('preferences.currencySystem')}
+                  testID="create-list-currency"
+                  value={draft?.currencyCode ?? resolvedCurrency}
+                />
+              ) : (
+                <AppColumn spacing={theme.space.xs}>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.onSurface,
+                      fontSize: theme.typography.label.fontSize,
+                      fontWeight: theme.typography.label.fontWeight,
+                      lineHeight: theme.typography.label.lineHeight,
+                    }}
+                  >
+                    {t('createList.currencyLabel')}
+                  </AppText>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.muted,
+                      fontSize: theme.typography.body.fontSize,
+                      fontWeight: theme.typography.body.fontWeight,
+                      lineHeight: theme.typography.body.lineHeight,
+                    }}
+                  >
+                    {selectedCurrencyLabel}
+                  </AppText>
+                  <AppText
+                    textStyle={{
+                      color: theme.colors.muted,
+                      fontSize: theme.typography.body.fontSize,
+                      fontWeight: theme.typography.body.fontWeight,
+                      lineHeight: theme.typography.body.lineHeight,
+                    }}
+                  >
+                    {t('createList.currencyLockedHint')}
+                  </AppText>
+                </AppColumn>
+              )}
+
+              <AppTextField
+                accessibilityHint={t('createList.nameHint')}
+                helperText={t('createList.nameHint')}
+                label={t('createList.nameLabel')}
+                onChangeText={(value) => {
+                  draftNameState.set(value);
+                  setDraft((current) => (current === null ? null : { ...current, name: value }));
                 }}
-                options={currencyOptions}
-                placeholder={t('preferences.currencySystem')}
-                testID="create-list-currency"
-                value={draft?.currencyCode ?? resolvedCurrency}
+                placeholder={t('createList.namePlaceholder')}
+                testID="create-list-name"
+                value={draftNameState}
               />
-            ) : (
+
+              <AppTextField
+                accessibilityHint={t('createList.budgetHint')}
+                helperText={t('createList.budgetHint')}
+                keyboardType="decimal-pad"
+                label={t('createList.budgetLabel')}
+                onChangeText={(value) => {
+                  draftBudgetTextState.set(value);
+                  setDraft((current) => (current === null ? null : { ...current, budgetText: value }));
+                }}
+                placeholder={t('createList.budgetPlaceholder')}
+                testID="create-list-budget"
+                value={draftBudgetTextState}
+              />
+
               <AppColumn spacing={theme.space.xs}>
                 <AppText
                   textStyle={{
@@ -662,7 +764,7 @@ export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
                     lineHeight: theme.typography.label.lineHeight,
                   }}
                 >
-                  {t('createList.currencyLabel')}
+                  {t('createList.itemsLabel')}
                 </AppText>
                 <AppText
                   textStyle={{
@@ -672,156 +774,58 @@ export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
                     lineHeight: theme.typography.body.lineHeight,
                   }}
                 >
-                  {selectedCurrencyLabel}
+                  {t('createList.itemsHint')}
                 </AppText>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.muted,
-                    fontSize: theme.typography.body.fontSize,
-                    fontWeight: theme.typography.body.fontWeight,
-                    lineHeight: theme.typography.body.lineHeight,
-                  }}
-                >
-                  {t('createList.currencyLockedHint')}
-                </AppText>
+                <AppRow spacing={theme.space.sm}>
+                  <AppButton
+                    accessibilityHint={t('createList.addItemHint')}
+                    label={t('createList.addItem')}
+                    onPress={() => setPlannedItemEditorVisible(true)}
+                    testID="create-list-add-item"
+                  />
+                  {draftItemCount > 0 ? (
+                    <AppButton
+                      accessibilityHint={t('createList.clearItemsHint')}
+                      label={t('createList.clearItems')}
+                      onPress={() => {
+                        setDraft((current) => (current === null ? null : { ...current, items: [], itemCount: 0 }));
+                      }}
+                      testID="create-list-clear-items"
+                      variant="ghost"
+                    />
+                  ) : null}
+                </AppRow>
               </AppColumn>
-            )}
 
-            <AppTextField
-              accessibilityHint={t('createList.nameHint')}
-              helperText={t('createList.nameHint')}
-              label={t('createList.nameLabel')}
-              onChangeText={(value) => {
-                draftNameState.set(value);
-                setDraft((current) => (current === null ? null : { ...current, name: value }));
-              }}
-              placeholder={t('createList.namePlaceholder')}
-              testID="create-list-name"
-              value={draftNameState}
-            />
-
-            <AppTextField
-              accessibilityHint={t('createList.budgetHint')}
-              helperText={t('createList.budgetHint')}
-              keyboardType="decimal-pad"
-              label={t('createList.budgetLabel')}
-              onChangeText={(value) => {
-                draftBudgetTextState.set(value);
-                setDraft((current) => (current === null ? null : { ...current, budgetText: value }));
-              }}
-              placeholder={t('createList.budgetPlaceholder')}
-              testID="create-list-budget"
-              value={draftBudgetTextState}
-            />
-
-            <AppColumn spacing={theme.space.xs}>
-              <AppText
-                textStyle={{
-                  color: theme.colors.onSurface,
-                  fontSize: theme.typography.label.fontSize,
-                  fontWeight: theme.typography.label.fontWeight,
-                  lineHeight: theme.typography.label.lineHeight,
-                }}
-              >
-                {t('createList.itemsLabel')}
-              </AppText>
-              <AppText
-                textStyle={{
-                  color: theme.colors.muted,
-                  fontSize: theme.typography.body.fontSize,
-                  fontWeight: theme.typography.body.fontWeight,
-                  lineHeight: theme.typography.body.lineHeight,
-                }}
-              >
-                {t('createList.itemsHint')}
-              </AppText>
               <AppRow spacing={theme.space.sm}>
                 <AppButton
-                  accessibilityHint={t('createList.addItemHint')}
-                  label={t('createList.addItem')}
-                  onPress={() => setPlannedItemEditorVisible(true)}
-                  testID="create-list-add-item"
+                  accessibilityHint={t('createList.saveHint')}
+                  disabled={!canSaveDraft}
+                  label={t('createList.save')}
+                  onPress={() => void saveCurrentDraft(false)}
+                  testID="create-list-save"
+                  variant="secondary"
                 />
-                {draftItemCount > 0 ? (
-                  <AppButton
-                    accessibilityHint={t('createList.clearItemsHint')}
-                    label={t('createList.clearItems')}
-                    onPress={() => {
-                      setDraft((current) => (current === null ? null : { ...current, items: [], itemCount: 0 }));
-                    }}
-                    testID="create-list-clear-items"
-                    variant="ghost"
-                  />
-                ) : null}
+                <AppButton
+                  accessibilityHint={t('createList.finalizeHint')}
+                  disabled={!canSaveDraft}
+                  label={t('createList.finalize')}
+                  onPress={() => void saveCurrentDraft(true)}
+                  testID="create-list-finalize"
+                />
+                <AppButton
+                  accessibilityHint={t('createList.closeHint')}
+                  label={t('createList.close')}
+                  onPress={() => {
+                    setCreateSheetVisible(false);
+                    setPlannedItemEditorVisible(false);
+                  }}
+                  variant="ghost"
+                />
               </AppRow>
             </AppColumn>
-
-            <AppRow spacing={theme.space.sm}>
-              <AppButton
-                accessibilityHint={t('createList.saveHint')}
-                disabled={!canSaveDraft}
-                label={t('createList.save')}
-                onPress={() => void saveCurrentDraft(false)}
-                testID="create-list-save"
-                variant="secondary"
-              />
-              <AppButton
-                accessibilityHint={t('createList.finalizeHint')}
-                disabled={!canSaveDraft}
-                label={t('createList.finalize')}
-                onPress={() => void saveCurrentDraft(true)}
-                testID="create-list-finalize"
-              />
-              <AppButton
-                accessibilityHint={t('createList.closeHint')}
-                label={t('createList.close')}
-                onPress={() => {
-                  setCreateSheetVisible(false);
-                  setPlannedItemEditorVisible(false);
-                }}
-                variant="ghost"
-              />
-            </AppRow>
-          </AppColumn>
+          )}
         </AppSheet>
-
-        <PlannedItemEditorSheet
-          currencyCode={draft?.currencyCode ?? resolvedCurrency}
-          onCancel={() => setPlannedItemEditorVisible(false)}
-          onSave={(plannedItemDraft) => {
-            const timestamp = new Date().toISOString();
-
-            setDraft((current) => {
-              if (current === null) {
-                return null;
-              }
-
-              return {
-                ...current,
-                itemCount: current.items.length + 1,
-                items: [
-                  ...current.items,
-                  {
-                    actualUnitMinor: null,
-                    createdAt: timestamp,
-                    deletedAt: null,
-                    id: `${current.listId}-item-${current.items.length + 1}`,
-                    listId: current.listId,
-                    name: plannedItemDraft.name,
-                    plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
-                    purchasedAt: null,
-                    quantityMilli: plannedItemDraft.quantityMilli,
-                    sortOrder: current.items.length + 1,
-                    unitCode: plannedItemDraft.unitCode,
-                    updatedAt: timestamp,
-                  },
-                ],
-              };
-            });
-            setPlannedItemEditorVisible(false);
-          }}
-          visible={plannedItemEditorVisible}
-        />
       </AppColumn>
     </AppHost>
   );

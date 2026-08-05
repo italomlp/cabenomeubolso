@@ -154,6 +154,8 @@ describe('create list shell rules', () => {
       addItemButton.props.onPress();
     });
 
+    expect(tree!.root.findAllByType(mockExpoUi.TextInput).some((input) => input.props.testID === 'planned-item-name')).toBe(true);
+
     const itemNameInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-name')!;
     const quantityInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-quantity')!;
     const priceInput = tree!.root.findAllByType(mockExpoUi.TextInput).find((input) => input.props.testID === 'planned-item-price')!;
