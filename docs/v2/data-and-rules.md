@@ -57,10 +57,10 @@ For a weight-priced item, `1.5 kg` has `quantity_milli = 1500`; BRL 2.00/kg has 
 - A draft/active list may change name, budget, items, quantities, planned prices, actual prices, and purchase state. Changing an item unit requires explicit per-unit price values; it never converts existing values.
 - Toggling purchased **on** requires/retains an actual unit price and sets `purchased_at`.
 - Toggling purchased **off** clears `purchased_at` and excludes the actual amount. Retaining or clearing the entered actual price is an owner decision; default proposal: retain it for quick re-completion, but never count it.
-- Finalizing is allowed with unpurchased items after confirmation. A finalized list is read-only until the owner-approved “reopen” policy exists; V2’s default is no reopen.
+- Finalizing is allowed with unpurchased items after confirmation. Empty lists cannot be saved or finalized. A finalized list can be reopened into an editable draft; reopening clears the finalized timestamp and restores editability.
 - A budget may be exceeded; show the overage, never prevent saving/finalizing.
 - A list currency is selected when the list is created and is copied into templates and generated/cloned lists. It is never inferred from language, locale, or region.
-- Currency is immutable after a list has any non-deleted item or actual spending. Start or clone a new list to use the other currency; no conversion rule exists in V2. Whether an empty list may change currency is an owner decision.
+- Currency may change while the list still has no non-deleted items and no actual spending. Once the first non-deleted item exists or actual spending occurs, the currency locks; start or clone a new list to use the other currency. No conversion rule exists in V2.
 
 ## Trash
 
@@ -87,6 +87,6 @@ Template changes affect only future generated occurrences. Editing or deleting a
 - Quantity: retain raw text during editing; parse only on commit/blur using the explicit input locale. Allow intermediate editing states, then reject ambiguous formatting, overflow, zero/negative values, and invalid precision. Require whole quantities for `piece`, `pack`, `g`, and `ml`; allow at most three decimals for `kg` and `l`. Persist only validated integer `quantity_milli`.
 - Unit price: `planned_unit_minor`/`actual_unit_minor` is a non-negative price per selected unit. A unit change requires explicit price semantics; no unit or weight-price conversion exists.
 - Budget and prices: parse at the UI boundary using the explicit input locale, require non-negative integer minor units, and reject malformed input. Persist canonical minor units and ISO codes, never formatted strings.
-- Empty lists may be saved only if the owner approves; otherwise require one non-deleted item before activation/finalization.
+- Require one non-deleted item before saving or finalization.
 - A deleted item cannot be edited or purchased until restored.
 - Concurrent writes on one device are serialized through repository transactions; every mutation refreshes computed summary data.

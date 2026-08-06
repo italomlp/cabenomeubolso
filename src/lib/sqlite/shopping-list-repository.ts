@@ -3,6 +3,7 @@ import {
   isSupportedShoppingListUnitCode,
   normalizeShoppingListName,
   validateShoppingList,
+  validateShoppingListForSave,
   validateShoppingListItem,
   type ShoppingList,
   type ShoppingListItem,
@@ -296,7 +297,7 @@ export function createSQLiteShoppingListRepository(
         name: normalizeShoppingListName(shoppingList.name),
       };
 
-      const validation = validateShoppingList(normalizedShoppingList);
+      const validation = validateShoppingListForSave(normalizedShoppingList);
 
       if (!validation.success) {
         throw new Error(validation.errors.map((issue) => `${issue.field}: ${issue.message}`).join('; '));

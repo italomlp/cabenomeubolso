@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, PropsWithChildren, ReactNode } from 'react';
+import { useMemo, useReducer, useRef, type ComponentPropsWithoutRef, type PropsWithChildren, type ReactNode } from 'react';
 import {
   Pressable as RNPressable,
   Text as RNText,
@@ -36,8 +36,27 @@ type TextInputProps = ComponentPropsWithoutRef<typeof RNTextInput> & {
   textStyle?: StyleProp<TextStyle>;
 };
 
+type NativeStateValue<T> = {
+  get: () => T;
+  set: (value: T) => void;
+  value: T;
+  onChange: ((value: T) => void) | null;
+};
+
 function withGap(style: StyleProp<ViewStyle> | undefined, spacing: number | undefined) {
   return [style, spacing != null ? { gap: spacing } : null];
+}
+
+function isNativeStateValue<T>(value: unknown): value is NativeStateValue<T> {
+  return typeof value === 'object' && value !== null && 'get' in value && 'set' in value;
+}
+
+function resolveTextInputValue<T>(value: T | NativeStateValue<T> | undefined) {
+  if (isNativeStateValue<T>(value)) {
+    return value.get();
+  }
+
+  return value;
 }
 
 export function BottomSheet({ children, ...props }: PropsWithChildren<ComponentPropsWithoutRef<typeof RNView>>) {
@@ -81,5 +100,45 @@ export function Text({ children, textStyle, style, ...props }: TextProps & Compo
 }
 
 export function TextInput({ style, textStyle, ...props }: TextInputProps) {
-  return <RNTextInput {...props} style={[style, textStyle]} />;
+  return <RNTextInput {...props} style={[style, textStyle]} value={resolveTextInputValue(props.value)} />;
+}
+
+export function useNativeState<T>(initialValue: T): NativeStateValue<T> {
+  const valueRef = useRef(initialValue);
+  const onChangeRef = useRef<NativeStateValue<T>['onChange']>(null);
+  const [, forceRender] = useReducer((count: number) => count + 1, 0);
+
+  return useMemo<NativeStateValue<T>>(
+    () => ({
+      get: () => valueRef.current,
+      set: (value: T) => {
+        if (Object.is(valueRef.current, value)) {
+          return;
+        }
+
+        valueRef.current = value;
+        onChangeRef.current?.(value);
+        forceRender();
+      },
+      get value() {
+        return valueRef.current;
+      },
+      set value(value: T) {
+        if (Object.is(valueRef.current, value)) {
+          return;
+        }
+
+        valueRef.current = value;
+        onChangeRef.current?.(value);
+        forceRender();
+      },
+      get onChange() {
+        return onChangeRef.current;
+      },
+      set onChange(listener) {
+        onChangeRef.current = listener;
+      },
+    }),
+    [forceRender]
+  );
 }
