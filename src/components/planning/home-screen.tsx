@@ -12,7 +12,7 @@ import type { ShoppingList } from '@/domain/shopping-list';
 import { formatCurrencyMinor, parseCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
 import { useLocalizationPreferencesStore } from '@/stores/localization-preferences';
-import { createDefaultPlanningRuntime, type PlanningRuntime } from './planning-runtime';
+import { type PlanningRuntime, usePlanningRuntime } from './planning-runtime';
 
 import {
   buildCreateListDraft,
@@ -282,7 +282,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const currencyPreference = useLocalizationPreferencesStore((state) => state.currencyPreference);
   const languagePreference = useLocalizationPreferencesStore((state) => state.languagePreference);
-  const [runtime, setRuntime] = useState<PlanningRuntime | null>(dependencies ?? null);
+  const runtime = usePlanningRuntime(dependencies);
   const [lists, setLists] = useState<readonly ShoppingList[]>([]);
   const [createSheetVisible, setCreateSheetVisible] = useState(false);
   const [draft, setDraft] = useState<CreateListDraftState | null>(null);
@@ -313,30 +313,6 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
     }),
     [lists]
   );
-
-  useEffect(() => {
-    if (dependencies !== undefined) {
-      return;
-    }
-
-    let isActive = true;
-
-    void createDefaultPlanningRuntime()
-      .then((nextRuntime) => {
-        if (isActive) {
-          setRuntime(nextRuntime);
-        }
-      })
-      .catch(() => {
-        if (isActive) {
-          setRuntime(null);
-        }
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, [dependencies]);
 
   useEffect(() => {
     if (runtime === null) {
