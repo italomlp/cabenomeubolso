@@ -66,6 +66,7 @@ export const localizationResources = {
       },
       plannedItem: {
         close: 'Close',
+        editTitle: 'Edit planned item',
         errors: {
           ambiguous: 'Use one locale separator only.',
           empty: 'Enter a value.',
@@ -83,6 +84,7 @@ export const localizationResources = {
         quantityHintWhole: 'Whole numbers only for this unit.',
         quantityLabel: 'Quantity',
         save: 'Save item',
+        saveEdit: 'Save changes',
         title: 'Planned item',
         unitHint: 'Use only piece, pack, kg, g, l, or ml.',
         unitLabel: 'Unit',
@@ -171,6 +173,7 @@ export const localizationResources = {
       },
       plannedItem: {
         close: 'Fechar',
+        editTitle: 'Editar item planejado',
         errors: {
           ambiguous: 'Use apenas um separador local.',
           empty: 'Digite um valor.',
@@ -188,6 +191,7 @@ export const localizationResources = {
         quantityHintWhole: 'Apenas números inteiros para esta unidade.',
         quantityLabel: 'Quantidade',
         save: 'Salvar item',
+        saveEdit: 'Salvar alterações',
         title: 'Item planejado',
         unitHint: 'Use apenas piece, pack, kg, g, l ou ml.',
         unitLabel: 'Unidade',

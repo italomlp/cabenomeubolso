@@ -24,6 +24,7 @@ type PlannedItemDraft = {
 
 type PlannedItemEditorSheetProps = {
   currencyCode: SupportedCurrency;
+  initialItem?: PlannedItemDraft;
   initialUnitCode?: ShoppingListUnitCode;
   onCancel: () => void;
   onSave: (draft: PlannedItemDraft) => void;
@@ -55,7 +56,7 @@ function parseErrorMessage(code: LocaleInputParseError['code'], t: (key: string)
   }
 }
 
-function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCancel, onSave }: PlannedItemEditorContentProps) {
+function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 'piece', onCancel, onSave }: PlannedItemEditorContentProps) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -72,19 +73,22 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
     [t]
   );
 
-  const [name, setName] = useState('');
-  const [unitCode, setUnitCode] = useState<ShoppingListUnitCode>(initialUnitCode);
-  const [quantityText, setQuantityText] = useState('');
-  const [quantityMilli, setQuantityMilli] = useState<number | null>(null);
+  const initialUnit = initialItem?.unitCode ?? initialUnitCode;
+  const initialQuantityText = initialItem === undefined ? '' : formatQuantityMilli(locale, initialUnit, initialItem.quantityMilli);
+  const initialPriceText = initialItem === undefined ? '' : formatCurrencyMinor(locale, initialItem.plannedUnitMinor, currencyCode);
+  const [name, setName] = useState(initialItem?.name ?? '');
+  const [unitCode, setUnitCode] = useState<ShoppingListUnitCode>(initialUnit);
+  const [quantityText, setQuantityText] = useState(initialQuantityText);
+  const [quantityMilli, setQuantityMilli] = useState<number | null>(initialItem?.quantityMilli ?? null);
   const [quantityError, setQuantityError] = useState<string | null>(null);
   const [quantityFocused, setQuantityFocused] = useState(false);
-  const [priceText, setPriceText] = useState('');
-  const [plannedUnitMinor, setPlannedUnitMinor] = useState<number | null>(null);
+  const [priceText, setPriceText] = useState(initialPriceText);
+  const [plannedUnitMinor, setPlannedUnitMinor] = useState<number | null>(initialItem?.plannedUnitMinor ?? null);
   const [priceError, setPriceError] = useState<string | null>(null);
   const [priceFocused, setPriceFocused] = useState(false);
-  const nameTextRef = useRef('');
-  const quantityTextRef = useRef('');
-  const priceTextRef = useRef('');
+  const nameTextRef = useRef(initialItem?.name ?? '');
+  const quantityTextRef = useRef(initialQuantityText);
+  const priceTextRef = useRef(initialPriceText);
   const nameState = useNativeState(name);
   const quantityState = useNativeState('');
   const priceState = useNativeState('');
@@ -142,7 +146,7 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
   const resetAndClose = () => {
     setName('');
     nameTextRef.current = '';
-    setUnitCode(initialUnitCode);
+    setUnitCode(initialUnit);
     setQuantityText('');
     quantityTextRef.current = '';
     setQuantityMilli(null);
@@ -281,7 +285,7 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
       />
 
       <AppRow spacing={theme.space.sm}>
-        <AppButton label={t('plannedItem.save')} onPress={handleSave} testID="planned-item-save" />
+        <AppButton label={initialItem === undefined ? t('plannedItem.save') : t('plannedItem.saveEdit')} onPress={handleSave} testID="planned-item-save" />
         <AppButton label={t('plannedItem.close')} onPress={resetAndClose} testID="planned-item-close" variant="ghost" />
       </AppRow>
     </AppColumn>
@@ -300,7 +304,7 @@ export function PlannedItemEditorSheet({ visible, ...props }: PlannedItemEditorS
   }
 
   return (
-    <AppSheet onClose={props.onCancel} title={t('plannedItem.title')} visible>
+    <AppSheet onClose={props.onCancel} title={props.initialItem === undefined ? t('plannedItem.title') : t('plannedItem.editTitle')} visible>
       <PlannedItemEditorFields {...props} />
     </AppSheet>
   );

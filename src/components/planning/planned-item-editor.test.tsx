@@ -110,4 +110,37 @@ describe('PlannedItemEditorSheet', () => {
       unitCode: 'kg',
     });
   });
+
+  it('prefills an item for editing and saves the edited draft', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('en');
+    });
+    const onSave = jest.fn();
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <PlannedItemEditorSheet
+            currencyCode="USD"
+            initialItem={{ name: 'Potatoes', plannedUnitMinor: 250, quantityMilli: 1500, unitCode: 'kg' }}
+            onCancel={jest.fn()}
+            onSave={onSave}
+            visible
+          />
+        </AppThemeProvider>
+      );
+    });
+
+    const inputs = tree!.root.findAllByType(TextInput);
+    expect(inputs.find((input) => input.props.testID === 'planned-item-name')?.props.value).toBe('Potatoes');
+    expect(inputs.find((input) => input.props.testID === 'planned-item-quantity')?.props.value).toBe('1.5');
+    expect(inputs.find((input) => input.props.testID === 'planned-item-price')?.props.value).toBe('$2.50');
+
+    act(() => {
+      tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
+    });
+
+    expect(onSave).toHaveBeenCalledWith({ name: 'Potatoes', plannedUnitMinor: 250, quantityMilli: 1500, unitCode: 'kg' });
+  });
 });

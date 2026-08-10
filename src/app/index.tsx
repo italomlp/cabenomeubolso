@@ -33,6 +33,12 @@ type HomeRuntime = {
 
 type HomeScreenProps = {
   dependencies?: HomeRuntime;
+  routeIntent?:
+    | { kind: 'home' }
+    | { kind: 'new-list' }
+    | { kind: 'list-detail'; listId: string };
+  onOpenList?: (listId: string) => void;
+  onOpenNewList?: () => void;
 };
 
 type SummaryCardProps = {
@@ -286,7 +292,7 @@ async function createDefaultRuntime(): Promise<HomeRuntime> {
   return { repository, useCases };
 }
 
-export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
+export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, routeIntent = { kind: 'home' } }: HomeScreenProps = {}) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -375,6 +381,11 @@ export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
   };
 
   const openNewDraft = () => {
+    if (onOpenNewList !== undefined) {
+      onOpenNewList();
+      return;
+    }
+
     setDraft(createEmptyCreateListDraftState(resolvedCurrency));
     setCreateSheetVisible(true);
     setPlannedItemEditorVisible(false);
@@ -403,6 +414,31 @@ export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
     setCreateSheetVisible(true);
     setPlannedItemEditorVisible(false);
   };
+
+  useEffect(() => {
+    if (runtime === null || routeIntent.kind === 'home') {
+      return;
+    }
+
+    if (routeIntent.kind === 'new-list') {
+      void Promise.resolve().then(() => {
+        setDraft(createEmptyCreateListDraftState(resolvedCurrency));
+        setCreateSheetVisible(true);
+        setPlannedItemEditorVisible(false);
+      });
+      return;
+    }
+
+    void runtime.useCases.loadList(routeIntent.listId, true).then((loaded) => {
+      if (loaded === null) {
+        return;
+      }
+
+      setDraft(createCreateListDraftStateFromList(loaded, locale, loaded.id));
+      setCreateSheetVisible(true);
+      setPlannedItemEditorVisible(false);
+    });
+  }, [locale, resolvedCurrency, routeIntent, runtime]);
 
   const saveCurrentDraft = async (finalize = false) => {
     if (runtime === null || draft === null) {
@@ -531,8 +567,8 @@ export default function HomeScreen({ dependencies }: HomeScreenProps = {}) {
               key={list.id}
               list={list}
               onFinalize={(listId) => void finalizeList(listId)}
-              onLoad={() => void loadListForEditing(list)}
-              onReopenAndEdit={(listId) => void reopenList(listId)}
+               onLoad={() => (onOpenList === undefined ? void loadListForEditing(list) : onOpenList(list.id))}
+               onReopenAndEdit={(listId) => (onOpenList === undefined ? void reopenList(listId) : onOpenList(listId))}
               resolveBudget={(entry) => formatCurrencyMinor(locale, entry.budgetMinor, entry.currencyCode)}
               resolveCurrency={(currencyCode) => (currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl'))}
               reopenLabel={t('home.reopenList')}
