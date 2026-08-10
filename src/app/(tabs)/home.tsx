@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 
-import HomeScreen from '../index';
+import HomeScreen from '@/components/planning/home-screen';
 
 export default function HomeRoute() {
   const router = useRouter();

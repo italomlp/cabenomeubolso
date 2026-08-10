@@ -9,7 +9,7 @@ import { AppThemeProvider } from '@/design-system/theme-context';
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
 import { i18n } from '@/lib/localization/i18n';
 
-import HomeScreen from '@/app/index';
+import HomeScreen from '@/components/planning/home-screen';
 
 type HomeScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof HomeScreen>>['dependencies']>;
 

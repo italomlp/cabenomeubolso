@@ -6,7 +6,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { i18n } from '@/lib/localization/i18n';
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
 
-import HomeScreen from '@/app/index';
+import HomeScreen from '@/components/planning/home-screen';
 
 type HomeScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof HomeScreen>>['dependencies']>;
 

@@ -3,7 +3,8 @@ import type { ComponentProps } from 'react';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
-import HomeScreen, { buildCreateListDraft, canPersistCreateListDraft } from '@/app/index';
+import HomeScreen from '@/components/planning/home-screen';
+import { buildCreateListDraft, canPersistCreateListDraft } from '@/app/home-state';
 import type { ShoppingList } from '@/domain/shopping-list';
 import { i18n } from '@/lib/localization/i18n';
 
