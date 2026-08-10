@@ -55,6 +55,7 @@ describe('HomeScreen', () => {
     expect(texts).toContain('Active summaries');
     expect(texts).toContain('Finalized summaries');
     expect(texts).toContain('Create list');
+    expect(texts).toContain('Nothing to review yet');
   });
 
   it('renders the pt-BR shell copy', async () => {
@@ -72,5 +73,6 @@ describe('HomeScreen', () => {
     expect(texts).toContain('Resumos ativos');
     expect(texts).toContain('Resumos finalizados');
     expect(texts).toContain('Criar lista');
+    expect(texts).toContain('Nada para revisar ainda');
   });
 });
