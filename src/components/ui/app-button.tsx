@@ -10,7 +10,7 @@ import { useAppTheme } from '@/design-system/theme-context';
 
 import { Button } from './expo-ui';
 
-type AppButtonVariant = 'primary' | 'secondary' | 'ghost';
+type AppButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 
 type ExpoButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
@@ -46,6 +46,7 @@ export function AppButton({
           borderWidth: 1,
         }
       : {}),
+    ...(variant === 'destructive' ? { backgroundColor: theme.colors.budgetRisk } : {}),
     ...(variant === 'ghost' ? { backgroundColor: 'transparent' } : {}),
     ...(disabled ? { opacity: 0.55 } : {}),
     ...(StyleSheet.flatten(style) ?? {}),
@@ -61,7 +62,7 @@ export function AppButton({
         ...(accessibilitySelected ? [accessibilityAddTraits(['isSelected'])] : []),
       ]}
       style={buttonStyle}
-      variant={variant === 'primary' ? 'filled' : variant === 'secondary' ? 'outlined' : 'text'}
+      variant={variant === 'primary' || variant === 'destructive' ? 'filled' : variant === 'secondary' ? 'outlined' : 'text'}
       {...props}
     />
   );

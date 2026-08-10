@@ -15,6 +15,10 @@ export const localizationResources = {
         designPreviewBody: 'Semantic tokens, adapters, and theme resolution are wired up.',
         designPreviewTitle: 'Design system preview',
       },
+      feedback: {
+        undo: 'Undo',
+        undoHint: 'Restore the removed item.',
+      },
       home: {
         activeSummaryBody: 'Open lists keep moving until they are finalized.',
         activeSummaryBudgetLabel: 'Budget',
@@ -121,6 +125,10 @@ export const localizationResources = {
         error: 'Não foi possível iniciar a base do app.',
         designPreviewBody: 'Tokens semânticos, adapters e resolução de tema já estão conectados.',
         designPreviewTitle: 'Prévia do design system',
+      },
+      feedback: {
+        undo: 'Desfazer',
+        undoHint: 'Restaura o item removido.',
       },
       home: {
         activeSummaryBody: 'Listas abertas seguem em movimento até serem finalizadas.',

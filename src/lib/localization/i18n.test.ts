@@ -15,6 +15,7 @@ describe('i18n bundle', () => {
     expect(i18n.t('units.piece')).toBe('peça');
     expect(i18n.t('plannedItem.title')).toBe('Item planejado');
     expect(i18n.t('app.loading')).toBe('Carregando a base do app…');
+    expect(i18n.t('feedback.undo')).toBe('Desfazer');
 
     await i18n.changeLanguage('en');
 
@@ -27,5 +28,6 @@ describe('i18n bundle', () => {
     expect(i18n.t('units.piece')).toBe('piece');
     expect(i18n.t('plannedItem.title')).toBe('Planned item');
     expect(i18n.t('app.error')).toBe('Unable to start the app shell.');
+    expect(i18n.t('feedback.undo')).toBe('Undo');
   });
 });

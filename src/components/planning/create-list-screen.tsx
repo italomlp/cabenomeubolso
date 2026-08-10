@@ -2,7 +2,7 @@ import { getLocales } from 'expo-localization';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppColumn, AppHost, AppText } from '@/components/ui';
+import { AppColumn, AppScreen, AppText } from '@/components/ui';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import { formatCurrencyMinor, parseCurrencyMinor } from '@/lib/locale-input';
@@ -92,16 +92,16 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
 
   if (runtime === null) {
     return (
-      <AppHost>
+      <AppScreen>
         <AppColumn spacing={theme.space.lg} style={{ backgroundColor: theme.colors.surface, padding: theme.space.content }}>
           <AppText>{t('app.loading')}</AppText>
         </AppColumn>
-      </AppHost>
+      </AppScreen>
     );
   }
 
   return (
-    <AppHost>
+    <AppScreen>
       <AppColumn spacing={theme.space.lg} style={{ backgroundColor: theme.colors.surface, padding: theme.space.content }}>
         <ListFormSheet
           canSaveDraft={canSaveDraft}
@@ -152,6 +152,6 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
           }}
         />
       </AppColumn>
-    </AppHost>
+    </AppScreen>
   );
 }

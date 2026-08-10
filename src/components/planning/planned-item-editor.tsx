@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppColumn, AppRow, AppSelect, AppSheet, AppTextField } from '@/components/ui';
+import { AppColumn, AppFormSheet, AppSelect, AppTextField } from '@/components/ui';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
@@ -203,7 +203,17 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
   }, [priceDisplayValue, priceState]);
 
   return (
-    <AppColumn spacing={theme.space.md}>
+    <AppFormSheet
+      cancelLabel={t('plannedItem.close')}
+      cancelTestID="planned-item-close"
+      onCancel={resetAndClose}
+      onSave={handleSave}
+      saveLabel={initialItem === undefined ? t('plannedItem.save') : t('plannedItem.saveEdit')}
+      saveTestID="planned-item-save"
+      title={initialItem === undefined ? t('plannedItem.title') : t('plannedItem.editTitle')}
+      visible
+    >
+      <AppColumn spacing={theme.space.md}>
       <AppTextField
         accessibilityHint={t('plannedItem.nameHint')}
         helperText={t('plannedItem.nameHint')}
@@ -284,11 +294,8 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
         value={priceState}
       />
 
-      <AppRow spacing={theme.space.sm}>
-        <AppButton label={initialItem === undefined ? t('plannedItem.save') : t('plannedItem.saveEdit')} onPress={handleSave} testID="planned-item-save" />
-        <AppButton label={t('plannedItem.close')} onPress={resetAndClose} testID="planned-item-close" variant="ghost" />
-      </AppRow>
-    </AppColumn>
+      </AppColumn>
+    </AppFormSheet>
   );
 }
 
@@ -297,17 +304,11 @@ export function PlannedItemEditorContent(props: PlannedItemEditorContentProps) {
 }
 
 export function PlannedItemEditorSheet({ visible, ...props }: PlannedItemEditorSheetProps) {
-  const { t } = useTranslation(undefined, { i18n });
-
   if (!visible) {
     return null;
   }
 
-  return (
-    <AppSheet onClose={props.onCancel} title={props.initialItem === undefined ? t('plannedItem.title') : t('plannedItem.editTitle')} visible>
-      <PlannedItemEditorFields {...props} />
-    </AppSheet>
-  );
+  return <PlannedItemEditorFields {...props} />;
 }
 
 export type { PlannedItemDraft };
