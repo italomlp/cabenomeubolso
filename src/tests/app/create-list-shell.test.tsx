@@ -3,12 +3,12 @@ import type { ComponentProps } from 'react';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
-import HomeScreen from '@/components/planning/home-screen';
+import CreateListScreen from '@/components/planning/create-list-screen';
 import { buildCreateListDraft, canPersistCreateListDraft } from '@/app/home-state';
 import type { ShoppingList } from '@/domain/shopping-list';
 import { i18n } from '@/lib/localization/i18n';
 
-type HomeScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof HomeScreen>>['dependencies']>;
+type CreateListScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof CreateListScreen>>['dependencies']>;
 
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -19,7 +19,7 @@ jest.mock('expo-localization', () => ({
   getLocales: () => [{ currencyCode: 'BRL', languageTag: 'pt-BR', regionCode: 'BR' }],
 }));
 
-function createRuntime(): HomeScreenDependencies {
+function createRuntime(): CreateListScreenDependencies {
   let savedList: ShoppingList | null = null;
 
   const runtime = {
@@ -133,14 +133,7 @@ describe('create list shell rules', () => {
 
     await act(async () => {
       await i18n.changeLanguage('pt-BR');
-      tree = renderer.create(<HomeScreen dependencies={runtime} />);
-    });
-
-    await act(async () => {
-      tree!.root
-        .findAllByType(mockExpoUi.Button)
-        .find((button) => button.props.label === 'Criar lista')!
-        .props.onPress();
+      tree = renderer.create(<CreateListScreen dependencies={runtime} />);
     });
 
     expect(tree!.root.findAllByProps({ testID: 'create-list-currency' }).length).toBeGreaterThan(0);

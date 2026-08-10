@@ -1,9 +1,10 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import HomeScreen from '@/components/planning/home-screen';
+import ListDetailScreen from '@/components/planning/list-detail-screen';
 
 export default function ListDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
 
-  return <HomeScreen routeIntent={{ kind: 'list-detail', listId: id }} />;
+  return <ListDetailScreen listId={id} onClose={() => router.replace('/(tabs)/home')} />;
 }

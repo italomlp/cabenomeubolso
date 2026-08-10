@@ -9,7 +9,6 @@ export default function HomeRoute() {
     <HomeScreen
       onOpenList={(listId) => router.push({ pathname: '/list/[id]', params: { id: listId } })}
       onOpenNewList={() => router.push('/list/new')}
-      routeIntent={{ kind: 'home' }}
     />
   );
 }

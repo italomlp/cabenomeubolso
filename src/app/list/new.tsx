@@ -1,5 +1,9 @@
-import HomeScreen from '@/components/planning/home-screen';
+import { useRouter } from 'expo-router';
+
+import CreateListScreen from '@/components/planning/create-list-screen';
 
 export default function CreateListRoute() {
-  return <HomeScreen routeIntent={{ kind: 'new-list' }} />;
+  const router = useRouter();
+
+  return <CreateListScreen onClose={() => router.replace('/(tabs)/home')} />;
 }

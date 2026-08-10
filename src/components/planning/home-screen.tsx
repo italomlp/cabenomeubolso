@@ -3,32 +3,21 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
-import { AppButton, AppColumn, AppHost, AppRow, AppSelect, AppSheet, AppText, AppTextField } from '@/components/ui';
-import { useNativeState } from '@/components/ui/expo-ui';
-import { PlannedItemEditorContent } from '@/components/planning/planned-item-editor';
+import { AppButton, AppColumn, AppHost, AppRow, AppText } from '@/components/ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
 import type { ShoppingList } from '@/domain/shopping-list';
-import { formatCurrencyMinor, parseCurrencyMinor } from '@/lib/locale-input';
+import { formatCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
 import { useLocalizationPreferencesStore } from '@/stores/localization-preferences';
-import { type PlanningRuntime, usePlanningRuntime } from './planning-runtime';
 
-import {
-  buildCreateListDraft,
-  canPersistCreateListDraft,
-  createCreateListDraftStateFromList,
-  createEmptyCreateListDraftState,
-  resolveCreateListCurrency,
-  type CreateListDraftState,
-} from '@/app/home-state';
+import { resolveCreateListCurrency } from '@/app/home-state';
+
+import type { PlanningRuntime } from './planning-runtime';
+import { usePlanningRuntime } from './planning-runtime';
 
 type HomeScreenProps = {
   dependencies?: PlanningRuntime;
-  routeIntent?:
-    | { kind: 'home' }
-    | { kind: 'new-list' }
-    | { kind: 'list-detail'; listId: string };
   onOpenList?: (listId: string) => void;
   onOpenNewList?: () => void;
 };
@@ -276,7 +265,7 @@ function PersistedListCard({
   );
 }
 
-export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, routeIntent = { kind: 'home' } }: HomeScreenProps = {}) {
+export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: HomeScreenProps = {}) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -284,34 +273,11 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
   const languagePreference = useLocalizationPreferencesStore((state) => state.languagePreference);
   const runtime = usePlanningRuntime(dependencies);
   const [lists, setLists] = useState<readonly ShoppingList[]>([]);
-  const [createSheetVisible, setCreateSheetVisible] = useState(false);
-  const [draft, setDraft] = useState<CreateListDraftState | null>(null);
-  const [plannedItemEditorVisible, setPlannedItemEditorVisible] = useState(false);
-  const draftNameState = useNativeState('');
-  const draftBudgetTextState = useNativeState('');
 
   const resolvedLocales = getLocales();
   const resolvedCurrency = useMemo(
     () => resolveCreateListCurrency({ currencyPreference, languagePreference }, resolvedLocales),
     [currencyPreference, languagePreference, resolvedLocales]
-  );
-
-  const currencyOptions = useMemo(
-    () => [
-      { label: t('preferences.currencyBrl'), value: 'BRL' as const },
-      { label: t('preferences.currencyUsd'), value: 'USD' as const },
-    ],
-    [t]
-  );
-
-  const createSheetTitle = plannedItemEditorVisible ? t('plannedItem.title') : t('createList.title');
-
-  const summaryLists = useMemo(
-    () => ({
-      active: lists.filter((list) => list.status !== 'finalized' && list.deletedAt === null),
-      finalized: lists.filter((list) => list.status === 'finalized' && list.deletedAt === null),
-    }),
-    [lists]
   );
 
   useEffect(() => {
@@ -340,87 +306,6 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
     setLists(await runtime.repository.list());
   };
 
-  const openNewDraft = () => {
-    if (onOpenNewList !== undefined) {
-      onOpenNewList();
-      return;
-    }
-
-    setDraft(createEmptyCreateListDraftState(resolvedCurrency));
-    setCreateSheetVisible(true);
-    setPlannedItemEditorVisible(false);
-  };
-
-  useEffect(() => {
-    draftNameState.set(draft?.name ?? '');
-  }, [draft?.name, draftNameState]);
-
-  useEffect(() => {
-    draftBudgetTextState.set(draft?.budgetText ?? '');
-  }, [draft?.budgetText, draftBudgetTextState]);
-
-  const loadListForEditing = async (list: ShoppingList) => {
-    if (runtime === null) {
-      return;
-    }
-
-    const loaded = await runtime.useCases.loadList(list.id, true);
-
-    if (loaded === null) {
-      return;
-    }
-
-    setDraft(createCreateListDraftStateFromList(loaded, locale, loaded.id));
-    setCreateSheetVisible(true);
-    setPlannedItemEditorVisible(false);
-  };
-
-  useEffect(() => {
-    if (runtime === null || routeIntent.kind === 'home') {
-      return;
-    }
-
-    if (routeIntent.kind === 'new-list') {
-      void Promise.resolve().then(() => {
-        setDraft(createEmptyCreateListDraftState(resolvedCurrency));
-        setCreateSheetVisible(true);
-        setPlannedItemEditorVisible(false);
-      });
-      return;
-    }
-
-    void runtime.useCases.loadList(routeIntent.listId, true).then((loaded) => {
-      if (loaded === null) {
-        return;
-      }
-
-      setDraft(createCreateListDraftStateFromList(loaded, locale, loaded.id));
-      setCreateSheetVisible(true);
-      setPlannedItemEditorVisible(false);
-    });
-  }, [locale, resolvedCurrency, routeIntent, runtime]);
-
-  const saveCurrentDraft = async (finalize = false) => {
-    if (runtime === null || draft === null) {
-      return;
-    }
-
-    const persistedDraft = buildCreateListDraft(draft, new Date().toISOString(), locale);
-    await runtime.useCases.saveList(persistedDraft);
-
-    if (finalize) {
-      await runtime.useCases.finalizeList(persistedDraft.id);
-    }
-
-    const reloaded = await runtime.useCases.loadList(persistedDraft.id, true);
-
-    if (reloaded !== null) {
-      setDraft(createCreateListDraftStateFromList(reloaded, locale, reloaded.id));
-    }
-
-    await refreshLists();
-  };
-
   const finalizeList = async (listId: string) => {
     if (runtime === null) {
       return;
@@ -430,30 +315,13 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
     await refreshLists();
   };
 
-  const reopenList = async (listId: string) => {
-    if (runtime === null) {
-      return;
-    }
-
-    const reopened = await runtime.useCases.reopenList(listId);
-    setDraft(createCreateListDraftStateFromList(reopened, locale, reopened.id));
-    setCreateSheetVisible(true);
-    await refreshLists();
-  };
-
-  const canSaveDraft = draft === null ? false : canPersistCreateListDraft(draft, locale);
-  const draftBudgetMinor = draft === null
-    ? 0
-    : (() => {
-        try {
-          return parseCurrencyMinor(locale, draft.budgetText, draft.currencyCode);
-        } catch {
-          return 0;
-        }
-      })();
-  const selectedCurrencyLabel = draft?.currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl');
-  const draftBudgetPreview = draft === null ? formatCurrencyMinor(locale, 0, resolvedCurrency) : formatCurrencyMinor(locale, draftBudgetMinor, draft.currencyCode);
-  const draftItemCount = draft?.items.length ?? 0;
+  const summaryLists = useMemo(
+    () => ({
+      active: lists.filter((list) => list.status !== 'finalized' && list.deletedAt === null),
+      finalized: lists.filter((list) => list.status === 'finalized' && list.deletedAt === null),
+    }),
+    [lists]
+  );
 
   const activeSummaryBudget = summaryLists.active.reduce((total, list) => total + list.budgetMinor, 0);
   const finalizedSummaryBudget = summaryLists.finalized.reduce((total, list) => total + list.budgetMinor, 0);
@@ -515,7 +383,12 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
           />
         </AppColumn>
 
-        <AppButton accessibilityHint={t('home.openCreateListHint')} label={t('home.openCreateList')} onPress={openNewDraft} style={{ alignSelf: 'flex-start' }} />
+        <AppButton
+          accessibilityHint={t('home.openCreateListHint')}
+          label={t('home.openCreateList')}
+          onPress={() => onOpenNewList?.()}
+          style={{ alignSelf: 'flex-start' }}
+        />
 
         <AppColumn spacing={theme.space.md}>
           {lists.map((list) => (
@@ -527,8 +400,8 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
               key={list.id}
               list={list}
               onFinalize={(listId) => void finalizeList(listId)}
-               onLoad={() => (onOpenList === undefined ? void loadListForEditing(list) : onOpenList(list.id))}
-               onReopenAndEdit={(listId) => (onOpenList === undefined ? void reopenList(listId) : onOpenList(listId))}
+              onLoad={(entry) => onOpenList?.(entry.id)}
+              onReopenAndEdit={(listId) => onOpenList?.(listId)}
               resolveBudget={(entry) => formatCurrencyMinor(locale, entry.budgetMinor, entry.currencyCode)}
               resolveCurrency={(currencyCode) => (currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl'))}
               reopenLabel={t('home.reopenList')}
@@ -542,303 +415,15 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ro
             />
           ))}
         </AppColumn>
-
-        <AppSheet
-          onClose={() => {
-            setCreateSheetVisible(false);
-            setPlannedItemEditorVisible(false);
-          }}
-          title={createSheetTitle}
-          visible={createSheetVisible}
-        >
-          {plannedItemEditorVisible ? (
-            <PlannedItemEditorContent
-              currencyCode={draft?.currencyCode ?? resolvedCurrency}
-              initialUnitCode="piece"
-              onCancel={() => setPlannedItemEditorVisible(false)}
-              onSave={(plannedItemDraft) => {
-                const timestamp = new Date().toISOString();
-
-                setDraft((current) => {
-                  if (current === null) {
-                    return null;
-                  }
-
-                  return {
-                    ...current,
-                    itemCount: current.items.length + 1,
-                    items: [
-                      ...current.items,
-                      {
-                        actualUnitMinor: null,
-                        createdAt: timestamp,
-                        deletedAt: null,
-                        id: `${current.listId}-item-${current.items.length + 1}`,
-                        listId: current.listId,
-                        name: plannedItemDraft.name,
-                        plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
-                        purchasedAt: null,
-                        quantityMilli: plannedItemDraft.quantityMilli,
-                        sortOrder: current.items.length + 1,
-                        unitCode: plannedItemDraft.unitCode,
-                        updatedAt: timestamp,
-                      },
-                    ],
-                  };
-                });
-                setPlannedItemEditorVisible(false);
-              }}
-            />
-          ) : (
-            <AppColumn spacing={theme.space.md}>
-              <AppColumn
-                spacing={theme.space.xs}
-                style={{
-                  ...styles.previewCard,
-                  backgroundColor: theme.colors.backgroundElement,
-                  borderColor: theme.colors.border,
-                }}
-              >
-                <AppText
-                  textStyle={{
-                    color: theme.colors.onSurface,
-                    fontSize: theme.typography.label.fontSize,
-                    fontWeight: theme.typography.label.fontWeight,
-                    lineHeight: theme.typography.label.lineHeight,
-                  }}
-                >
-                  {t('createList.summaryTitle')}
-                </AppText>
-                <AppRow spacing={theme.space.sm}>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.muted,
-                      fontSize: theme.typography.label.fontSize,
-                      fontWeight: theme.typography.label.fontWeight,
-                      lineHeight: theme.typography.label.lineHeight,
-                    }}
-                  >
-                    {t('createList.summaryCurrencyLabel')}
-                  </AppText>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.onSurface,
-                      fontSize: theme.typography.body.fontSize,
-                      fontWeight: theme.typography.body.fontWeight,
-                      lineHeight: theme.typography.body.lineHeight,
-                    }}
-                  >
-                    {selectedCurrencyLabel}
-                  </AppText>
-                </AppRow>
-                <AppRow spacing={theme.space.sm}>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.muted,
-                      fontSize: theme.typography.label.fontSize,
-                      fontWeight: theme.typography.label.fontWeight,
-                      lineHeight: theme.typography.label.lineHeight,
-                    }}
-                  >
-                    {t('createList.summaryBudgetLabel')}
-                  </AppText>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.onSurface,
-                      fontSize: theme.typography.numeric.fontSize,
-                      fontWeight: theme.typography.numeric.fontWeight,
-                      lineHeight: theme.typography.numeric.lineHeight,
-                    }}
-                  >
-                    {draftBudgetPreview}
-                  </AppText>
-                </AppRow>
-                <AppRow spacing={theme.space.sm}>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.muted,
-                      fontSize: theme.typography.label.fontSize,
-                      fontWeight: theme.typography.label.fontWeight,
-                      lineHeight: theme.typography.label.lineHeight,
-                    }}
-                  >
-                    {t('createList.summaryItemsLabel')}
-                  </AppText>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.onSurface,
-                      fontSize: theme.typography.body.fontSize,
-                      fontWeight: theme.typography.body.fontWeight,
-                      lineHeight: theme.typography.body.lineHeight,
-                    }}
-                  >
-                    {t('createList.itemCount', { count: draft?.items.length ?? 0 })}
-                  </AppText>
-                </AppRow>
-              </AppColumn>
-
-              {draftItemCount === 0 ? (
-                <AppSelect
-                  helperText={t('createList.currencyHint')}
-                  label={t('createList.currencyLabel')}
-                  onValueChange={(value) => {
-                    setDraft((current) => (current === null ? null : { ...current, currencyCode: value as SupportedCurrency }));
-                  }}
-                  options={currencyOptions}
-                  placeholder={t('preferences.currencySystem')}
-                  testID="create-list-currency"
-                  value={draft?.currencyCode ?? resolvedCurrency}
-                />
-              ) : (
-                <AppColumn spacing={theme.space.xs}>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.onSurface,
-                      fontSize: theme.typography.label.fontSize,
-                      fontWeight: theme.typography.label.fontWeight,
-                      lineHeight: theme.typography.label.lineHeight,
-                    }}
-                  >
-                    {t('createList.currencyLabel')}
-                  </AppText>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.muted,
-                      fontSize: theme.typography.body.fontSize,
-                      fontWeight: theme.typography.body.fontWeight,
-                      lineHeight: theme.typography.body.lineHeight,
-                    }}
-                  >
-                    {selectedCurrencyLabel}
-                  </AppText>
-                  <AppText
-                    textStyle={{
-                      color: theme.colors.muted,
-                      fontSize: theme.typography.body.fontSize,
-                      fontWeight: theme.typography.body.fontWeight,
-                      lineHeight: theme.typography.body.lineHeight,
-                    }}
-                  >
-                    {t('createList.currencyLockedHint')}
-                  </AppText>
-                </AppColumn>
-              )}
-
-              <AppTextField
-                accessibilityHint={t('createList.nameHint')}
-                helperText={t('createList.nameHint')}
-                label={t('createList.nameLabel')}
-                onChangeText={(value) => {
-                  draftNameState.set(value);
-                  setDraft((current) => (current === null ? null : { ...current, name: value }));
-                }}
-                placeholder={t('createList.namePlaceholder')}
-                testID="create-list-name"
-                value={draftNameState}
-              />
-
-              <AppTextField
-                accessibilityHint={t('createList.budgetHint')}
-                helperText={t('createList.budgetHint')}
-                keyboardType="decimal-pad"
-                label={t('createList.budgetLabel')}
-                onChangeText={(value) => {
-                  draftBudgetTextState.set(value);
-                  setDraft((current) => (current === null ? null : { ...current, budgetText: value }));
-                }}
-                placeholder={t('createList.budgetPlaceholder')}
-                testID="create-list-budget"
-                value={draftBudgetTextState}
-              />
-
-              <AppColumn spacing={theme.space.xs}>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.onSurface,
-                    fontSize: theme.typography.label.fontSize,
-                    fontWeight: theme.typography.label.fontWeight,
-                    lineHeight: theme.typography.label.lineHeight,
-                  }}
-                >
-                  {t('createList.itemsLabel')}
-                </AppText>
-                <AppText
-                  textStyle={{
-                    color: theme.colors.muted,
-                    fontSize: theme.typography.body.fontSize,
-                    fontWeight: theme.typography.body.fontWeight,
-                    lineHeight: theme.typography.body.lineHeight,
-                  }}
-                >
-                  {t('createList.itemsHint')}
-                </AppText>
-                <AppRow spacing={theme.space.sm}>
-                  <AppButton
-                    accessibilityHint={t('createList.addItemHint')}
-                    label={t('createList.addItem')}
-                    onPress={() => setPlannedItemEditorVisible(true)}
-                    testID="create-list-add-item"
-                  />
-                  {draftItemCount > 0 ? (
-                    <AppButton
-                      accessibilityHint={t('createList.clearItemsHint')}
-                      label={t('createList.clearItems')}
-                      onPress={() => {
-                        setDraft((current) => (current === null ? null : { ...current, items: [], itemCount: 0 }));
-                      }}
-                      testID="create-list-clear-items"
-                      variant="ghost"
-                    />
-                  ) : null}
-                </AppRow>
-              </AppColumn>
-
-              <AppRow spacing={theme.space.sm}>
-                <AppButton
-                  accessibilityHint={t('createList.saveHint')}
-                  disabled={!canSaveDraft}
-                  label={t('createList.save')}
-                  onPress={() => void saveCurrentDraft(false)}
-                  testID="create-list-save"
-                  variant="secondary"
-                />
-                <AppButton
-                  accessibilityHint={t('createList.finalizeHint')}
-                  disabled={!canSaveDraft}
-                  label={t('createList.finalize')}
-                  onPress={() => void saveCurrentDraft(true)}
-                  testID="create-list-finalize"
-                />
-                <AppButton
-                  accessibilityHint={t('createList.closeHint')}
-                  label={t('createList.close')}
-                  onPress={() => {
-                    setCreateSheetVisible(false);
-                    setPlannedItemEditorVisible(false);
-                  }}
-                  variant="ghost"
-                />
-              </AppRow>
-            </AppColumn>
-          )}
-        </AppSheet>
       </AppColumn>
     </AppHost>
   );
 }
 
-export { buildCreateListDraft, canPersistCreateListDraft } from '@/app/home-state';
-export type { CreateListDraftState } from '@/app/home-state';
-
 const styles = StyleSheet.create({
   listCard: {
     borderRadius: 16,
     borderWidth: 1,
-    padding: 16,
-  },
-  previewCard: {
-    borderWidth: 1,
-    borderRadius: 16,
     padding: 16,
   },
   summaryCard: {
