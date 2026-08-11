@@ -74,9 +74,9 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
   );
 
   const initialUnit = initialItem?.unitCode ?? initialUnitCode;
-  const initialQuantityText = initialItem === undefined ? '' : formatQuantityMilli(locale, initialUnit, initialItem.quantityMilli);
-  const initialPriceText = initialItem === undefined ? '' : formatCurrencyMinor(locale, initialItem.plannedUnitMinor, currencyCode);
-  const [name, setName] = useState(initialItem?.name ?? '');
+  const initialQuantityText = initialItem === undefined ? undefined : formatQuantityMilli(locale, initialUnit, initialItem.quantityMilli);
+  const initialPriceText = initialItem === undefined ? undefined : formatCurrencyMinor(locale, initialItem.plannedUnitMinor, currencyCode);
+  const [name, setName] = useState<string | undefined>(initialItem?.name);
   const [unitCode, setUnitCode] = useState<ShoppingListUnitCode>(initialUnit);
   const [quantityText, setQuantityText] = useState(initialQuantityText);
   const [quantityMilli, setQuantityMilli] = useState<number | null>(initialItem?.quantityMilli ?? null);
@@ -86,12 +86,12 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
   const [plannedUnitMinor, setPlannedUnitMinor] = useState<number | null>(initialItem?.plannedUnitMinor ?? null);
   const [priceError, setPriceError] = useState<string | null>(null);
   const [priceFocused, setPriceFocused] = useState(false);
-  const nameTextRef = useRef(initialItem?.name ?? '');
+  const nameTextRef = useRef<string | undefined>(initialItem?.name);
   const quantityTextRef = useRef(initialQuantityText);
   const priceTextRef = useRef(initialPriceText);
   const nameState = useNativeState(name);
-  const quantityState = useNativeState('');
-  const priceState = useNativeState('');
+  const quantityState = useNativeState<string | undefined>(initialQuantityText);
+  const priceState = useNativeState<string | undefined>(initialPriceText);
 
   const unitLabel = unitOptions.find((option) => option.value === unitCode)?.label ?? unitCode;
   const quantityHint = isFractionalQuantityUnit(unitCode)
@@ -105,7 +105,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
 
   const commitQuantity = () => {
     try {
-      const parsed = parseQuantityMilli(locale, quantityTextRef.current, unitCode);
+      const parsed = parseQuantityMilli(locale, quantityTextRef.current ?? '', unitCode);
 
       setQuantityMilli(parsed);
       setQuantityError(null);
@@ -125,7 +125,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
 
   const commitPrice = () => {
     try {
-      const parsed = parseCurrencyMinor(locale, priceTextRef.current, currencyCode);
+      const parsed = parseCurrencyMinor(locale, priceTextRef.current ?? '', currencyCode);
 
       setPlannedUnitMinor(parsed);
       setPriceError(null);
@@ -161,7 +161,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
   };
 
   const handleSave = () => {
-    const normalizedName = nameTextRef.current.trim();
+    const normalizedName = (nameTextRef.current ?? '').trim();
     const nextQuantityMilli = commitQuantity();
     const nextPlannedUnitMinor = commitPrice();
 
@@ -183,12 +183,12 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
     ? quantityText
     : quantityMilli !== null
       ? formatQuantity(quantityMilli)
-      : '';
+      : undefined;
   const priceDisplayValue = priceFocused || priceError !== null
     ? priceText
     : plannedUnitMinor !== null
       ? formatPrice(plannedUnitMinor)
-      : '';
+      : undefined;
 
   useEffect(() => {
     nameState.set(name);
@@ -224,7 +224,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
         }}
         placeholder={t('plannedItem.namePlaceholder')}
         testID="planned-item-name"
-        value={nameState}
+        value={nameState as any}
       />
 
       <AppSelect
@@ -269,7 +269,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
         }}
         placeholder={isFractionalQuantityUnit(unitCode) ? '1.5' : '2'}
         testID="planned-item-quantity"
-        value={quantityState}
+        value={quantityState as any}
       />
 
       <AppTextField
@@ -291,7 +291,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
         }}
         placeholder={currencyCode === 'BRL' ? '12,34' : '12.34'}
         testID="planned-item-price"
-        value={priceState}
+        value={priceState as any}
       />
 
       </AppColumn>

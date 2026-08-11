@@ -32,6 +32,16 @@ describe('PlannedItemEditorSheet', () => {
     const priceInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-price')!;
     const nameInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-name')!;
 
+    expect(nameInput().props.value).toBeUndefined();
+    expect(quantityInput().props.value).toBeUndefined();
+    expect(priceInput().props.value).toBeUndefined();
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
+    });
+
+    expect(onSave).not.toHaveBeenCalled();
+
     act(() => {
       nameInput().props.onChangeText?.('Batata');
       quantityInput().props.onFocus?.();
@@ -81,6 +91,10 @@ describe('PlannedItemEditorSheet', () => {
     const quantityInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-quantity')!;
     const priceInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-price')!;
     const nameInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-name')!;
+
+    expect(nameInput().props.value).toBeUndefined();
+    expect(quantityInput().props.value).toBeUndefined();
+    expect(priceInput().props.value).toBeUndefined();
 
     act(() => {
       nameInput().props.onChangeText?.('Potato');
@@ -177,8 +191,8 @@ describe('PlannedItemEditorSheet', () => {
       tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'app-select-option-piece')!.props.onPress();
     });
 
-    expect(quantityInput().props.value).toBe('');
-    expect(priceInput().props.value).toBe('');
+    expect(quantityInput().props.value).toBeUndefined();
+    expect(priceInput().props.value).toBeUndefined();
 
     act(() => {
       quantityInput().props.onFocus?.();
