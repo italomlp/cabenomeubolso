@@ -25,9 +25,10 @@ describe('AppScreen', () => {
       );
     });
 
-    const scrollView = tree!.root.findByType(ScrollView);
+    const host = tree!.root.findByType(AppHost);
+    const scrollView = host.findByType(ScrollView);
 
-    expect(scrollView.findByType(AppHost)).toBeTruthy();
+    expect(host).toBeTruthy();
     expect(scrollView.findByProps({ testID: 'child' })).toBeTruthy();
   });
 });
