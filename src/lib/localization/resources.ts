@@ -42,6 +42,18 @@ export const localizationResources = {
         openCreateList: 'Create list',
         openCreateListHint: 'Open the list shell to choose a currency and start planning.',
       },
+      listDetail: {
+        addItem: 'Add item',
+        addItemHint: 'Open the planned-item editor to add another item to the list.',
+        actualPriceLabel: 'Actual price per {{unit}}',
+        finalizeHint: 'Finalize this list when the items are ready.',
+        finalizeLabel: 'Finalize list',
+        reopenHint: 'Reopen the finalized list so it can be edited again.',
+        reopenLabel: 'Reopen list',
+        removedItemMessage: 'Removed {{name}}. Undo?',
+        removeItemHint: 'Soft-remove this item and keep it available for immediate undo.',
+        title: 'List details',
+      },
       createList: {
         addItem: 'Add planned item',
         addItemHint: 'Open the planned-item editor to add one item to the draft.',
@@ -74,6 +86,7 @@ export const localizationResources = {
       plannedItem: {
         close: 'Close',
         editTitle: 'Edit planned item',
+        edit: 'Edit item',
         errors: {
           ambiguous: 'Use one locale separator only.',
           empty: 'Enter a value.',
@@ -92,6 +105,7 @@ export const localizationResources = {
         quantityLabel: 'Quantity',
         save: 'Save item',
         saveEdit: 'Save changes',
+        remove: 'Remove item',
         title: 'Planned item',
         unitHint: 'Use only piece, pack, kg, g, l, or ml.',
         unitLabel: 'Unit',
@@ -156,6 +170,18 @@ export const localizationResources = {
         openCreateList: 'Criar lista',
         openCreateListHint: 'Abre a base da lista para escolher a moeda e começar o planejamento.',
       },
+      listDetail: {
+        addItem: 'Adicionar item',
+        addItemHint: 'Abre o editor de item planejado para adicionar outro item à lista.',
+        actualPriceLabel: 'Preço real por {{unit}}',
+        finalizeHint: 'Finalize esta lista quando os itens estiverem prontos.',
+        finalizeLabel: 'Finalizar lista',
+        reopenHint: 'Reabre a lista finalizada para que ela possa ser editada novamente.',
+        reopenLabel: 'Reabrir lista',
+        removedItemMessage: 'Removido(a) {{name}}. Desfazer?',
+        removeItemHint: 'Remove o item de forma suave e mantém o desfazer imediato.',
+        title: 'Detalhes da lista',
+      },
       createList: {
         addItem: 'Adicionar item planejado',
         addItemHint: 'Abre o editor de item planejado para adicionar um item ao rascunho.',
@@ -188,6 +214,7 @@ export const localizationResources = {
       plannedItem: {
         close: 'Fechar',
         editTitle: 'Editar item planejado',
+        edit: 'Editar item',
         errors: {
           ambiguous: 'Use apenas um separador local.',
           empty: 'Digite um valor.',
@@ -206,6 +233,7 @@ export const localizationResources = {
         quantityLabel: 'Quantidade',
         save: 'Salvar item',
         saveEdit: 'Salvar alterações',
+        remove: 'Remover item',
         title: 'Item planejado',
         unitHint: 'Use apenas piece, pack, kg, g, l ou ml.',
         unitLabel: 'Unidade',

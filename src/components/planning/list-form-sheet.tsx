@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton, AppColumn, AppRow, AppSelect, AppSheet, AppText, AppTextField } from '@/components/ui';
@@ -23,6 +24,7 @@ type ListFormSheetProps = {
   draftItemCount: number;
   draftNameState: ObservableState<string>;
   plannedItemEditorVisible: boolean;
+  plannedItemInitialItem?: PlannedItemDraft;
   resolvedCurrencyLabel: string;
   title: string;
   visible: boolean;
@@ -36,6 +38,9 @@ type ListFormSheetProps = {
   onNameChange: (value: string) => void;
   onSaveDraft: () => void;
   onSavePlannedItem: (draft: PlannedItemDraft) => void;
+  onReopenList?: () => void;
+  showClearItems?: boolean;
+  children?: ReactNode;
 };
 
 export function ListFormSheet({
@@ -47,6 +52,7 @@ export function ListFormSheet({
   draftItemCount,
   draftNameState,
   plannedItemEditorVisible,
+  plannedItemInitialItem,
   resolvedCurrencyLabel,
   title,
   visible,
@@ -58,23 +64,28 @@ export function ListFormSheet({
   onFinalizeDraft,
   onClosePlannedItemEditor,
   onNameChange,
+  onReopenList,
+  showClearItems = true,
   onSaveDraft,
   onSavePlannedItem,
+  children,
 }: ListFormSheetProps) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
 
-  const canShowCurrencySelect = draftItemCount === 0;
-
   if (!visible || draft === null) {
     return null;
   }
+
+  const canShowCurrencySelect = draftItemCount === 0 && draft.status !== 'finalized';
+  const isReadOnly = draft.status === 'finalized';
 
   return (
     <AppSheet onClose={onClose} title={title} visible>
       {plannedItemEditorVisible ? (
         <PlannedItemEditorContent
           currencyCode={draft.currencyCode}
+          initialItem={plannedItemInitialItem}
           initialUnitCode="piece"
           onCancel={onClosePlannedItemEditor}
           onSave={onSavePlannedItem}
@@ -216,6 +227,7 @@ export function ListFormSheet({
             accessibilityHint={t('createList.nameHint')}
             helperText={t('createList.nameHint')}
             label={t('createList.nameLabel')}
+            editable={!isReadOnly}
             onChangeText={(value) => {
               draftNameState.set(value);
               onNameChange(value);
@@ -228,6 +240,7 @@ export function ListFormSheet({
           <AppTextField
             accessibilityHint={t('createList.budgetHint')}
             helperText={t('createList.budgetHint')}
+            editable={!isReadOnly}
             keyboardType="decimal-pad"
             label={t('createList.budgetLabel')}
             onChangeText={(value) => {
@@ -260,48 +273,65 @@ export function ListFormSheet({
             >
               {t('createList.itemsHint')}
             </AppText>
-            <AppRow spacing={theme.space.sm}>
-              <AppButton
-                accessibilityHint={t('createList.addItemHint')}
-                label={t('createList.addItem')}
-                onPress={onAddPlannedItem}
-                testID="create-list-add-item"
-              />
-              {draftItemCount > 0 ? (
+            {!isReadOnly ? (
+              <AppRow spacing={theme.space.sm}>
                 <AppButton
-                  accessibilityHint={t('createList.clearItemsHint')}
-                  label={t('createList.clearItems')}
-                  onPress={onClearItems}
-                  testID="create-list-clear-items"
-                  variant="ghost"
+                  accessibilityHint={t('createList.addItemHint')}
+                  label={t('createList.addItem')}
+                  onPress={onAddPlannedItem}
+                  testID="create-list-add-item"
                 />
-              ) : null}
-            </AppRow>
+                {showClearItems && draftItemCount > 0 ? (
+                  <AppButton
+                    accessibilityHint={t('createList.clearItemsHint')}
+                    label={t('createList.clearItems')}
+                    onPress={onClearItems}
+                    testID="create-list-clear-items"
+                    variant="ghost"
+                  />
+                ) : null}
+              </AppRow>
+            ) : null}
           </AppColumn>
 
-          <AppRow spacing={theme.space.sm}>
-            <AppButton
-              accessibilityHint={t('createList.saveHint')}
-              disabled={!canSaveDraft}
-              label={t('createList.save')}
-              onPress={onSaveDraft}
-              testID="create-list-save"
-              variant="secondary"
-            />
-            <AppButton
-              accessibilityHint={t('createList.finalizeHint')}
-              disabled={!canSaveDraft}
-              label={t('createList.finalize')}
-              onPress={onFinalizeDraft}
-              testID="create-list-finalize"
-            />
-            <AppButton
-              accessibilityHint={t('createList.closeHint')}
-              label={t('createList.close')}
-              onPress={onClose}
-              variant="ghost"
-            />
-          </AppRow>
+          {isReadOnly && onReopenList !== undefined ? (
+            <AppRow spacing={theme.space.sm}>
+              <AppButton
+                accessibilityHint={t('listDetail.reopenHint')}
+                label={t('listDetail.reopenLabel')}
+                onPress={onReopenList}
+                testID="list-detail-reopen"
+                variant="secondary"
+              />
+              <AppButton accessibilityHint={t('createList.closeHint')} label={t('createList.close')} onPress={onClose} variant="ghost" />
+            </AppRow>
+          ) : (
+            <AppRow spacing={theme.space.sm}>
+              <AppButton
+                accessibilityHint={t('createList.saveHint')}
+                disabled={!canSaveDraft}
+                label={t('createList.save')}
+                onPress={onSaveDraft}
+                testID="create-list-save"
+                variant="secondary"
+              />
+              <AppButton
+                accessibilityHint={t('createList.finalizeHint')}
+                disabled={!canSaveDraft}
+                label={t('createList.finalize')}
+                onPress={onFinalizeDraft}
+                testID="create-list-finalize"
+              />
+              <AppButton
+                accessibilityHint={t('createList.closeHint')}
+                label={t('createList.close')}
+                onPress={onClose}
+                variant="ghost"
+              />
+            </AppRow>
+          )}
+
+          {children}
         </AppColumn>
       )}
     </AppSheet>

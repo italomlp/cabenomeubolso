@@ -50,7 +50,7 @@ describe('PlannedItemEditorSheet', () => {
       priceInput().props.onFocus?.();
       priceInput().props.onChangeText?.('12,34');
       priceInput().props.onBlur?.();
-      tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
     });
 
     expect(onSave).toHaveBeenCalledWith({
@@ -100,7 +100,7 @@ describe('PlannedItemEditorSheet', () => {
       priceInput().props.onFocus?.();
       priceInput().props.onChangeText?.('12.34');
       priceInput().props.onBlur?.();
-      tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
     });
 
     expect(onSave).toHaveBeenCalledWith({
@@ -138,9 +138,63 @@ describe('PlannedItemEditorSheet', () => {
     expect(inputs.find((input) => input.props.testID === 'planned-item-price')?.props.value).toBe('$2.50');
 
     act(() => {
-      tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
     });
 
     expect(onSave).toHaveBeenCalledWith({ name: 'Potatoes', plannedUnitMinor: 250, quantityMilli: 1500, unitCode: 'kg' });
+  });
+
+  it('clears the quantity and price when the unit changes during editing', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('en');
+    });
+
+    const onSave = jest.fn();
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <PlannedItemEditorSheet
+            currencyCode="USD"
+            initialItem={{ name: 'Potatoes', plannedUnitMinor: 250, quantityMilli: 1500, unitCode: 'kg' }}
+            onCancel={jest.fn()}
+            onSave={onSave}
+            visible
+          />
+        </AppThemeProvider>
+      );
+    });
+
+    const quantityInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-quantity')!;
+    const priceInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-price')!;
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-unit')!.props.onPress();
+    });
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'app-select-option-piece')!.props.onPress();
+    });
+
+    expect(quantityInput().props.value).toBe('');
+    expect(priceInput().props.value).toBe('');
+
+    act(() => {
+      quantityInput().props.onFocus?.();
+      quantityInput().props.onChangeText?.('2');
+      quantityInput().props.onBlur?.();
+      priceInput().props.onFocus?.();
+      priceInput().props.onChangeText?.('3.50');
+      priceInput().props.onBlur?.();
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
+    });
+
+    expect(onSave).toHaveBeenCalledWith({
+      name: 'Potatoes',
+      plannedUnitMinor: 350,
+      quantityMilli: 2000,
+      unitCode: 'piece',
+    });
   });
 });

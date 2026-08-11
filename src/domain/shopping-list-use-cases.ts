@@ -4,6 +4,7 @@ import {
   markShoppingListItemPurchased,
   markShoppingListItemDeleted,
   markShoppingListItemUnpurchased,
+  markShoppingListItemRestored,
   reopenShoppingList,
   validateShoppingListForSave,
 } from './shopping-list';
@@ -19,6 +20,7 @@ export type ShoppingListUseCases = {
   finalizeList: (listId: string) => Promise<ShoppingList>;
   reopenList: (listId: string) => Promise<ShoppingList>;
   removeItem: (listId: string, itemId: string) => Promise<ShoppingList>;
+  restoreItem: (listId: string, itemId: string) => Promise<ShoppingList>;
   saveList: (list: ShoppingList) => Promise<void>;
   setItemPurchased: (listId: string, itemId: string, actualUnitMinor: number) => Promise<ShoppingList>;
   setItemUnpurchased: (listId: string, itemId: string) => Promise<ShoppingList>;
@@ -59,12 +61,27 @@ export function createShoppingListUseCases({ now = () => new Date().toISOString(
       const list = requireLoadedList(await repository.get(listId), listId);
       assertListCanBeEdited(list);
 
+      const visibleItemCount = list.items.filter((item) => item.deletedAt === null).length;
+
+      if (visibleItemCount <= 1) {
+        throw new Error('At least one non-deleted item is required.');
+      }
+
       const updated = markShoppingListItemDeleted(list, itemId, now());
       const validation = validateShoppingListForSave(updated);
 
       if (!validation.success) {
         throw new Error(validation.errors.map((issue) => `${issue.field}: ${issue.message}`).join('; '));
       }
+
+      await repository.save(updated);
+      return updated;
+    },
+    restoreItem: async (listId, itemId) => {
+      const list = requireLoadedList(await repository.get(listId), listId);
+      assertListCanBeEdited(list);
+
+      const updated = markShoppingListItemRestored(list, itemId, now());
 
       await repository.save(updated);
       return updated;

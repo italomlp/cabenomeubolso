@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 export type PlanningRuntime = {
   repository: Pick<ShoppingListRepository, 'get' | 'list' | 'save'>;
-  useCases: Pick<ShoppingListUseCases, 'finalizeList' | 'loadList' | 'reopenList' | 'saveList'>;
+  useCases: Pick<ShoppingListUseCases, 'finalizeList' | 'loadList' | 'removeItem' | 'reopenList' | 'restoreItem' | 'saveList'>;
 };
 
 export async function createDefaultPlanningRuntime(): Promise<PlanningRuntime> {

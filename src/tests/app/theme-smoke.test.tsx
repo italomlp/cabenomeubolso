@@ -34,7 +34,13 @@ function createRuntime(): HomeScreenDependencies {
         throw new Error('not expected');
       }),
       loadList: jest.fn(async () => null),
+      removeItem: jest.fn(async () => {
+        throw new Error('not expected');
+      }),
       reopenList: jest.fn(async () => {
+        throw new Error('not expected');
+      }),
+      restoreItem: jest.fn(async () => {
         throw new Error('not expected');
       }),
       saveList: jest.fn(async () => undefined),

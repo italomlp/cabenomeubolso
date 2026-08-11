@@ -30,8 +30,8 @@ function createRuntime(): CreateListScreenDependencies {
         savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
       }),
     },
-    useCases: {
-      finalizeList: jest.fn(async (listId: string) => {
+      useCases: {
+        finalizeList: jest.fn(async (listId: string) => {
         if (savedList === null || savedList.id !== listId) {
           throw new Error(`Shopping list not found: ${listId}`);
         }
@@ -44,17 +44,20 @@ function createRuntime(): CreateListScreenDependencies {
 
         return JSON.parse(JSON.stringify(savedList));
       }),
-      loadList: jest.fn(async (listId: string) => {
-        if (savedList === null || savedList.id !== listId) {
-          return null;
-        }
+        loadList: jest.fn(async (listId: string) => {
+          if (savedList === null || savedList.id !== listId) {
+            return null;
+          }
 
-        return JSON.parse(JSON.stringify(savedList));
-      }),
-      reopenList: jest.fn(async (listId: string) => {
-        if (savedList === null || savedList.id !== listId) {
-          throw new Error(`Shopping list not found: ${listId}`);
-        }
+          return JSON.parse(JSON.stringify(savedList));
+        }),
+        removeItem: jest.fn(async () => {
+          throw new Error('not expected');
+        }),
+        reopenList: jest.fn(async (listId: string) => {
+          if (savedList === null || savedList.id !== listId) {
+            throw new Error(`Shopping list not found: ${listId}`);
+          }
 
         savedList = {
           ...savedList,
@@ -62,12 +65,15 @@ function createRuntime(): CreateListScreenDependencies {
           status: 'draft',
         };
 
-        return JSON.parse(JSON.stringify(savedList));
-      }),
-      saveList: jest.fn(async (list) => {
-        savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
-      }),
-    },
+          return JSON.parse(JSON.stringify(savedList));
+        }),
+        restoreItem: jest.fn(async () => {
+          throw new Error('not expected');
+        }),
+        saveList: jest.fn(async (list) => {
+          savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
+        }),
+      },
   } as const;
 
   return runtime;

@@ -228,4 +228,38 @@ describe('createShoppingListUseCases', () => {
     ]);
     expect(repository.save).toHaveBeenCalledTimes(1);
   });
+
+  it('restores a soft-deleted item in place', async () => {
+    const repository = createRepository(createCompraSemanalList());
+    const useCases = createShoppingListUseCases({
+      now: () => '2026-07-31T10:00:00.000Z',
+      repository,
+    });
+
+    await useCases.removeItem('list-compra-semanal', 'item-2');
+    const restored = await useCases.restoreItem('list-compra-semanal', 'item-2');
+
+    expect(restored.items).toMatchObject([
+      { deletedAt: null, quantityMilli: 2000, unitCode: 'piece' },
+      { deletedAt: null, quantityMilli: 500000, unitCode: 'g' },
+      { deletedAt: null, quantityMilli: 1500, unitCode: 'kg' },
+    ]);
+    expect(repository.save).toHaveBeenCalledTimes(2);
+  });
+
+  it('refuses to remove the last remaining visible item', async () => {
+    const repository = createRepository({
+      ...createShoppingList(),
+      items: [createShoppingList().items[0]],
+    });
+    const useCases = createShoppingListUseCases({
+      now: () => '2026-07-31T10:00:00.000Z',
+      repository,
+    });
+
+    await expect(useCases.removeItem('list-1', 'item-1')).rejects.toThrow(
+      'At least one non-deleted item is required.'
+    );
+    expect(repository.save).not.toHaveBeenCalled();
+  });
 });
