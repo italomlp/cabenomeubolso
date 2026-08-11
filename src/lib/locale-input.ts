@@ -43,6 +43,62 @@ type ParseScaledInputOptions = {
 
 const localeSymbolsCache = new Map<string, LocaleSymbols>();
 
+function normalizeLocaleToken(token: string): string {
+  return token.normalize('NFKC');
+}
+
+function collectLocaleTokens(formattedText: string, separators: readonly string[]): readonly string[] {
+  const separatorSet = new Set(separators.map(normalizeLocaleToken));
+  const tokens: string[] = [];
+
+  let currentToken = '';
+  let currentTokenKind: 'literal' | 'whitespace' | null = null;
+
+  const pushCurrentToken = () => {
+    if (currentToken.length === 0) {
+      return;
+    }
+
+    tokens.push(normalizeLocaleToken(currentToken));
+    currentToken = '';
+    currentTokenKind = null;
+  };
+
+  for (const character of formattedText.normalize('NFKC')) {
+    if (/\p{Decimal_Number}/u.test(character) || separatorSet.has(character)) {
+      pushCurrentToken();
+      continue;
+    }
+
+    const nextKind: 'literal' | 'whitespace' = /\p{White_Space}/u.test(character) ? 'whitespace' : 'literal';
+
+    if (currentTokenKind !== null && currentTokenKind !== nextKind) {
+      pushCurrentToken();
+    }
+
+    currentTokenKind = nextKind;
+    currentToken += character;
+  }
+
+  pushCurrentToken();
+
+  return Array.from(new Set(tokens));
+}
+
+function extractDecimalSeparator(formattedNumber: string): string {
+  const normalized = formattedNumber.normalize('NFKC');
+  const match = normalized.match(/([^\p{Decimal_Number}])\p{Decimal_Number}+$/u);
+
+  return normalizeLocaleToken(match?.[1] ?? '.');
+}
+
+function extractGroupSeparator(formattedNumber: string): string {
+  const normalized = formattedNumber.normalize('NFKC');
+  const match = normalized.match(/\p{Decimal_Number}([^\p{Decimal_Number}])\p{Decimal_Number}{3}(?:[^\p{Decimal_Number}]|$)/u);
+
+  return normalizeLocaleToken(match?.[1] ?? ',');
+}
+
 function getLocaleSymbols(locale: string, currencyCode?: SupportedCurrency): LocaleSymbols {
   const cacheKey = `${locale}:${currencyCode ?? ''}`;
   const cached = localeSymbolsCache.get(cacheKey);
@@ -51,18 +107,23 @@ function getLocaleSymbols(locale: string, currencyCode?: SupportedCurrency): Loc
     return cached;
   }
 
-  const numberParts = new Intl.NumberFormat(locale).formatToParts(12345.6);
-  const currencyParts = currencyCode
-    ? new Intl.NumberFormat(locale, { currency: currencyCode, style: 'currency' }).formatToParts(12345.6)
-    : [];
+  const numberFormatter = new Intl.NumberFormat(locale);
+  const supportsFormatToParts = typeof numberFormatter.formatToParts === 'function';
+  const numberSample = numberFormatter.format(12345.6);
+  const integerSample = numberFormatter.format(12345);
+  const numberParts = supportsFormatToParts ? numberFormatter.formatToParts(12345.6) : null;
+  const currencyFormatter = currencyCode === undefined ? null : new Intl.NumberFormat(locale, { currency: currencyCode, style: 'currency' });
+  const currencySample = currencyFormatter === null ? null : currencyFormatter.format(12345.6);
+  const currencyParts = supportsFormatToParts && currencyFormatter !== null ? currencyFormatter.formatToParts(12345.6) : null;
 
-  const decimalSeparator = numberParts.find((part) => part.type === 'decimal')?.value ?? '.';
-  const groupSeparator = numberParts.find((part) => part.type === 'group')?.value ?? ',';
-
-  const currencyTokens = Array.from(
-    new Set(currencyParts.filter((part) => part.type === 'currency' || part.type === 'literal').map((part) => part.value))
-  );
-  const numberTokens = Array.from(new Set(numberParts.filter((part) => part.type === 'literal').map((part) => part.value)));
+  const decimalSeparator = numberParts?.find((part) => part.type === 'decimal')?.value ?? extractDecimalSeparator(numberSample);
+  const groupSeparator = numberParts?.find((part) => part.type === 'group')?.value ?? extractGroupSeparator(integerSample);
+  const numberTokens =
+    numberParts?.filter((part) => part.type === 'literal').map((part) => normalizeLocaleToken(part.value)) ??
+    collectLocaleTokens(numberSample, [decimalSeparator, groupSeparator]);
+  const currencyTokens =
+    currencyParts?.filter((part) => part.type === 'currency' || part.type === 'literal').map((part) => normalizeLocaleToken(part.value)) ??
+    (currencySample === null ? [] : collectLocaleTokens(currencySample, [decimalSeparator, groupSeparator]));
 
   const symbols = {
     currencyTokens,
