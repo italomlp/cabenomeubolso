@@ -40,7 +40,7 @@ describe('AppFormSheet', () => {
     const saveButton = tree!.root.findAllByType(Button).find((button) => button.props.label === 'Save')!;
 
     expect(sheet.props.isPresented).toBe(true);
-    expect(scrollView.props.style).toMatchObject({ height: 520 });
+    expect(scrollView.props.style).toBeUndefined();
     expect(tree!.root.findByProps({ testID: 'body' })).toBeTruthy();
 
     act(() => {

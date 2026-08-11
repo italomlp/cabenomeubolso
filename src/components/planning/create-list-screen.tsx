@@ -2,9 +2,8 @@ import { getLocales } from 'expo-localization';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppColumn, AppScreen, AppText } from '@/components/ui';
+import { AppScreen, AppText } from '@/components/ui';
 import { useNativeState } from '@/components/ui/expo-ui';
-import { useAppTheme } from '@/design-system/theme-context';
 import { formatCurrencyMinor, parseCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
 import { useLocalizationPreferencesStore } from '@/stores/localization-preferences';
@@ -27,7 +26,6 @@ type CreateListScreenProps = {
 };
 
 export default function CreateListScreen({ dependencies, onClose = () => undefined }: CreateListScreenProps = {}) {
-  const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const currencyPreference = useLocalizationPreferencesStore((state) => state.currencyPreference);
@@ -93,65 +91,61 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
   if (runtime === null) {
     return (
       <AppScreen>
-        <AppColumn spacing={theme.space.lg} style={{ backgroundColor: theme.colors.surface, padding: theme.space.content }}>
-          <AppText>{t('app.loading')}</AppText>
-        </AppColumn>
+        <AppText>{t('app.loading')}</AppText>
       </AppScreen>
     );
   }
 
   return (
     <AppScreen>
-      <AppColumn spacing={theme.space.lg} style={{ backgroundColor: theme.colors.surface, padding: theme.space.content }}>
-        <ListFormSheet
-          canSaveDraft={canSaveDraft}
-          currencyOptions={currencyOptions}
-          draft={draft}
-          draftBudgetPreview={draftBudgetPreview}
-          draftBudgetTextState={draftBudgetTextState}
-          draftItemCount={draftItemCount}
-          draftNameState={draftNameState}
-          plannedItemEditorVisible={plannedItemEditorVisible}
-          resolvedCurrencyLabel={selectedCurrencyLabel}
-          title={t('createList.title')}
-          visible
-          onAddPlannedItem={() => setPlannedItemEditorVisible(true)}
-          onBudgetTextChange={(value) => setDraft((current) => ({ ...current, budgetText: value }))}
-          onClearItems={() => setDraft((current) => ({ ...current, items: [], itemCount: 0 }))}
-          onClose={onClose}
-          onClosePlannedItemEditor={() => setPlannedItemEditorVisible(false)}
-          onCurrencyChange={(value) => setDraft((current) => ({ ...current, currencyCode: value }))}
-          onFinalizeDraft={() => void saveCurrentDraft(true)}
-          onNameChange={(value) => setDraft((current) => ({ ...current, name: value }))}
-          onSaveDraft={() => void saveCurrentDraft(false)}
-          onSavePlannedItem={(plannedItemDraft) => {
-            const timestamp = new Date().toISOString();
+      <ListFormSheet
+        canSaveDraft={canSaveDraft}
+        currencyOptions={currencyOptions}
+        draft={draft}
+        draftBudgetPreview={draftBudgetPreview}
+        draftBudgetTextState={draftBudgetTextState}
+        draftItemCount={draftItemCount}
+        draftNameState={draftNameState}
+        plannedItemEditorVisible={plannedItemEditorVisible}
+        resolvedCurrencyLabel={selectedCurrencyLabel}
+        title={t('createList.title')}
+        visible
+        onAddPlannedItem={() => setPlannedItemEditorVisible(true)}
+        onBudgetTextChange={(value) => setDraft((current) => ({ ...current, budgetText: value }))}
+        onClearItems={() => setDraft((current) => ({ ...current, items: [], itemCount: 0 }))}
+        onClose={onClose}
+        onClosePlannedItemEditor={() => setPlannedItemEditorVisible(false)}
+        onCurrencyChange={(value) => setDraft((current) => ({ ...current, currencyCode: value }))}
+        onFinalizeDraft={() => void saveCurrentDraft(true)}
+        onNameChange={(value) => setDraft((current) => ({ ...current, name: value }))}
+        onSaveDraft={() => void saveCurrentDraft(false)}
+        onSavePlannedItem={(plannedItemDraft) => {
+          const timestamp = new Date().toISOString();
 
-            setDraft((current) => ({
-              ...current,
-              itemCount: current.items.length + 1,
-              items: [
-                ...current.items,
-                {
-                  actualUnitMinor: null,
-                  createdAt: timestamp,
-                  deletedAt: null,
-                  id: `${current.listId}-item-${current.items.length + 1}`,
-                  listId: current.listId,
-                  name: plannedItemDraft.name,
-                  plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
-                  purchasedAt: null,
-                  quantityMilli: plannedItemDraft.quantityMilli,
-                  sortOrder: current.items.length + 1,
-                  unitCode: plannedItemDraft.unitCode,
-                  updatedAt: timestamp,
-                },
-              ],
-            }));
-            setPlannedItemEditorVisible(false);
-          }}
-        />
-      </AppColumn>
+          setDraft((current) => ({
+            ...current,
+            itemCount: current.items.length + 1,
+            items: [
+              ...current.items,
+              {
+                actualUnitMinor: null,
+                createdAt: timestamp,
+                deletedAt: null,
+                id: `${current.listId}-item-${current.items.length + 1}`,
+                listId: current.listId,
+                name: plannedItemDraft.name,
+                plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
+                purchasedAt: null,
+                quantityMilli: plannedItemDraft.quantityMilli,
+                sortOrder: current.items.length + 1,
+                unitCode: plannedItemDraft.unitCode,
+                updatedAt: timestamp,
+              },
+            ],
+          }));
+          setPlannedItemEditorVisible(false);
+        }}
+      />
     </AppScreen>
   );
 }

@@ -153,172 +153,167 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   if (runtime === null || draft === null) {
     return (
       <AppScreen>
-        <AppColumn spacing={theme.space.lg} style={{ backgroundColor: theme.colors.surface, padding: theme.space.content }}>
-          <AppText>{t('app.loading')}</AppText>
-        </AppColumn>
+        <AppText>{t('app.loading')}</AppText>
       </AppScreen>
     );
   }
 
   return (
     <AppScreen>
-      <AppColumn spacing={theme.space.lg} style={{ backgroundColor: theme.colors.surface, padding: theme.space.content }}>
-        <ListFormSheet
-          canSaveDraft={canSaveDraft}
-          currencyOptions={currencyOptions}
-          draft={draft}
-          draftBudgetPreview={draftBudgetPreview}
-          draftBudgetTextState={draftBudgetTextState}
-          draftItemCount={visibleItemCount}
-          draftNameState={draftNameState}
-          plannedItemEditorVisible={plannedItemEditorVisible}
-          plannedItemInitialItem={plannedItemEditorInitialItem}
-          resolvedCurrencyLabel={selectedCurrencyLabel}
-          title={t('listDetail.title')}
-          visible
-          onAddPlannedItem={() => {
-            setEditingItemId(null);
-            setPlannedItemEditorInitialItem(undefined);
-            setPlannedItemEditorVisible(true);
-          }}
-          onBudgetTextChange={(value) => setDraft((current) => (current === null ? null : { ...current, budgetText: value }))}
-          onClearItems={() => setDraft((current) => (current === null ? null : { ...current, items: [], itemCount: 0 }))}
-          onClose={onClose}
-          onClosePlannedItemEditor={() => {
-            setPlannedItemEditorVisible(false);
-            setEditingItemId(null);
-            setPlannedItemEditorInitialItem(undefined);
-          }}
-          onCurrencyChange={(value) => setDraft((current) => (current === null ? null : { ...current, currencyCode: value }))}
-          onFinalizeDraft={() => void saveCurrentDraft(true)}
-          onNameChange={(value) => setDraft((current) => (current === null ? null : { ...current, name: value }))}
-          onReopenList={draft.status === 'finalized' ? () => void reopenList() : undefined}
-          onSaveDraft={() => void saveCurrentDraft(false)}
-          onSavePlannedItem={(plannedItemDraft) => {
-            const timestamp = new Date().toISOString();
+      <ListFormSheet
+        canSaveDraft={canSaveDraft}
+        currencyOptions={currencyOptions}
+        draft={draft}
+        draftBudgetPreview={draftBudgetPreview}
+        draftBudgetTextState={draftBudgetTextState}
+        draftItemCount={visibleItemCount}
+        draftNameState={draftNameState}
+        plannedItemEditorVisible={plannedItemEditorVisible}
+        plannedItemInitialItem={plannedItemEditorInitialItem}
+        resolvedCurrencyLabel={selectedCurrencyLabel}
+        title={t('listDetail.title')}
+        visible
+        onAddPlannedItem={() => {
+          setEditingItemId(null);
+          setPlannedItemEditorInitialItem(undefined);
+          setPlannedItemEditorVisible(true);
+        }}
+        onBudgetTextChange={(value) => setDraft((current) => (current === null ? null : { ...current, budgetText: value }))}
+        onClearItems={() => setDraft((current) => (current === null ? null : { ...current, items: [], itemCount: 0 }))}
+        onClose={onClose}
+        onClosePlannedItemEditor={() => {
+          setPlannedItemEditorVisible(false);
+          setEditingItemId(null);
+          setPlannedItemEditorInitialItem(undefined);
+        }}
+        onCurrencyChange={(value) => setDraft((current) => (current === null ? null : { ...current, currencyCode: value }))}
+        onFinalizeDraft={() => void saveCurrentDraft(true)}
+        onNameChange={(value) => setDraft((current) => (current === null ? null : { ...current, name: value }))}
+        onReopenList={draft.status === 'finalized' ? () => void reopenList() : undefined}
+        onSaveDraft={() => void saveCurrentDraft(false)}
+        onSavePlannedItem={(plannedItemDraft) => {
+          const timestamp = new Date().toISOString();
 
-            setDraft((current) => {
-              if (current === null) {
-                return null;
-              }
+          setDraft((current) => {
+            if (current === null) {
+              return null;
+            }
 
-              if (editingItemId !== null) {
-                return {
-                  ...current,
-                  items: current.items.map((item) =>
-                    item.id === editingItemId
-                      ? {
-                          ...item,
-                          name: plannedItemDraft.name,
-                          plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
-                          quantityMilli: plannedItemDraft.quantityMilli,
-                          unitCode: plannedItemDraft.unitCode,
-                          updatedAt: timestamp,
-                        }
-                      : item
-                  ),
-                };
-              }
-
+            if (editingItemId !== null) {
               return {
                 ...current,
-                itemCount: current.items.filter((item) => item.deletedAt === null).length + 1,
-                items: [
-                  ...current.items,
-                  {
-                    actualUnitMinor: null,
-                    createdAt: timestamp,
-                    deletedAt: null,
-                    id: `${current.listId}-item-${current.items.length + 1}`,
-                    listId: current.listId,
-                    name: plannedItemDraft.name,
-                    plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
-                    purchasedAt: null,
-                    quantityMilli: plannedItemDraft.quantityMilli,
-                    sortOrder: current.items.length + 1,
-                    unitCode: plannedItemDraft.unitCode,
-                    updatedAt: timestamp,
-                  },
-                ],
+                items: current.items.map((item) =>
+                  item.id === editingItemId
+                    ? {
+                        ...item,
+                        name: plannedItemDraft.name,
+                        plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
+                        quantityMilli: plannedItemDraft.quantityMilli,
+                        unitCode: plannedItemDraft.unitCode,
+                        updatedAt: timestamp,
+                      }
+                    : item
+                ),
               };
-            });
-            setEditingItemId(null);
-            setPlannedItemEditorInitialItem(undefined);
-            setPlannedItemEditorVisible(false);
-          }}
-          showClearItems={false}
-        >
-          <AppColumn spacing={theme.space.sm}>
-            {visibleItems.map((item) => {
-              const unitLabel = t(`units.${item.unitCode}`);
-              const quantityLabel = `${formatQuantityMilli(locale, item.unitCode, item.quantityMilli)} ${unitLabel}`;
-              const plannedValue = formatCurrencyMinor(locale, item.plannedUnitMinor, draft.currencyCode);
-              const actualValue = item.actualUnitMinor === null ? null : formatCurrencyMinor(locale, item.actualUnitMinor, draft.currencyCode);
+            }
 
-              return (
-                <AppColumn key={item.id} spacing={theme.space.xs}>
-                  <GroceryItemRow
-                    actualLabel={actualValue === null ? undefined : t('listDetail.actualPriceLabel', { unit: unitLabel })}
-                    actualValue={actualValue ?? undefined}
-                    plannedLabel={t('plannedItem.priceLabel', { unit: unitLabel })}
-                    plannedValue={plannedValue}
-                    quantityLabel={quantityLabel}
-                    title={item.name}
-                  />
-                  {!isReadOnly ? (
-                    <AppRow spacing={theme.space.sm}>
-                      <AppButton
-                        accessibilityHint={t('plannedItem.edit')}
-                        label={t('plannedItem.edit')}
-                        onPress={() => {
-                          setEditingItemId(item.id);
-                          setPlannedItemEditorInitialItem(toPlannedItemDraft(item));
-                          setPlannedItemEditorVisible(true);
-                        }}
-                        testID={`edit-item-${item.id}`}
-                        variant="secondary"
-                      />
-                      <AppButton
-                        accessibilityHint={t('listDetail.removeItemHint')}
-                        disabled={visibleItemCount <= 1}
-                        label={t('plannedItem.remove')}
-                        onPress={async () => {
-                          if (runtime === null || draft === null || visibleItemCount <= 1) {
-                            return;
-                          }
+            return {
+              ...current,
+              itemCount: current.items.filter((item) => item.deletedAt === null).length + 1,
+              items: [
+                ...current.items,
+                {
+                  actualUnitMinor: null,
+                  createdAt: timestamp,
+                  deletedAt: null,
+                  id: `${current.listId}-item-${current.items.length + 1}`,
+                  listId: current.listId,
+                  name: plannedItemDraft.name,
+                  plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
+                  purchasedAt: null,
+                  quantityMilli: plannedItemDraft.quantityMilli,
+                  sortOrder: current.items.length + 1,
+                  unitCode: plannedItemDraft.unitCode,
+                  updatedAt: timestamp,
+                },
+              ],
+            };
+          });
+          setEditingItemId(null);
+          setPlannedItemEditorInitialItem(undefined);
+          setPlannedItemEditorVisible(false);
+        }}
+        showClearItems={false}
+      >
+        <AppColumn spacing={theme.space.sm}>
+          {visibleItems.map((item) => {
+            const unitLabel = t(`units.${item.unitCode}`);
+            const quantityLabel = `${formatQuantityMilli(locale, item.unitCode, item.quantityMilli)} ${unitLabel}`;
+            const plannedValue = formatCurrencyMinor(locale, item.plannedUnitMinor, draft.currencyCode);
+            const actualValue = item.actualUnitMinor === null ? null : formatCurrencyMinor(locale, item.actualUnitMinor, draft.currencyCode);
 
-                          const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
-                          setDraft(createCreateListDraftStateFromList(nextList, locale, nextList.id));
-                          setRecentlyRemovedItem(item);
-                          setEditingItemId(null);
-                          setPlannedItemEditorInitialItem(undefined);
-                        }}
-                        testID={`remove-item-${item.id}`}
-                        variant="destructive"
-                      />
-                    </AppRow>
-                  ) : null}
-                </AppColumn>
-              );
-            })}
+            return (
+              <AppColumn key={item.id} spacing={theme.space.xs}>
+                <GroceryItemRow
+                  actualLabel={actualValue === null ? undefined : t('listDetail.actualPriceLabel', { unit: unitLabel })}
+                  actualValue={actualValue ?? undefined}
+                  plannedLabel={t('plannedItem.priceLabel', { unit: unitLabel })}
+                  plannedValue={plannedValue}
+                  quantityLabel={quantityLabel}
+                  title={item.name}
+                />
+                {!isReadOnly ? (
+                  <AppRow spacing={theme.space.sm}>
+                    <AppButton
+                      accessibilityHint={t('plannedItem.edit')}
+                      label={t('plannedItem.edit')}
+                      onPress={() => {
+                        setEditingItemId(item.id);
+                        setPlannedItemEditorInitialItem(toPlannedItemDraft(item));
+                        setPlannedItemEditorVisible(true);
+                      }}
+                      testID={`edit-item-${item.id}`}
+                      variant="secondary"
+                    />
+                    <AppButton
+                      accessibilityHint={t('listDetail.removeItemHint')}
+                      disabled={visibleItemCount <= 1}
+                      label={t('plannedItem.remove')}
+                      onPress={async () => {
+                        if (runtime === null || draft === null || visibleItemCount <= 1) {
+                          return;
+                        }
 
-            <AppUndoNotice
-              message={recentlyRemovedItem === null ? '' : t('listDetail.removedItemMessage', { name: recentlyRemovedItem.name })}
-              onUndo={async () => {
-                if (runtime === null || recentlyRemovedItem === null || draft === null) {
-                  return;
-                }
+                        const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
+                        setDraft(createCreateListDraftStateFromList(nextList, locale, nextList.id));
+                        setRecentlyRemovedItem(item);
+                        setEditingItemId(null);
+                        setPlannedItemEditorInitialItem(undefined);
+                      }}
+                      testID={`remove-item-${item.id}`}
+                      variant="destructive"
+                    />
+                  </AppRow>
+                ) : null}
+              </AppColumn>
+            );
+          })}
 
-                const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
-                setDraft(createCreateListDraftStateFromList(restoredList, locale, restoredList.id));
-                setRecentlyRemovedItem(null);
-              }}
-              visible={recentlyRemovedItem !== null}
-            />
-          </AppColumn>
-        </ListFormSheet>
+          <AppUndoNotice
+            message={recentlyRemovedItem === null ? '' : t('listDetail.removedItemMessage', { name: recentlyRemovedItem.name })}
+            onUndo={async () => {
+              if (runtime === null || recentlyRemovedItem === null || draft === null) {
+                return;
+              }
 
-      </AppColumn>
+              const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
+              setDraft(createCreateListDraftStateFromList(restoredList, locale, restoredList.id));
+              setRecentlyRemovedItem(null);
+            }}
+            visible={recentlyRemovedItem !== null}
+          />
+        </AppColumn>
+      </ListFormSheet>
     </AppScreen>
   );
 }

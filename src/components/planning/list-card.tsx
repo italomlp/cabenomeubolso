@@ -34,19 +34,18 @@ export function ListCard({
   statusLabel,
 }: ListCardProps) {
   const theme = useAppTheme();
-  const visibleItemCount = list.items.filter((item) => item.deletedAt === null).length;
   const currencyText = resolveCurrency(list.currencyCode);
   const actionLabel = list.status === 'finalized' ? reopenLabel : editLabel;
 
   return (
     <AppColumn
-      spacing={theme.space.sm}
+      spacing={theme.space.xs}
       style={{
         backgroundColor: theme.colors.backgroundElement,
         borderColor: theme.colors.border,
-        borderRadius: theme.radius.lg,
+        borderRadius: theme.radius.md,
         borderWidth: 1,
-        padding: theme.space.md,
+        padding: theme.space.sm,
       }}
     >
       <AppColumn spacing={theme.space.xxs}>
@@ -72,7 +71,7 @@ export function ListCard({
         </AppText>
       </AppColumn>
 
-      <AppRow spacing={theme.space.lg}>
+      <AppRow spacing={theme.space.md}>
         <AppColumn spacing={theme.space.xxs}>
           <AppText
             textStyle={{
@@ -117,28 +116,6 @@ export function ListCard({
             {resolveBudget(list)}
           </AppText>
         </AppColumn>
-        <AppColumn spacing={theme.space.xxs}>
-          <AppText
-            textStyle={{
-              color: theme.colors.muted,
-              fontSize: theme.typography.label.fontSize,
-              fontWeight: theme.typography.label.fontWeight,
-              lineHeight: theme.typography.label.lineHeight,
-            }}
-          >
-            Items
-          </AppText>
-          <AppText
-            textStyle={{
-              color: theme.colors.onSurface,
-              fontSize: theme.typography.body.fontSize,
-              fontWeight: theme.typography.body.fontWeight,
-              lineHeight: theme.typography.body.lineHeight,
-            }}
-          >
-            {String(visibleItemCount)}
-          </AppText>
-        </AppColumn>
       </AppRow>
 
       <AppRow spacing={theme.space.sm}>
@@ -147,7 +124,6 @@ export function ListCard({
           label={actionLabel}
           onPress={() => (list.status === 'finalized' ? onReopenAndEdit(list.id) : onLoad(list))}
           testID={`load-${list.id}`}
-          variant="secondary"
         />
         {list.status !== 'finalized' ? <AppButton label={finalizeLabel} onPress={() => onFinalize(list.id)} testID={`finalize-${list.id}`} /> : null}
       </AppRow>

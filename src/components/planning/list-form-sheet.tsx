@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppColumn, AppRow, AppSelect, AppSheet, AppText, AppTextField } from '@/components/ui';
+import { AppButton, AppColumn, AppRow, AppSelect, AppText, AppTextField } from '@/components/ui';
 import type { ObservableState } from '@/components/ui/expo-ui';
+import { ScrollView } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
 import { i18n } from '@/lib/localization/i18n';
@@ -81,7 +82,21 @@ export function ListFormSheet({
   const isReadOnly = draft.status === 'finalized';
 
   return (
-    <AppSheet onClose={onClose} title={title} visible>
+    <ScrollView
+      style={{ backgroundColor: theme.colors.surface }}
+    >
+      <AppColumn spacing={theme.space.md} style={{ padding: theme.space.content }}>
+      <AppText
+        textStyle={{
+          color: theme.colors.onSurface,
+          fontSize: theme.typography.title.fontSize,
+          fontWeight: theme.typography.title.fontWeight,
+          lineHeight: theme.typography.title.lineHeight,
+        }}
+      >
+        {title}
+      </AppText>
+
       {plannedItemEditorVisible ? (
         <PlannedItemEditorContent
           currencyCode={draft.currencyCode}
@@ -95,9 +110,11 @@ export function ListFormSheet({
           <AppColumn
             spacing={theme.space.xs}
             style={{
-              ...styles.previewCard,
               backgroundColor: theme.colors.backgroundElement,
               borderColor: theme.colors.border,
+              borderRadius: theme.radius.md,
+              borderWidth: 1,
+              padding: theme.space.sm,
             }}
           >
             <AppText
@@ -152,28 +169,6 @@ export function ListFormSheet({
                 }}
               >
                 {draftBudgetPreview}
-              </AppText>
-            </AppRow>
-            <AppRow spacing={theme.space.sm}>
-              <AppText
-                textStyle={{
-                  color: theme.colors.muted,
-                  fontSize: theme.typography.label.fontSize,
-                  fontWeight: theme.typography.label.fontWeight,
-                  lineHeight: theme.typography.label.lineHeight,
-                }}
-              >
-                {t('createList.summaryItemsLabel')}
-              </AppText>
-              <AppText
-                textStyle={{
-                  color: theme.colors.onSurface,
-                  fontSize: theme.typography.body.fontSize,
-                  fontWeight: theme.typography.body.fontWeight,
-                  lineHeight: theme.typography.body.lineHeight,
-                }}
-              >
-                {t('createList.itemCount', { count: draftItemCount })}
               </AppText>
             </AppRow>
           </AppColumn>
@@ -334,14 +329,7 @@ export function ListFormSheet({
           {children}
         </AppColumn>
       )}
-    </AppSheet>
+      </AppColumn>
+    </ScrollView>
   );
 }
-
-const styles = {
-  previewCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-  },
-} as const;

@@ -43,7 +43,7 @@ export function AppFormSheet({
 
   return (
     <AppSheet onClose={onCancel} title={title} visible>
-      <ScrollView style={{ height: 520 }}>
+      <ScrollView>
         <AppColumn spacing={theme.space.md} style={{ paddingBottom: theme.space.sm }}>
           {children}
           <AppRow spacing={theme.space.sm}>

@@ -6,5 +6,5 @@ export default function ListDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
-  return <ListDetailScreen listId={id} onClose={() => router.replace('/(tabs)/home')} />;
+  return <ListDetailScreen listId={id} onClose={() => router.back()} />;
 }
