@@ -5,6 +5,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { AppThemeProvider } from '@/design-system/theme-context';
 
 import * as mockExpoUi from './expo-ui.mock';
+import { AppHost } from './app-host';
 import { AppScreen } from './app-screen';
 import { ScrollView } from './expo-ui';
 
@@ -26,7 +27,7 @@ describe('AppScreen', () => {
 
     const scrollView = tree!.root.findByType(ScrollView);
 
-    expect(scrollView.props.keyboardShouldPersistTaps).toBe('handled');
+    expect(scrollView.findByType(AppHost)).toBeTruthy();
     expect(scrollView.findByProps({ testID: 'child' })).toBeTruthy();
   });
 });

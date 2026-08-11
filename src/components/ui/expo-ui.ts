@@ -4,12 +4,11 @@ import {
   Column,
   Host,
   Row,
+  ScrollView,
   Text,
   TextInput,
   useNativeState as expoUseNativeState,
 } from '@expo/ui';
-
-import { ScrollView } from 'react-native';
 
 export type ObservableState<T> = {
   get(): T;

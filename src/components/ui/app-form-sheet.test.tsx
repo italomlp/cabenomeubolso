@@ -5,7 +5,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { AppThemeProvider } from '@/design-system/theme-context';
 
 import * as mockExpoUi from './expo-ui.mock';
-import { BottomSheet, Button } from './expo-ui';
+import { BottomSheet, Button, ScrollView } from './expo-ui';
 import { AppFormSheet } from './app-form-sheet';
 
 jest.mock('./expo-ui', () => mockExpoUi);
@@ -35,10 +35,12 @@ describe('AppFormSheet', () => {
     });
 
     const sheet = tree!.root.findByType(BottomSheet);
+    const scrollView = tree!.root.findByType(ScrollView);
     const cancelButton = tree!.root.findAllByType(Button).find((button) => button.props.label === 'Cancel')!;
     const saveButton = tree!.root.findAllByType(Button).find((button) => button.props.label === 'Save')!;
 
     expect(sheet.props.isPresented).toBe(true);
+    expect(scrollView.props.style).toMatchObject({ height: 520 });
     expect(tree!.root.findByProps({ testID: 'body' })).toBeTruthy();
 
     act(() => {

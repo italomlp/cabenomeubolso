@@ -18,24 +18,23 @@ export function AppScreen({ children, contentStyle, scrollEnabled = true, testID
   const theme = useAppTheme();
 
   return (
-    <AppHost>
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.surface }]}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
-          <ScrollView
-            contentContainerStyle={[
-              styles.content,
-              { paddingHorizontal: theme.space.content, paddingVertical: theme.space.content },
-              contentStyle,
-            ]}
-            keyboardShouldPersistTaps="handled"
-            scrollEnabled={scrollEnabled}
-            testID={testID}
-          >
-            <View style={styles.inner}>{children}</View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </AppHost>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.surface }]}> 
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+        <ScrollView disabled={!scrollEnabled} testID={testID}>
+          <AppHost>
+            <View
+              style={[
+                styles.content,
+                { paddingHorizontal: theme.space.content, paddingVertical: theme.space.content },
+                contentStyle,
+              ]}
+            >
+              {children}
+            </View>
+          </AppHost>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -45,10 +44,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  inner: {
-    flex: 1,
-    width: '100%',
   },
   safeArea: {
     flex: 1,
