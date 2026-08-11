@@ -122,6 +122,7 @@ describe('ListDetailScreen', () => {
     expect(reopenedTexts).toContain('2 piece');
     expect(reopenedTexts).toContain('500 g');
     expect(reopenedTexts).toContain('1.5 kg');
+    expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'list-detail-reopen')).toHaveLength(0);
     expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'create-list-save')).toHaveLength(1);
     expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'edit-item-item-3')).toHaveLength(1);
   });

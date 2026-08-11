@@ -124,6 +124,10 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     }
 
     await runtime.useCases.reopenList(draft.listId);
+    setRecentlyRemovedItem(null);
+    setEditingItemId(null);
+    setPlannedItemEditorInitialItem(undefined);
+    setPlannedItemEditorVisible(false);
     await refreshDraft(draft.listId);
   };
 
