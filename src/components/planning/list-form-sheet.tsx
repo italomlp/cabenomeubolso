@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { AppButton, AppColumn, AppRow, AppSelect, AppText, AppTextField } from '@/components/ui';
 import type { ObservableState } from '@/components/ui/expo-ui';
-import { ScrollView } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
 import { i18n } from '@/lib/localization/i18n';
@@ -82,10 +81,7 @@ export function ListFormSheet({
   const isReadOnly = draft.status === 'finalized';
 
   return (
-    <ScrollView
-      style={{ backgroundColor: theme.colors.surface }}
-    >
-      <AppColumn spacing={theme.space.md} style={{ padding: theme.space.content }}>
+    <AppColumn spacing={theme.space.md} style={{ padding: theme.space.content }}>
       <AppText
         textStyle={{
           color: theme.colors.onSurface,
@@ -329,7 +325,6 @@ export function ListFormSheet({
           {children}
         </AppColumn>
       )}
-      </AppColumn>
-    </ScrollView>
+    </AppColumn>
   );
 }
