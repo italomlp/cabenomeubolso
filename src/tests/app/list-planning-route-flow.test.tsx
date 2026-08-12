@@ -173,6 +173,8 @@ describe('app planning route flows', () => {
     });
 
     const persistedList = mockRuntime.saveMock.mock.calls[mockRuntime.saveMock.mock.calls.length - 1]?.[0] as ShoppingList | undefined;
+    expect(persistedList?.id).toBeTruthy();
+    mockSearchParams = { id: persistedList!.id };
 
     expect(persistedList).toMatchObject({
       budgetMinor: 4_000,
@@ -203,10 +205,11 @@ describe('app planning route flows', () => {
     });
 
     expect(getTextValues(tree!)).toEqual(expect.arrayContaining(['2 piece', '500 g', '1.5 kg']));
-    expect(tree!.root.findAllByType(mockExpoUi.Button).some((node) => node.props.testID === 'remove-item-home-create-list-draft-item-2')).toBe(true);
+    const riceItem = persistedList!.items[1]!;
+    expect(tree!.root.findAllByType(mockExpoUi.Button).some((node) => node.props.testID === `remove-item-${riceItem.id}`)).toBe(true);
 
     await act(async () => {
-      getButton(tree!, 'remove-item-home-create-list-draft-item-2').props.onPress();
+      getButton(tree!, `remove-item-${riceItem.id}`).props.onPress();
       await Promise.resolve();
     });
 
