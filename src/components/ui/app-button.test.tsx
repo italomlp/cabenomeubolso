@@ -24,6 +24,6 @@ describe('AppButton', () => {
     const button = tree!.root.findByType(Button);
 
     expect(button.props.variant).toBe('filled');
-    expect(button.props.style.backgroundColor).toBe('#C62828');
+    expect(button.props.style.backgroundColor).toBe('#B94D3C');
   });
 });

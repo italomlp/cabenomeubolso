@@ -34,5 +34,6 @@ describe('GroceryItemRow', () => {
     expect(texts).toContain('2 piece');
     expect(texts).toContain('Planned');
     expect(texts).toContain('Actual');
+    expect(tree!.root.findAllByType(mockExpoUi.Row)[0].props.style.borderWidth).toBe(1);
   });
 });

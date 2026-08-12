@@ -24,6 +24,8 @@ describe('BudgetSummary', () => {
             listLabel="Lists"
             listValue="2"
             title="Active summaries"
+            statusIcon="✓"
+            statusLabel="Within budget"
           />
         </AppThemeProvider>
       );
@@ -35,5 +37,6 @@ describe('BudgetSummary', () => {
     expect(texts).toContain('Open lists keep moving until they are finalized.');
     expect(texts).toContain('Budget');
     expect(texts).toContain('$10.00');
+    expect(texts).toContain('Within budget');
   });
 });

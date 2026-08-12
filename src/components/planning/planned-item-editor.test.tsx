@@ -1,4 +1,4 @@
-import { TextInput } from 'react-native';
+import { Text, TextInput } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
 import { describe, expect, it, jest } from '@jest/globals';
 
@@ -210,5 +210,26 @@ describe('PlannedItemEditorSheet', () => {
       quantityMilli: 2000,
       unitCode: 'piece',
     });
+  });
+
+  it('exposes the localized name validation message when saving without a name', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('pt-BR');
+    });
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <PlannedItemEditorSheet currencyCode="BRL" onCancel={jest.fn()} onSave={jest.fn()} visible />
+        </AppThemeProvider>
+      );
+    });
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
+    });
+
+    expect(tree!.root.findAllByType(Text).map((node) => node.props.children)).toContain('Digite o nome do item.');
   });
 });

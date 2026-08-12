@@ -1,8 +1,10 @@
 import { getLocales } from 'expo-localization';
+import { AccessibilityInfo } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton, AppColumn, AppRow, AppScreen, AppText, AppUndoNotice } from '@/components/ui';
+import { BudgetSummary } from './budget-summary';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import { formatCurrencyMinor, formatQuantityMilli, parseCurrencyMinor } from '@/lib/locale-input';
@@ -11,6 +13,7 @@ import { useLocalizationPreferencesStore } from '@/stores/localization-preferenc
 
 import { buildCreateListDraft, canPersistCreateListDraft, createCreateListDraftStateFromList, resolveCreateListCurrency, type CreateListDraftState } from '@/app/home-state';
 import type { ShoppingListItem } from '@/domain/shopping-list';
+import { calculateShoppingListTotals } from '@/domain/shopping-list';
 
 import { GroceryItemRow } from './grocery-item-row';
 import { ListFormSheet } from './list-form-sheet';
@@ -30,6 +33,10 @@ function toPlannedItemDraft(item: ShoppingListItem): PlannedItemDraft {
     quantityMilli: item.quantityMilli,
     unitCode: item.unitCode,
   };
+}
+
+function announce(message: string) {
+  AccessibilityInfo.announceForAccessibility(message);
 }
 
 export default function ListDetailScreen({ dependencies, listId, onClose = () => undefined }: ListDetailScreenProps) {
@@ -124,6 +131,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     }
 
     await runtime.useCases.reopenList(draft.listId);
+    announce(t('listDetail.reopenedAnnouncement'));
     setRecentlyRemovedItem(null);
     setEditingItemId(null);
     setPlannedItemEditorInitialItem(undefined);
@@ -149,6 +157,35 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   const visibleItemCount = visibleItems.length;
   const isReadOnly = draft?.status === 'finalized';
   const selectedCurrencyLabel = draft?.currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl');
+
+  const budgetStatusAnnouncement = (nextDraft: CreateListDraftState) => {
+    const budgetMinor = (() => {
+      try {
+        return parseCurrencyMinor(locale, nextDraft.budgetText, nextDraft.currencyCode);
+      } catch {
+        return 0;
+      }
+    })();
+    const nextVisibleItems = nextDraft.items.filter((item) => item.deletedAt === null);
+    const totals = calculateShoppingListTotals({
+      ...nextDraft,
+      budgetMinor,
+      createdAt: '',
+      deletedAt: null,
+      finalizedAt: null,
+      id: nextDraft.listId,
+      items: nextVisibleItems,
+      name: nextDraft.name,
+      status: nextDraft.status ?? 'draft',
+      updatedAt: '',
+    });
+
+    return t('listDetail.budgetStatusAnnouncement', {
+      budget: formatCurrencyMinor(locale, budgetMinor, nextDraft.currencyCode),
+      planned: formatCurrencyMinor(locale, totals.plannedMinor, nextDraft.currencyCode),
+      status: totals.remainingMinor >= 0 ? t('listDetail.withinBudget') : t('listDetail.overBudget'),
+    });
+  };
 
   if (runtime === null || draft === null) {
     return (
@@ -189,56 +226,55 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
         onCurrencyChange={(value) => setDraft((current) => (current === null ? null : { ...current, currencyCode: value }))}
         onFinalizeDraft={() => void saveCurrentDraft(true)}
         onNameChange={(value) => setDraft((current) => (current === null ? null : { ...current, name: value }))}
+        onEditPlannedItem={() => undefined}
+        onRemovePlannedItem={() => undefined}
         onReopenList={draft.status === 'finalized' ? () => void reopenList() : undefined}
         onSaveDraft={() => void saveCurrentDraft(false)}
         onSavePlannedItem={(plannedItemDraft) => {
           const timestamp = new Date().toISOString();
 
-          setDraft((current) => {
-            if (current === null) {
-              return null;
-            }
+          if (draft !== null) {
+            const nextDraft: CreateListDraftState = editingItemId === null
+              ? {
+                  ...draft,
+                  itemCount: draft.items.filter((item) => item.deletedAt === null).length + 1,
+                  items: [
+                    ...draft.items,
+                    {
+                      actualUnitMinor: null,
+                      createdAt: timestamp,
+                      deletedAt: null,
+                      id: `${draft.listId}-item-${draft.items.length + 1}`,
+                      listId: draft.listId,
+                      name: plannedItemDraft.name,
+                      plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
+                      purchasedAt: null,
+                      quantityMilli: plannedItemDraft.quantityMilli,
+                      sortOrder: draft.items.length + 1,
+                      unitCode: plannedItemDraft.unitCode,
+                      updatedAt: timestamp,
+                    },
+                  ],
+                }
+              : {
+                  ...draft,
+                  items: draft.items.map((item) =>
+                    item.id === editingItemId
+                      ? {
+                          ...item,
+                          name: plannedItemDraft.name,
+                          plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
+                          quantityMilli: plannedItemDraft.quantityMilli,
+                          unitCode: plannedItemDraft.unitCode,
+                          updatedAt: timestamp,
+                        }
+                      : item
+                  ),
+                };
 
-            if (editingItemId !== null) {
-              return {
-                ...current,
-                items: current.items.map((item) =>
-                  item.id === editingItemId
-                    ? {
-                        ...item,
-                        name: plannedItemDraft.name,
-                        plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
-                        quantityMilli: plannedItemDraft.quantityMilli,
-                        unitCode: plannedItemDraft.unitCode,
-                        updatedAt: timestamp,
-                      }
-                    : item
-                ),
-              };
-            }
-
-            return {
-              ...current,
-              itemCount: current.items.filter((item) => item.deletedAt === null).length + 1,
-              items: [
-                ...current.items,
-                {
-                  actualUnitMinor: null,
-                  createdAt: timestamp,
-                  deletedAt: null,
-                  id: `${current.listId}-item-${current.items.length + 1}`,
-                  listId: current.listId,
-                  name: plannedItemDraft.name,
-                  plannedUnitMinor: plannedItemDraft.plannedUnitMinor,
-                  purchasedAt: null,
-                  quantityMilli: plannedItemDraft.quantityMilli,
-                  sortOrder: current.items.length + 1,
-                  unitCode: plannedItemDraft.unitCode,
-                  updatedAt: timestamp,
-                },
-              ],
-            };
-          });
+            setDraft(nextDraft);
+            announce(`${t(editingItemId === null ? 'listDetail.itemAddedAnnouncement' : 'listDetail.itemUpdatedAnnouncement', { name: plannedItemDraft.name })} ${budgetStatusAnnouncement(nextDraft)}`);
+          }
           setEditingItemId(null);
           setPlannedItemEditorInitialItem(undefined);
           setPlannedItemEditorVisible(false);
@@ -246,6 +282,34 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
         showClearItems={false}
       >
         <AppColumn spacing={theme.space.sm}>
+          {(() => {
+            const totals = calculateShoppingListTotals({
+              ...draft,
+              budgetMinor: draftBudgetMinor,
+              createdAt: '',
+              deletedAt: null,
+              finalizedAt: null,
+              id: draft.listId,
+              items: visibleItems,
+              name: draft.name,
+              status: draft.status ?? 'draft',
+              updatedAt: '',
+            });
+
+            return (
+              <BudgetSummary
+                accentColor={totals.remainingMinor >= 0 ? theme.colors.budgetSafe : theme.colors.budgetRisk}
+                body={t('createList.itemsHint')}
+                budgetLabel={t('createList.summaryBudgetLabel')}
+                budgetValue={formatCurrencyMinor(locale, draftBudgetMinor, draft.currencyCode)}
+                listLabel={t('createList.itemsLabel')}
+                listValue={String(visibleItemCount)}
+                statusIcon={totals.remainingMinor >= 0 ? '✓' : '!'}
+                statusLabel={totals.remainingMinor >= 0 ? t('home.listStatusActive') : t('home.listStatusFinalized')}
+                title={t('createList.summaryTitle')}
+              />
+            );
+          })()}
           {visibleItems.map((item) => {
             const unitLabel = t(`units.${item.unitCode}`);
             const quantityLabel = `${formatQuantityMilli(locale, item.unitCode, item.quantityMilli)} ${unitLabel}`;
@@ -285,7 +349,9 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                         }
 
                         const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
-                        setDraft(createCreateListDraftStateFromList(nextList, locale, nextList.id));
+                        const nextDraft = createCreateListDraftStateFromList(nextList, locale, nextList.id);
+                        setDraft(nextDraft);
+                        announce(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
                         setRecentlyRemovedItem(item);
                         setEditingItemId(null);
                         setPlannedItemEditorInitialItem(undefined);
@@ -307,7 +373,9 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
               }
 
               const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
-              setDraft(createCreateListDraftStateFromList(restoredList, locale, restoredList.id));
+              const restoredDraft = createCreateListDraftStateFromList(restoredList, locale, restoredList.id);
+              setDraft(restoredDraft);
+              announce(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
               setRecentlyRemovedItem(null);
             }}
             visible={recentlyRemovedItem !== null}

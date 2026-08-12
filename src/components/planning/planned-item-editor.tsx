@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppColumn, AppFormSheet, AppSelect, AppTextField } from '@/components/ui';
+import { AppColumn, AppFormSheet, AppSelect, AppText, AppTextField } from '@/components/ui';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
@@ -86,6 +86,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
   const [plannedUnitMinor, setPlannedUnitMinor] = useState<number | null>(initialItem?.plannedUnitMinor ?? null);
   const [priceError, setPriceError] = useState<string | null>(null);
   const [priceFocused, setPriceFocused] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
   const nameTextRef = useRef<string | undefined>(initialItem?.name);
   const quantityTextRef = useRef(initialQuantityText);
   const priceTextRef = useRef(initialPriceText);
@@ -162,10 +163,12 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
 
   const handleSave = () => {
     const normalizedName = (nameTextRef.current ?? '').trim();
+    const nextNameError = normalizedName.length === 0 ? t('plannedItem.errors.nameRequired') : null;
     const nextQuantityMilli = commitQuantity();
     const nextPlannedUnitMinor = commitPrice();
+    setNameError(nextNameError);
 
-    if (normalizedName.length === 0 || nextQuantityMilli === null || nextPlannedUnitMinor === null) {
+    if (nextNameError !== null || nextQuantityMilli === null || nextPlannedUnitMinor === null) {
       return;
     }
 
@@ -214,13 +217,24 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
       visible
     >
       <AppColumn spacing={theme.space.md}>
+      <AppText
+        textStyle={{
+          color: theme.colors.muted,
+          fontSize: theme.typography.body.fontSize,
+          fontWeight: theme.typography.body.fontWeight,
+          lineHeight: theme.typography.body.lineHeight,
+        }}
+      >
+        {t('plannedItem.priceHint', { currency: currencyCode })}
+      </AppText>
       <AppTextField
-        accessibilityHint={t('plannedItem.nameHint')}
-        helperText={t('plannedItem.nameHint')}
+        accessibilityHint={nameError ?? t('plannedItem.nameHint')}
+        helperText={nameError ?? t('plannedItem.nameHint')}
         label={t('plannedItem.nameLabel')}
         onChangeText={(nextName) => {
           nameTextRef.current = nextName;
           setName(nextName);
+          setNameError(nextName.trim().length === 0 ? t('plannedItem.errors.nameRequired') : null);
         }}
         placeholder={t('plannedItem.namePlaceholder')}
         testID="planned-item-name"
@@ -229,7 +243,7 @@ function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 
 
       <AppSelect
         helperText={t('plannedItem.unitHint')}
-        label={t('plannedItem.unitLabel')}
+        label={t('plannedItem.unitLabel', { item: name?.trim() || t('plannedItem.itemFallback') })}
         onValueChange={(nextUnit) => {
           const nextValue = nextUnit as ShoppingListUnitCode;
 

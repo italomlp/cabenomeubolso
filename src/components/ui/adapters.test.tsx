@@ -55,8 +55,8 @@ describe('universal adapters', () => {
 
     const input = tree!.root.findByType(mockExpoUi.TextInput);
 
-    expect(input.props.placeholderTextColor).toBe('#93A4BB');
-    expect(input.props.textStyle.color).toBe('#F3F4F6');
+    expect(input.props.placeholderTextColor).toBe('#8FA29A');
+    expect(input.props.textStyle.color).toBe('#F4F0E8');
     expect(input.props.placeholderTextColor).not.toBe(input.props.textStyle.color);
   });
 });

@@ -3,16 +3,18 @@ import { useAppTheme } from '@/design-system/theme-context';
 import { AppColumn, AppRow, AppText } from '@/components/ui';
 
 type BudgetSummaryProps = {
-  accentColor: string;
+  accentColor?: string;
   body: string;
   budgetLabel: string;
   budgetValue: string;
   listLabel: string;
   listValue: string;
   title: string;
+  statusLabel?: string;
+  statusIcon?: string;
 };
 
-export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, listLabel, listValue, title }: BudgetSummaryProps) {
+export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, listLabel, listValue, statusIcon = '•', statusLabel, title }: BudgetSummaryProps) {
   const theme = useAppTheme();
 
   return (
@@ -20,13 +22,24 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
       spacing={theme.space.sm}
       style={{
         backgroundColor: theme.colors.surfaceRaised,
-        borderColor: accentColor,
         borderRadius: theme.radius.lg,
-        borderWidth: 1,
-        padding: theme.space.md,
+        borderColor: accentColor ?? theme.colors.budgetNeutral,
+        borderWidth: 2,
+        padding: theme.space.lg,
       }}
     >
-      <AppText
+      <AppRow spacing={theme.space.sm}>
+        <AppText
+          textStyle={{
+            color: accentColor ?? theme.colors.budgetNeutral,
+            fontSize: theme.typography.title.fontSize,
+            fontWeight: theme.typography.title.fontWeight,
+            lineHeight: theme.typography.title.lineHeight,
+          }}
+        >
+          {statusIcon}
+        </AppText>
+        <AppText
         textStyle={{
           color: theme.colors.onSurface,
           fontSize: theme.typography.title.fontSize,
@@ -35,7 +48,8 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
         }}
       >
         {title}
-      </AppText>
+        </AppText>
+      </AppRow>
       <AppText
         textStyle={{
           color: theme.colors.muted,
@@ -46,6 +60,18 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
       >
         {body}
       </AppText>
+      {statusLabel ? (
+        <AppText
+          textStyle={{
+            color: accentColor ?? theme.colors.budgetNeutral,
+            fontSize: theme.typography.label.fontSize,
+            fontWeight: theme.typography.label.fontWeight,
+            lineHeight: theme.typography.label.lineHeight,
+          }}
+        >
+          {statusLabel}
+        </AppText>
+      ) : null}
       <AppRow spacing={theme.space.lg}>
         <AppColumn spacing={theme.space.xxs}>
           <AppText
@@ -83,9 +109,9 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
           <AppText
             textStyle={{
               color: theme.colors.onSurface,
-              fontSize: theme.typography.numeric.fontSize,
-              fontWeight: theme.typography.numeric.fontWeight,
-              lineHeight: theme.typography.numeric.lineHeight,
+              fontSize: theme.typography.display.fontSize,
+              fontWeight: theme.typography.display.fontWeight,
+              lineHeight: theme.typography.display.lineHeight,
             }}
           >
             {budgetValue}

@@ -21,11 +21,9 @@ export function GroceryItemRow({ actualLabel, actualValue, leading, plannedLabel
     <AppRow
       spacing={theme.space.md}
       style={{
-        backgroundColor: theme.colors.backgroundElement,
         borderColor: theme.colors.border,
-        borderRadius: theme.radius.md,
         borderWidth: 1,
-        padding: theme.space.md,
+        paddingVertical: theme.space.md,
       }}
     >
       {leading}
