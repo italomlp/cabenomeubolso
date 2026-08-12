@@ -42,4 +42,22 @@ describe('AppTextField', () => {
     expect(input().props.style.borderColor).toBe('#D7DFEA');
     expect(onBlur).toHaveBeenCalledWith();
   });
+
+  it('uses a distinct placeholder color from entered text', () => {
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <AppTextField label="Search" placeholder="Type here" />
+        </AppThemeProvider>
+      );
+    });
+
+    const input = tree!.root.findByType(TextInput);
+
+    expect(input.props.placeholderTextColor).toBe('#6B7A99');
+    expect(input.props.textStyle.color).toBe('#172B4D');
+    expect(input.props.placeholderTextColor).not.toBe(input.props.textStyle.color);
+  });
 });

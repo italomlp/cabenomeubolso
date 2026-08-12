@@ -7,6 +7,7 @@ export type SemanticColorTokens = {
   surfaceRaised: string;
   onSurface: string;
   muted: string;
+  placeholder: string;
   border: string;
   focus: string;
   budgetSafe: string;
@@ -112,6 +113,7 @@ const LIGHT_COLORS: SemanticColorTokens = {
   surfaceRaised: '#F5F7FA',
   onSurface: '#172B4D',
   muted: '#44546F',
+  placeholder: '#6B7A99',
   border: '#D7DFEA',
   focus: '#208AEF',
   budgetSafe: '#2E7D32',
@@ -129,6 +131,7 @@ const DARK_COLORS: SemanticColorTokens = {
   surfaceRaised: '#1F2937',
   onSurface: '#F3F4F6',
   muted: '#C7D2E0',
+  placeholder: '#93A4BB',
   border: '#334155',
   focus: '#66B2FF',
   budgetSafe: '#4CAF50',

@@ -10,7 +10,7 @@ Default mode is System; Light and Dark are persisted overrides. Define token val
 
 | Category | Semantic tokens | Rule |
 |---|---|---|
-| Color | `surface`, `surfaceRaised`, `onSurface`, `muted`, `border`, `focus` | contrast and focus remain visible in both modes |
+| Color | `surface`, `surfaceRaised`, `onSurface`, `muted`, `placeholder`, `border`, `focus` | contrast and focus remain visible in both modes; placeholder is lighter than entered text |
 | Budget | `budgetSafe`, `budgetRisk`, `budgetNeutral` | pair color with text/icon; never block overspend |
 | Typography | `body`, `label`, `title`, `display`, `numeric` | support dynamic type; use tabular numerals where available |
 | Space/layout | `space.*`, `radius.*`, `touchTarget`, `contentMax` | minimum 44×44 pt controls; avoid clipped totals |
