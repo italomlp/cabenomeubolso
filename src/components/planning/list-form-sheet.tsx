@@ -5,6 +5,8 @@ import { AppButton, AppColumn, AppRow, AppSelect, AppText, AppTextField } from '
 import type { ObservableState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
+import type { ShoppingListItem } from '@/domain/shopping-list';
+import { formatCurrencyMinor, formatQuantityMilli } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
 
 import { PlannedItemEditorContent, type PlannedItemDraft } from './planned-item-editor';
@@ -29,6 +31,8 @@ type ListFormSheetProps = {
   title: string;
   visible: boolean;
   onAddPlannedItem: () => void;
+  onEditPlannedItem: (item: ShoppingListItem) => void;
+  onRemovePlannedItem: (itemId: string) => void;
   onBudgetTextChange: (value: string) => void;
   onClearItems: () => void;
   onClose: () => void;
@@ -57,6 +61,8 @@ export function ListFormSheet({
   title,
   visible,
   onAddPlannedItem,
+  onEditPlannedItem,
+  onRemovePlannedItem,
   onBudgetTextChange,
   onClearItems,
   onClose,
@@ -79,6 +85,8 @@ export function ListFormSheet({
 
   const canShowCurrencySelect = draftItemCount === 0 && draft.status !== 'finalized';
   const isReadOnly = draft.status === 'finalized';
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const visibleItems = draft.items.filter((item) => item.deletedAt === null);
 
   return (
     <AppColumn spacing={theme.space.md} style={{ padding: theme.space.content }}>
@@ -285,8 +293,66 @@ export function ListFormSheet({
             ) : null}
           </AppColumn>
 
+          {visibleItems.length > 0 ? (
+            <AppColumn spacing={theme.space.xs}>
+              <AppText
+                textStyle={{
+                  color: theme.colors.onSurface,
+                  fontSize: theme.typography.label.fontSize,
+                  fontWeight: theme.typography.label.fontWeight,
+                  lineHeight: theme.typography.label.lineHeight,
+                }}
+              >
+                {t('createList.itemsPreviewTitle')}
+              </AppText>
+              {visibleItems.map((item) => {
+                const unitLabel = t(`units.${item.unitCode}`);
+
+                return (
+                  <AppColumn
+                    key={item.id}
+                    spacing={theme.space.xs}
+                    style={{
+                      backgroundColor: theme.colors.surface,
+                      borderColor: theme.colors.border,
+                      borderWidth: 1,
+                      paddingVertical: theme.space.sm,
+                    }}
+                  >
+                    <AppText>{item.name}</AppText>
+                    <AppText>
+                      {t('createList.itemPreviewDetails', {
+                        price: formatCurrencyMinor(locale, item.plannedUnitMinor, draft.currencyCode),
+                        quantity: formatQuantityMilli(locale, item.unitCode, item.quantityMilli),
+                        unit: unitLabel,
+                      })}
+                    </AppText>
+                    {!isReadOnly ? (
+                      <AppRow spacing={theme.space.sm}>
+                        <AppButton
+                          accessibilityHint={t('plannedItem.editHint')}
+                          label={t('plannedItem.edit')}
+                          onPress={() => onEditPlannedItem(item)}
+                          testID={`edit-planned-item-${item.id}`}
+                          variant="secondary"
+                        />
+                        <AppButton
+                          accessibilityHint={t('plannedItem.removeHint')}
+                          label={t('plannedItem.remove')}
+                          onPress={() => onRemovePlannedItem(item.id)}
+                          testID={`remove-planned-item-${item.id}`}
+                          variant="destructive"
+                        />
+                      </AppRow>
+                    ) : null}
+                  </AppColumn>
+                );
+              })}
+            </AppColumn>
+          ) : null}
+
           {isReadOnly && onReopenList !== undefined ? (
-            <AppRow spacing={theme.space.sm}>
+            <AppColumn spacing={theme.space.sm}>
               <AppButton
                 accessibilityHint={t('listDetail.reopenHint')}
                 label={t('listDetail.reopenLabel')}
@@ -295,9 +361,9 @@ export function ListFormSheet({
                 variant="secondary"
               />
               <AppButton accessibilityHint={t('createList.closeHint')} label={t('createList.close')} onPress={onClose} variant="ghost" />
-            </AppRow>
+            </AppColumn>
           ) : (
-            <AppRow spacing={theme.space.sm}>
+            <AppColumn spacing={theme.space.sm}>
               <AppButton
                 accessibilityHint={t('createList.saveHint')}
                 disabled={!canSaveDraft}
@@ -319,7 +385,7 @@ export function ListFormSheet({
                 onPress={onClose}
                 variant="ghost"
               />
-            </AppRow>
+            </AppColumn>
           )}
 
           {children}

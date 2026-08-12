@@ -118,7 +118,7 @@ export function ListCard({
         </AppColumn>
       </AppRow>
 
-      <AppRow spacing={theme.space.sm}>
+      <AppColumn spacing={theme.space.sm}>
         <AppButton
           accessibilityHint={actionLabel}
           label={actionLabel}
@@ -126,7 +126,7 @@ export function ListCard({
           testID={`load-${list.id}`}
         />
         {list.status !== 'finalized' ? <AppButton label={finalizeLabel} onPress={() => onFinalize(list.id)} testID={`finalize-${list.id}`} /> : null}
-      </AppRow>
+      </AppColumn>
     </AppColumn>
   );
 }

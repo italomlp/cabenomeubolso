@@ -58,8 +58,6 @@ describe('HomeScreen', () => {
 
     expect(texts).toContain('Home');
     expect(texts).toContain('Plan the next list offline before you shop.');
-    expect(texts).toContain('Active summaries');
-    expect(texts).toContain('Finalized summaries');
     expect(texts).toContain('Create list');
     expect(texts).toContain('Nothing to review yet');
   });
@@ -76,8 +74,6 @@ describe('HomeScreen', () => {
 
     expect(texts).toContain('Início');
     expect(texts).toContain('Planeje a próxima lista offline antes de comprar.');
-    expect(texts).toContain('Resumos ativos');
-    expect(texts).toContain('Resumos finalizados');
     expect(texts).toContain('Criar lista');
     expect(texts).toContain('Nada para revisar ainda');
   });

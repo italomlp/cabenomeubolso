@@ -18,6 +18,7 @@ import {
 } from '@/app/home-state';
 
 import { ListFormSheet } from './list-form-sheet';
+import type { PlannedItemDraft } from './planned-item-editor';
 import { usePlanningRuntime, type PlanningRuntime } from './planning-runtime';
 
 type CreateListScreenProps = {
@@ -46,6 +47,8 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
 
   const [draft, setDraft] = useState<CreateListDraftState>(() => createEmptyCreateListDraftState(resolvedCurrency));
   const [plannedItemEditorVisible, setPlannedItemEditorVisible] = useState(false);
+  const [plannedItemEditorInitialItem, setPlannedItemEditorInitialItem] = useState<PlannedItemDraft | undefined>();
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const draftNameState = useNativeState('');
   const draftBudgetTextState = useNativeState('');
 
@@ -106,23 +109,43 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
         draftBudgetTextState={draftBudgetTextState}
         draftItemCount={draftItemCount}
         draftNameState={draftNameState}
+        plannedItemInitialItem={plannedItemEditorInitialItem}
         plannedItemEditorVisible={plannedItemEditorVisible}
         resolvedCurrencyLabel={selectedCurrencyLabel}
         title={t('createList.title')}
         visible
-        onAddPlannedItem={() => setPlannedItemEditorVisible(true)}
+        onAddPlannedItem={() => {
+          setEditingItemId(null);
+          setPlannedItemEditorInitialItem(undefined);
+          setPlannedItemEditorVisible(true);
+        }}
         onBudgetTextChange={(value) => setDraft((current) => ({ ...current, budgetText: value }))}
         onClearItems={() => setDraft((current) => ({ ...current, items: [], itemCount: 0 }))}
         onClose={onClose}
-        onClosePlannedItemEditor={() => setPlannedItemEditorVisible(false)}
+        onClosePlannedItemEditor={() => {
+          setEditingItemId(null);
+          setPlannedItemEditorInitialItem(undefined);
+          setPlannedItemEditorVisible(false);
+        }}
         onCurrencyChange={(value) => setDraft((current) => ({ ...current, currencyCode: value }))}
         onFinalizeDraft={() => void saveCurrentDraft(true)}
         onNameChange={(value) => setDraft((current) => ({ ...current, name: value }))}
+        onEditPlannedItem={(item) => {
+          setEditingItemId(item.id);
+          setPlannedItemEditorInitialItem({ name: item.name, plannedUnitMinor: item.plannedUnitMinor, quantityMilli: item.quantityMilli, unitCode: item.unitCode });
+          setPlannedItemEditorVisible(true);
+        }}
+        onRemovePlannedItem={(itemId) => setDraft((current) => ({ ...current, itemCount: Math.max(0, current.itemCount - 1), items: current.items.filter((item) => item.id !== itemId) }))}
         onSaveDraft={() => void saveCurrentDraft(false)}
         onSavePlannedItem={(plannedItemDraft) => {
           const timestamp = new Date().toISOString();
 
-          setDraft((current) => ({
+          setDraft((current) => {
+            if (editingItemId !== null) {
+              return { ...current, items: current.items.map((item) => item.id === editingItemId ? { ...item, ...plannedItemDraft, updatedAt: timestamp } : item) };
+            }
+
+            return ({
             ...current,
             itemCount: current.items.length + 1,
             items: [
@@ -142,7 +165,10 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
                 updatedAt: timestamp,
               },
             ],
-          }));
+            });
+          });
+          setEditingItemId(null);
+          setPlannedItemEditorInitialItem(undefined);
           setPlannedItemEditorVisible(false);
         }}
       />

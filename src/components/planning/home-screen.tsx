@@ -1,4 +1,3 @@
-import { getLocales } from 'expo-localization';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,9 +7,6 @@ import type { SupportedCurrency } from '@/domain/currency';
 import type { ShoppingList } from '@/domain/shopping-list';
 import { formatCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
-import { useLocalizationPreferencesStore } from '@/stores/localization-preferences';
-
-import { resolveCreateListCurrency } from '@/app/home-state';
 
 import { AppEmptyState } from './app-empty-state';
 import { BudgetSummary } from './budget-summary';
@@ -28,16 +24,8 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
-  const currencyPreference = useLocalizationPreferencesStore((state) => state.currencyPreference);
-  const languagePreference = useLocalizationPreferencesStore((state) => state.languagePreference);
   const runtime = usePlanningRuntime(dependencies);
   const [lists, setLists] = useState<readonly ShoppingList[]>([]);
-
-  const resolvedLocales = getLocales();
-  const resolvedCurrency = useMemo(
-    () => resolveCreateListCurrency({ currencyPreference, languagePreference }, resolvedLocales),
-    [currencyPreference, languagePreference, resolvedLocales]
-  );
 
   useEffect(() => {
     if (runtime === null) {
@@ -82,8 +70,16 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
     [lists]
   );
 
-  const activeSummaryBudget = summaryLists.active.reduce((total, list) => total + list.budgetMinor, 0);
-  const finalizedSummaryBudget = summaryLists.finalized.reduce((total, list) => total + list.budgetMinor, 0);
+  const summaryByCurrency = useMemo(() => {
+    const grouped = new Map<SupportedCurrency, { active: number; finalized: number }>();
+    for (const list of lists) {
+      if (list.deletedAt !== null) continue;
+      const current = grouped.get(list.currencyCode) ?? { active: 0, finalized: 0 };
+      current[list.status === 'finalized' ? 'finalized' : 'active'] += list.budgetMinor;
+      grouped.set(list.currencyCode, current);
+    }
+    return grouped;
+  }, [lists]);
 
   if (runtime === null) {
     return (
@@ -122,24 +118,29 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
         </AppColumn>
 
         <AppColumn spacing={theme.space.md}>
-          <BudgetSummary
-            accentColor={theme.colors.budgetSafe}
-            body={t('home.activeSummaryBody')}
-            budgetLabel={t('home.activeSummaryBudgetLabel')}
-            budgetValue={formatCurrencyMinor(locale, activeSummaryBudget, resolvedCurrency)}
-            listLabel={t('home.activeSummaryListsLabel')}
-            listValue={String(summaryLists.active.length)}
-            title={t('home.activeSummaryTitle')}
-          />
-          <BudgetSummary
-            accentColor={theme.colors.budgetNeutral}
-            body={t('home.finalizedSummaryBody')}
-            budgetLabel={t('home.finalizedSummaryBudgetLabel')}
-            budgetValue={formatCurrencyMinor(locale, finalizedSummaryBudget, resolvedCurrency)}
-            listLabel={t('home.finalizedSummaryListsLabel')}
-            listValue={String(summaryLists.finalized.length)}
-            title={t('home.finalizedSummaryTitle')}
-          />
+          {[...summaryByCurrency.entries()].map(([currencyCode, totals]) => (
+            <AppColumn key={currencyCode} spacing={theme.space.sm}>
+              <AppText>{t('home.currencySummaryTitle', { currency: currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl') })}</AppText>
+              <BudgetSummary
+                accentColor={theme.colors.budgetSafe}
+                body={t('home.activeSummaryBody')}
+                budgetLabel={t('home.activeSummaryBudgetLabel')}
+                budgetValue={formatCurrencyMinor(locale, totals.active, currencyCode)}
+                listLabel={t('home.activeSummaryListsLabel')}
+                listValue={String(summaryLists.active.filter((list) => list.currencyCode === currencyCode).length)}
+                title={t('home.activeSummaryTitle')}
+              />
+              <BudgetSummary
+                accentColor={theme.colors.budgetNeutral}
+                body={t('home.finalizedSummaryBody')}
+                budgetLabel={t('home.finalizedSummaryBudgetLabel')}
+                budgetValue={formatCurrencyMinor(locale, totals.finalized, currencyCode)}
+                listLabel={t('home.finalizedSummaryListsLabel')}
+                listValue={String(summaryLists.finalized.filter((list) => list.currencyCode === currencyCode).length)}
+                title={t('home.finalizedSummaryTitle')}
+              />
+            </AppColumn>
+          ))}
         </AppColumn>
 
         <AppButton accessibilityHint={t('home.openCreateListHint')} label={t('home.openCreateList')} onPress={() => onOpenNewList?.()} style={{ alignSelf: 'flex-start' }} />
