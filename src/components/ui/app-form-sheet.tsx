@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Platform } from 'react-native';
 
 import { useAppTheme } from '@/design-system/theme-context';
 
@@ -36,6 +37,7 @@ export function AppFormSheet({
   visible,
 }: AppFormSheetProps) {
   const theme = useAppTheme();
+  const scrollViewProps = Platform.OS === 'ios' ? ({ keyboardDismissMode: 'interactive' } as any) : undefined;
 
   if (!visible) {
     return null;
@@ -43,15 +45,17 @@ export function AppFormSheet({
 
   return (
     <AppSheet onClose={onCancel} title={title} visible>
-      <ScrollView>
-        <AppColumn spacing={theme.space.md} style={{ paddingBottom: theme.space.sm }}>
-          {children}
-          <AppRow spacing={theme.space.sm}>
-            <AppButton label={cancelLabel} onPress={onCancel} testID={cancelTestID} variant="ghost" />
-            <AppButton accessibilityHint={saveHint} disabled={saveDisabled} label={saveLabel} onPress={onSave} testID={saveTestID} />
-          </AppRow>
-        </AppColumn>
-      </ScrollView>
+      <AppColumn spacing={theme.space.md}>
+        <ScrollView {...scrollViewProps}>
+          <AppColumn spacing={theme.space.md} style={{ paddingBottom: theme.space.sm }}>
+            {children}
+          </AppColumn>
+        </ScrollView>
+        <AppRow spacing={theme.space.sm}>
+          <AppButton label={cancelLabel} onPress={onCancel} testID={cancelTestID} variant="ghost" />
+          <AppButton accessibilityHint={saveHint} disabled={saveDisabled} label={saveLabel} onPress={onSave} testID={saveTestID} />
+        </AppRow>
+      </AppColumn>
     </AppSheet>
   );
 }
