@@ -31,6 +31,29 @@ export function createSQLiteBootstrap({
       await applySQLiteMigrations(database, currentVersion);
     }
 
+    // Expired trash is best-effort foreground maintenance. A failed cleanup must
+    // not prevent an otherwise usable database from opening.
+    const maintenanceDatabase = database as SQLiteDatabase & {
+      runAsync?: (sql: string, ...params: readonly unknown[]) => Promise<unknown>;
+    };
+    if (maintenanceDatabase.runAsync !== undefined) {
+      try {
+        await database.withTransactionAsync(async () => {
+          await maintenanceDatabase.runAsync?.(
+            `DELETE FROM shopping_list_items WHERE deleted_at IS NOT NULL AND deleted_at <= datetime('now', '-7 days');`
+          );
+          await maintenanceDatabase.runAsync?.(
+            `DELETE FROM shopping_list_items WHERE list_id IN (SELECT id FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= datetime('now', '-7 days'));`
+          );
+          await maintenanceDatabase.runAsync?.(
+            `DELETE FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= datetime('now', '-7 days');`
+          );
+        });
+      } catch {
+        // Maintenance is retryable on the next foreground event.
+      }
+    }
+
     return database;
   };
 

@@ -36,6 +36,6 @@ describe('createSQLiteBootstrap', () => {
     expect(execAsync).toHaveBeenCalledWith('PRAGMA journal_mode = WAL;');
     expect(execAsync).toHaveBeenCalledWith('PRAGMA foreign_keys = ON;');
     expect(withTransactionAsync).toHaveBeenCalledTimes(1);
-    expect(execAsync).toHaveBeenCalledWith('PRAGMA user_version = 2;');
+    expect(execAsync).toHaveBeenCalledWith('PRAGMA user_version = 3;');
   });
 });
