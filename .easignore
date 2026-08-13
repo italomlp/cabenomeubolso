@@ -1,7 +1,93 @@
+# .easignore — controls which files EAS Build uploads to the build servers.
+#
+# When this file exists, EAS CLI prioritizes it over .gitignore. It mirrors
+# .gitignore below and adds files that are never needed to produce a build,
+# so secrets and local-only tooling are never uploaded.
+
+# ---------------------------------------------------------------------------
+# Mirrors .gitignore
+# ---------------------------------------------------------------------------
+
+# dependencies
 node_modules/
+.tmp/
+
+# Expo
 .expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android
+
+# UI audit artifacts
+artifacts/ui-audit/
+
+# ---------------------------------------------------------------------------
+# Additional files never needed to build (kept out of the upload)
+# ---------------------------------------------------------------------------
+
+# Secrets and local environment — never upload. Supply build-time variables via
+# EAS Secrets or the eas.json "env" field instead.
+.env
+.env.*
+
+# Version control
 .git/
+
+# CI configuration
 .github/
+
+# Local agent and editor tooling
+.agents/
+.claude/
+.codex/
+.gemini/
+.opencode/
+.vscode/
+.mcp.json
+opencode.json
+skills-lock.json
+
+# Documentation (not required at build time)
 docs/
+
+# Maestro E2E flows (device tests, not build inputs)
+.maestro/
+
+# Development-only scripts
+scripts/
+
+# Local screenshots/videos/audit output
 artifacts/
-*.log
