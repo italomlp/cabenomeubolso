@@ -1,9 +1,8 @@
 import { getLocales } from 'expo-localization';
-import { AccessibilityInfo } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppColumn, AppRow, AppScreen, AppText, AppUndoNotice } from '@/components/ui';
+import { announceForAccessibility, AppButton, AppColumn, AppRow, AppScreen, AppText, AppUndoNotice } from '@/components/ui';
 import { BudgetSummary } from './budget-summary';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
@@ -33,10 +32,6 @@ function toPlannedItemDraft(item: ShoppingListItem): PlannedItemDraft {
     quantityMilli: item.quantityMilli,
     unitCode: item.unitCode,
   };
-}
-
-function announce(message: string) {
-  AccessibilityInfo.announceForAccessibility(message);
 }
 
 export default function ListDetailScreen({ dependencies, listId, onClose = () => undefined }: ListDetailScreenProps) {
@@ -131,7 +126,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     }
 
     await runtime.useCases.reopenList(draft.listId);
-    announce(t('listDetail.reopenedAnnouncement'));
+    announceForAccessibility(t('listDetail.reopenedAnnouncement'));
     setRecentlyRemovedItem(null);
     setEditingItemId(null);
     setPlannedItemEditorInitialItem(undefined);
@@ -226,8 +221,6 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
         onCurrencyChange={(value) => setDraft((current) => (current === null ? null : { ...current, currencyCode: value }))}
         onFinalizeDraft={() => void saveCurrentDraft(true)}
         onNameChange={(value) => setDraft((current) => (current === null ? null : { ...current, name: value }))}
-        onEditPlannedItem={() => undefined}
-        onRemovePlannedItem={() => undefined}
         onReopenList={draft.status === 'finalized' ? () => void reopenList() : undefined}
         onSaveDraft={() => void saveCurrentDraft(false)}
         onSavePlannedItem={(plannedItemDraft) => {
@@ -273,13 +266,14 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                 };
 
             setDraft(nextDraft);
-            announce(`${t(editingItemId === null ? 'listDetail.itemAddedAnnouncement' : 'listDetail.itemUpdatedAnnouncement', { name: plannedItemDraft.name })} ${budgetStatusAnnouncement(nextDraft)}`);
+            announceForAccessibility(`${t(editingItemId === null ? 'listDetail.itemAddedAnnouncement' : 'listDetail.itemUpdatedAnnouncement', { name: plannedItemDraft.name })} ${budgetStatusAnnouncement(nextDraft)}`);
           }
           setEditingItemId(null);
           setPlannedItemEditorInitialItem(undefined);
           setPlannedItemEditorVisible(false);
         }}
         showClearItems={false}
+        showItemActions={false}
       >
         <AppColumn spacing={theme.space.sm}>
           {(() => {
@@ -351,7 +345,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                         const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
                         const nextDraft = createCreateListDraftStateFromList(nextList, locale, nextList.id);
                         setDraft(nextDraft);
-                        announce(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
+                        announceForAccessibility(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
                         setRecentlyRemovedItem(item);
                         setEditingItemId(null);
                         setPlannedItemEditorInitialItem(undefined);
@@ -375,7 +369,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
               const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
               const restoredDraft = createCreateListDraftStateFromList(restoredList, locale, restoredList.id);
               setDraft(restoredDraft);
-              announce(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
+              announceForAccessibility(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
               setRecentlyRemovedItem(null);
             }}
             visible={recentlyRemovedItem !== null}

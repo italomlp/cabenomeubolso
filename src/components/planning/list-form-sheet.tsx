@@ -31,8 +31,8 @@ type ListFormSheetProps = {
   title: string;
   visible: boolean;
   onAddPlannedItem: () => void;
-  onEditPlannedItem: (item: ShoppingListItem) => void;
-  onRemovePlannedItem: (itemId: string) => void;
+  onEditPlannedItem?: (item: ShoppingListItem) => void;
+  onRemovePlannedItem?: (itemId: string) => void;
   onBudgetTextChange: (value: string) => void;
   onClearItems: () => void;
   onClose: () => void;
@@ -44,6 +44,7 @@ type ListFormSheetProps = {
   onSavePlannedItem: (draft: PlannedItemDraft) => void;
   onReopenList?: () => void;
   showClearItems?: boolean;
+  showItemActions?: boolean;
   children?: ReactNode;
 };
 
@@ -72,6 +73,7 @@ export function ListFormSheet({
   onNameChange,
   onReopenList,
   showClearItems = true,
+  showItemActions = true,
   onSaveDraft,
   onSavePlannedItem,
   children,
@@ -327,7 +329,7 @@ export function ListFormSheet({
                         unit: unitLabel,
                       })}
                     </AppText>
-                    {!isReadOnly ? (
+                    {!isReadOnly && showItemActions && onEditPlannedItem !== undefined && onRemovePlannedItem !== undefined ? (
                       <AppRow spacing={theme.space.sm}>
                         <AppButton
                           accessibilityHint={t('plannedItem.editHint')}
