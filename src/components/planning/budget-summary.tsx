@@ -7,14 +7,18 @@ type BudgetSummaryProps = {
   body: string;
   budgetLabel: string;
   budgetValue: string;
-  listLabel: string;
-  listValue: string;
+  remainingLabel?: string;
+  remainingValue?: string;
+  actualLabel?: string;
+  actualValue?: string;
+  listLabel?: string;
+  listValue?: string;
   title: string;
   statusLabel?: string;
   statusIcon?: string;
 };
 
-export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, listLabel, listValue, statusIcon = '•', statusLabel, title }: BudgetSummaryProps) {
+export function BudgetSummary({ accentColor, actualLabel, actualValue, body, budgetLabel, budgetValue, listLabel, listValue, remainingLabel, remainingValue, statusIcon = '•', statusLabel, title }: BudgetSummaryProps) {
   const theme = useAppTheme();
 
   return (
@@ -82,7 +86,7 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
               lineHeight: theme.typography.label.lineHeight,
             }}
           >
-            {listLabel}
+            {remainingLabel ?? listLabel}
           </AppText>
           <AppText
             textStyle={{
@@ -92,7 +96,7 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
               lineHeight: theme.typography.display.lineHeight,
             }}
           >
-            {listValue}
+            {remainingValue ?? listValue}
           </AppText>
         </AppColumn>
         <AppColumn spacing={theme.space.xxs}>
@@ -104,7 +108,7 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
               lineHeight: theme.typography.label.lineHeight,
             }}
           >
-            {budgetLabel}
+            {actualLabel ?? budgetLabel}
           </AppText>
           <AppText
             textStyle={{
@@ -114,7 +118,7 @@ export function BudgetSummary({ accentColor, body, budgetLabel, budgetValue, lis
               lineHeight: theme.typography.display.lineHeight,
             }}
           >
-            {budgetValue}
+            {actualValue ?? budgetValue}
           </AppText>
         </AppColumn>
       </AppRow>

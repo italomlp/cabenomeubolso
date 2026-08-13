@@ -45,6 +45,7 @@ export const localizationResources = {
         finalizeError: 'Could not finalize this list. Your current data is still here.',
         loadError: 'Could not load your saved lists. Your current view is still here.',
         retry: 'Try again',
+        remainingLabel: 'Remaining', actualLabel: 'Actual', budgetLabel: 'Budget',
       },
       listDetail: {
         addItem: 'Add item',
@@ -199,6 +200,7 @@ export const localizationResources = {
         finalizeError: 'Não foi possível finalizar esta lista. Seus dados atuais continuam aqui.',
         loadError: 'Não foi possível carregar suas listas salvas. A visualização atual continua aqui.',
         retry: 'Tentar novamente',
+        remainingLabel: 'Restante', actualLabel: 'Real', budgetLabel: 'Orçamento',
       },
       listDetail: {
         addItem: 'Adicionar item',
