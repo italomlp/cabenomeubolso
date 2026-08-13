@@ -155,6 +155,8 @@ export const localizationResources = {
       },
       shopping: { title: 'Shopping', activeLabel: 'Active shopping', buy: 'Bought', undo: 'Undo', remaining: 'Remaining', overBy: 'Over by', actualTitle: 'Actual price', actualHint: 'Enter the price paid per unit.', actualPrice: 'Actual price per unit', saveActual: 'Save price', finalize: 'Finish shopping', finalizeHint: 'Review and finish this shopping session.', confirmTitle: 'Unpurchased items', confirmBody: 'Some items were not purchased. Finish anyway?', confirm: 'Finish anyway', cancel: 'Keep shopping', purchasedAnnouncement: 'Item marked as purchased.', priceError: 'Enter a valid price.', loadError: 'Could not load this shopping list.' },
       summary: { title: 'Shopping summary', purchased: 'Purchased', unpurchased: 'Not purchased', cloneName: 'New list name (optional)', clone: 'Clone list' },
+      trash: { title: 'Trash', subtitle: 'Deleted lists stay here for seven days.', empty: 'Trash is empty.', restore: 'Restore', restoreHint: 'Restore this list to Home.', deleteForever: 'Delete forever', confirmTitle: 'Delete permanently?', confirmBody: 'This cannot be undone.', confirmDelete: 'Delete permanently', cancel: 'Cancel', loadError: 'Could not load Trash.', retry: 'Try again' },
+      templates: { title: 'Templates', subtitle: 'Reusable snapshots for your grocery plans.', create: 'Create from latest list', snapshot: '{{count}} items · {{cadence}}', generate: 'Generate now', edit: 'Edit', editTitle: 'Edit template', name: 'Template name', cadence: 'Cadence', save: 'Save changes', cancel: 'Cancel', loadError: 'Could not load templates.', retry: 'Try again' },
     },
   },
   'pt-BR': {
@@ -307,6 +309,8 @@ export const localizationResources = {
       },
       shopping: { title: 'Compras', activeLabel: 'Compra ativa', buy: 'Comprado', undo: 'Desfazer', remaining: 'Restante', overBy: 'Acima', actualTitle: 'Preço real', actualHint: 'Digite o preço pago por unidade.', actualPrice: 'Preço real por unidade', saveActual: 'Salvar preço', finalize: 'Finalizar compras', finalizeHint: 'Revise e finalize esta compra.', confirmTitle: 'Itens não comprados', confirmBody: 'Alguns itens não foram comprados. Finalizar mesmo assim?', confirm: 'Finalizar mesmo assim', cancel: 'Continuar comprando', purchasedAnnouncement: 'Item marcado como comprado.', priceError: 'Digite um preço válido.', loadError: 'Não foi possível carregar esta lista.' },
       summary: { title: 'Resumo da compra', purchased: 'Comprados', unpurchased: 'Não comprados', cloneName: 'Nome da nova lista (opcional)', clone: 'Clonar lista' },
+      trash: { title: 'Lixeira', subtitle: 'Listas excluídas ficam aqui por sete dias.', empty: 'A lixeira está vazia.', restore: 'Restaurar', restoreHint: 'Restaura esta lista para o início.', deleteForever: 'Excluir para sempre', confirmTitle: 'Excluir permanentemente?', confirmBody: 'Essa ação não pode ser desfeita.', confirmDelete: 'Excluir permanentemente', cancel: 'Cancelar', loadError: 'Não foi possível carregar a lixeira.', retry: 'Tentar novamente' },
+      templates: { title: 'Modelos', subtitle: 'Snapshots reutilizáveis para seus planos de compras.', create: 'Criar da lista mais recente', snapshot: '{{count}} itens · {{cadence}}', generate: 'Gerar agora', edit: 'Editar', editTitle: 'Editar modelo', name: 'Nome do modelo', cadence: 'Frequência', save: 'Salvar alterações', cancel: 'Cancelar', loadError: 'Não foi possível carregar os modelos.', retry: 'Tentar novamente' },
     },
   },
 } as const;

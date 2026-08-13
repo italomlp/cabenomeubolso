@@ -9,6 +9,8 @@ export default function PrimaryTabsLayout() {
   return (
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="home" options={{ title: t('home.title') }} />
+      <Tabs.Screen name="trash" options={{ title: t('trash.title') }} />
+      <Tabs.Screen name="templates" options={{ title: t('templates.title') }} />
     </Tabs>
   );
 }
