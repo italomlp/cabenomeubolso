@@ -1,0 +1,15 @@
+appId: com.italomlp.cabenomeubolso
+
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 10000
+- assertVisible: "Nothing to review yet"
+- assertVisible: "No saved lists yet. Start a new plan to track a budget."
+- assertVisible:
+    id: home-primary-create
+- tapOn:
+    id: home-primary-create
+- assertVisible: "Create list"

@@ -42,3 +42,6 @@ example
 # generated native folders
 /ios
 /android
+
+# UI audit artifacts
+artifacts/ui-audit/

@@ -1,0 +1,11 @@
+# BLOCKED PLACEHOLDER: seed a persisted list with this exact ID and at least
+# one planned item before running this flow. There is intentionally no seed
+# step here; the assertion must fail until that prerequisite exists.
+appId: com.italomlp.cabenomeubolso
+
+---
+- launchApp:
+    clearState: false
+- openLink: "cabenomeubolso:///list/maestro-shopping-seed/shop"
+- assertVisible: "Active shopping"
+- assertVisible: "Finish shopping"
