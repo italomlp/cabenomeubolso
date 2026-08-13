@@ -59,6 +59,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   const [plannedItemEditorInitialItem, setPlannedItemEditorInitialItem] = useState<PlannedItemDraft | undefined>(undefined);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [recentlyRemovedItem, setRecentlyRemovedItem] = useState<ShoppingListItem | null>(null);
+  const [errorKind, setErrorKind] = useState<'finalize' | 'load' | 'save' | null>(null);
   const draftNameState = useNativeState('');
   const draftBudgetTextState = useNativeState('');
 
@@ -70,14 +71,24 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     let isActive = true;
 
     void runtime.useCases.loadList(listId, true).then((loaded) => {
-      if (!isActive || loaded === null) {
+      if (!isActive) {
+        return;
+      }
+
+      if (loaded === null) {
+        setErrorKind('load');
         return;
       }
 
       setDraft(createCreateListDraftStateFromList(loaded, locale, loaded.id));
+      setErrorKind(null);
       setRecentlyRemovedItem(null);
       setEditingItemId(null);
       setPlannedItemEditorInitialItem(undefined);
+    }).catch(() => {
+      if (isActive) {
+        setErrorKind('load');
+      }
     });
 
     return () => {
@@ -98,10 +109,18 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
       return;
     }
 
-    const reloaded = await runtime.useCases.loadList(nextListId, true);
+    try {
+      const reloaded = await runtime.useCases.loadList(nextListId, true);
 
-    if (reloaded !== null) {
+      if (reloaded === null) {
+        throw new Error('List not found');
+      }
+
       setDraft(createCreateListDraftStateFromList(reloaded, locale, reloaded.id));
+      setErrorKind(null);
+    } catch (error) {
+      setErrorKind('load');
+      throw error;
     }
   };
 
@@ -110,14 +129,34 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
       return;
     }
 
-    const persistedDraft = buildCreateListDraft(draft, new Date().toISOString(), locale);
-    await runtime.useCases.saveList(persistedDraft);
-
-    if (finalize) {
-      await runtime.useCases.finalizeList(persistedDraft.id);
+    try {
+      const persistedDraft = buildCreateListDraft(draft, new Date().toISOString(), locale);
+      await runtime.useCases.saveList(persistedDraft);
+    } catch {
+      setErrorKind('save');
+      return;
     }
 
-    await refreshDraft(persistedDraft.id);
+    if (finalize) {
+      try {
+        await runtime.useCases.finalizeList(draft.listId);
+      } catch {
+        setErrorKind('finalize');
+        return;
+      }
+    }
+
+    await refreshDraft(draft.listId).catch(() => undefined);
+  };
+
+  const retry = () => {
+    if (errorKind === 'load') {
+      void refreshDraft().catch(() => undefined);
+    } else if (errorKind === 'save') {
+      void saveCurrentDraft(false);
+    } else if (errorKind === 'finalize') {
+      void saveCurrentDraft(true);
+    }
   };
 
   const reopenList = async () => {
@@ -185,7 +224,12 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   if (runtime === null || draft === null) {
     return (
       <AppScreen>
-        <AppText>{t('app.loading')}</AppText>
+        {errorKind === 'load' ? (
+          <AppColumn spacing={theme.space.sm} style={{ padding: theme.space.content }}>
+            <AppText>{t('listDetail.loadError')}</AppText>
+            <AppButton label={t('listDetail.retry')} onPress={retry} testID="list-detail-retry" variant="secondary" />
+          </AppColumn>
+        ) : <AppText>{t('app.loading')}</AppText>}
       </AppScreen>
     );
   }
@@ -276,6 +320,12 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
         showItemActions={false}
       >
         <AppColumn spacing={theme.space.sm}>
+          {errorKind !== null ? (
+            <AppColumn spacing={theme.space.sm}>
+              <AppText>{t(errorKind === 'load' ? 'listDetail.loadError' : errorKind === 'save' ? 'listDetail.saveError' : 'listDetail.finalizeError')}</AppText>
+              <AppButton label={t('listDetail.retry')} onPress={retry} testID="list-detail-retry" variant="secondary" />
+            </AppColumn>
+          ) : null}
           {(() => {
             const totals = calculateShoppingListTotals({
               ...draft,

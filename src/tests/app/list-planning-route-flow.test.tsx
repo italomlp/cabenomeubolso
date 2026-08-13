@@ -15,6 +15,7 @@ const mockPush = jest.fn();
 const mockReplace = jest.fn();
 let mockSearchParams: { id: string } = { id: DEFAULT_DRAFT_LIST_ID };
 let mockRuntime: ReturnType<typeof createRouteRuntime>;
+let mockLocales = [{ currencyCode: 'USD', languageTag: 'en-US', regionCode: 'US' }];
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockSearchParams,
@@ -41,7 +42,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   default: { getItem: jest.fn(), removeItem: jest.fn(), setItem: jest.fn() },
 }));
 jest.mock('expo-localization', () => ({
-  getLocales: () => [{ currencyCode: 'USD', languageTag: 'en-US', regionCode: 'US' }],
+  getLocales: () => mockLocales,
 }));
 
 function clone<T>(value: T): T {
@@ -140,6 +141,7 @@ describe('app planning route flows', () => {
     mockReplace.mockReset();
     mockSearchParams = { id: DEFAULT_DRAFT_LIST_ID };
     mockRuntime = createRouteRuntime();
+    mockLocales = [{ currencyCode: 'USD', languageTag: 'en-US', regionCode: 'US' }];
   });
 
   it('covers create-list-finalize, reopen, remove, and Undo across routes', async () => {
@@ -223,5 +225,79 @@ describe('app planning route flows', () => {
 
     expect(getTextValues(tree!)).toEqual(expect.arrayContaining(['2 piece', '500 g', '1.5 kg']));
     expect(getTextValues(tree!)).not.toEqual(expect.arrayContaining(['Removed Rice. Undo?']));
+  });
+
+  it('covers pt-BR/BRL item edit, save, finalize, reopen, and exact values across routes', async () => {
+    mockLocales = [{ currencyCode: 'BRL', languageTag: 'pt-BR', regionCode: 'BR' }];
+    let tree: renderer.ReactTestRenderer;
+
+    await act(async () => {
+      await i18n.changeLanguage('pt-BR');
+      tree = renderer.create(<CreateListRoute />);
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      getTextInput(tree!, 'create-list-name').props.onChangeText?.('Compras da semana');
+      getTextInput(tree!, 'create-list-budget').props.onChangeText?.('R$ 123,45');
+      getButton(tree!, 'create-list-add-item').props.onPress();
+    });
+
+    await fillPlannedItem(tree!, { name: 'Batatas', quantity: '1,5', price: '12,34', unitTestID: 'app-select-option-kg' });
+
+    const firstItem = mockRuntime.saveMock.mock.calls[0]?.[0] as ShoppingList | undefined;
+    expect(firstItem).toBeUndefined();
+    expect(getTextValues(tree!)).toEqual(expect.arrayContaining(['Batatas', '1,5 kg · R$\u00a012,34 por unidade']));
+
+    await act(async () => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((node) => typeof node.props.testID === 'string' && node.props.testID.startsWith('edit-planned-item-'))!.props.onPress();
+    });
+
+    await act(async () => {
+      getTextInput(tree!, 'planned-item-name').props.onChangeText?.('Batatas doces');
+      getTextInput(tree!, 'planned-item-quantity').props.onFocus?.();
+      getTextInput(tree!, 'planned-item-quantity').props.onChangeText?.('2,25');
+      getTextInput(tree!, 'planned-item-quantity').props.onBlur?.();
+      getTextInput(tree!, 'planned-item-price').props.onFocus?.();
+      getTextInput(tree!, 'planned-item-price').props.onChangeText?.('13,45');
+      getTextInput(tree!, 'planned-item-price').props.onBlur?.();
+      getButton(tree!, 'planned-item-save').props.onPress();
+    });
+
+    expect(getTextValues(tree!)).toEqual(expect.arrayContaining(['Batatas doces', '2,25 kg · R$\u00a013,45 por unidade']));
+
+    await act(async () => {
+      getButton(tree!, 'create-list-save').props.onPress();
+      await Promise.resolve();
+    });
+
+    const savedDraft = mockRuntime.saveMock.mock.calls[mockRuntime.saveMock.mock.calls.length - 1]?.[0] as ShoppingList;
+    expect(savedDraft).toMatchObject({ budgetMinor: 12_345, currencyCode: 'BRL', status: 'draft' });
+    expect(savedDraft.items).toEqual([expect.objectContaining({ name: 'Batatas doces', plannedUnitMinor: 1_345, quantityMilli: 2_250, unitCode: 'kg' })]);
+
+    await act(async () => {
+      getButton(tree!, 'create-list-finalize').props.onPress();
+      await Promise.resolve();
+    });
+
+    const finalized = mockRuntime.saveMock.mock.calls[mockRuntime.saveMock.mock.calls.length - 1]?.[0] as ShoppingList;
+    expect(finalized).toMatchObject({ budgetMinor: 12_345, currencyCode: 'BRL', status: 'finalized' });
+    expect(finalized.items).toEqual([expect.objectContaining({ name: 'Batatas doces', plannedUnitMinor: 1_345, quantityMilli: 2_250, unitCode: 'kg' })]);
+
+    mockSearchParams = { id: finalized.id };
+    await act(async () => {
+      tree!.unmount();
+      tree = renderer.create(<ListDetailRoute />);
+      await Promise.resolve();
+    });
+
+    expect(getTextValues(tree!)).toEqual(expect.arrayContaining(['Batatas doces', '2,25 kg', 'R$\u00a013,45']));
+    await act(async () => {
+      getButton(tree!, 'list-detail-reopen').props.onPress();
+      await Promise.resolve();
+    });
+
+    expect(getTextValues(tree!)).toEqual(expect.arrayContaining(['Batatas doces', '2,25 kg', 'R$\u00a013,45']));
+    expect(mockRuntime.saveMock.mock.calls[mockRuntime.saveMock.mock.calls.length - 1]?.[0]).toMatchObject({ status: 'draft' });
   });
 });

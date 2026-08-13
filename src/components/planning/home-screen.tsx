@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton, AppColumn, AppScreen, AppText } from '@/components/ui';
@@ -26,40 +26,54 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const runtime = usePlanningRuntime(dependencies);
   const [lists, setLists] = useState<readonly ShoppingList[]>([]);
+  const [errorKind, setErrorKind] = useState<'finalize' | 'load' | null>(null);
+  const [failedFinalizeListId, setFailedFinalizeListId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const refreshLists = useCallback(async () => {
     if (runtime === null) {
       return;
     }
 
+    try {
+      const nextLists = await runtime.repository.list();
+      setLists(nextLists);
+      setErrorKind(null);
+    } catch {
+      setErrorKind('load');
+    }
+  }, [runtime]);
+
+  useEffect(() => {
     let isActive = true;
 
-    void runtime.repository.list().then((nextLists) => {
-      if (isActive) {
-        setLists(nextLists);
-      }
-    });
+    if (runtime !== null) {
+      queueMicrotask(() => {
+        void refreshLists().catch(() => {
+          if (isActive) {
+            setErrorKind('load');
+          }
+        });
+      });
+    }
 
     return () => {
       isActive = false;
     };
-  }, [runtime]);
-
-  const refreshLists = async () => {
-    if (runtime === null) {
-      return;
-    }
-
-    setLists(await runtime.repository.list());
-  };
+  }, [refreshLists, runtime]);
 
   const finalizeList = async (listId: string) => {
     if (runtime === null) {
       return;
     }
 
-    await runtime.useCases.finalizeList(listId);
-    await refreshLists();
+    try {
+      await runtime.useCases.finalizeList(listId);
+      await refreshLists();
+      setFailedFinalizeListId(null);
+    } catch {
+      setErrorKind('finalize');
+      setFailedFinalizeListId(listId);
+    }
   };
 
   const summaryLists = useMemo(
@@ -144,6 +158,25 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
         </AppColumn>
 
         <AppButton accessibilityHint={t('home.openCreateListHint')} label={t('home.openCreateList')} onPress={() => onOpenNewList?.()} style={{ alignSelf: 'flex-start' }} testID="home-primary-create" />
+
+        {errorKind !== null ? (
+          <AppColumn spacing={theme.space.sm}>
+            <AppText>{t(errorKind === 'load' ? 'home.loadError' : 'home.finalizeError')}</AppText>
+            <AppButton
+              accessibilityHint={t('home.retry')}
+              label={t('home.retry')}
+              onPress={() => {
+                if (errorKind === 'load') {
+                  void refreshLists();
+                } else if (failedFinalizeListId !== null) {
+                  void finalizeList(failedFinalizeListId);
+                }
+              }}
+              testID="home-retry"
+              variant="secondary"
+            />
+          </AppColumn>
+        ) : null}
 
         {lists.length === 0 ? (
           <AppEmptyState

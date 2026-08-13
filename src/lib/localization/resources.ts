@@ -42,6 +42,9 @@ export const localizationResources = {
         openCreateList: 'Create list',
         openCreateListHint: 'Open the list shell to choose a currency and start planning.',
         currencySummaryTitle: 'Summary in {{currency}}',
+        finalizeError: 'Could not finalize this list. Your current data is still here.',
+        loadError: 'Could not load your saved lists. Your current view is still here.',
+        retry: 'Try again',
       },
       listDetail: {
         addItem: 'Add item',
@@ -62,6 +65,10 @@ export const localizationResources = {
         removeItemHint: 'Soft-remove this item and keep it available for immediate undo.',
         title: 'List details',
         withinBudget: 'within budget',
+        finalizeError: 'Could not finalize the list. Your draft is still here.',
+        loadError: 'Could not load this list. Your current draft is still here.',
+        retry: 'Try again',
+        saveError: 'Could not save the list. Your current draft is still here.',
       },
       createList: {
         addItem: 'Add planned item',
@@ -185,6 +192,9 @@ export const localizationResources = {
         openCreateList: 'Criar lista',
         openCreateListHint: 'Abre a base da lista para escolher a moeda e começar o planejamento.',
         currencySummaryTitle: 'Resumo em {{currency}}',
+        finalizeError: 'Não foi possível finalizar esta lista. Seus dados atuais continuam aqui.',
+        loadError: 'Não foi possível carregar suas listas salvas. A visualização atual continua aqui.',
+        retry: 'Tentar novamente',
       },
       listDetail: {
         addItem: 'Adicionar item',
@@ -205,6 +215,10 @@ export const localizationResources = {
         removeItemHint: 'Remove o item de forma suave e mantém o desfazer imediato.',
         title: 'Detalhes da lista',
         withinBudget: 'dentro do orçamento',
+        finalizeError: 'Não foi possível finalizar a lista. Seu rascunho continua aqui.',
+        loadError: 'Não foi possível carregar esta lista. Seu rascunho atual continua aqui.',
+        retry: 'Tentar novamente',
+        saveError: 'Não foi possível salvar a lista. Seu rascunho atual continua aqui.',
       },
       createList: {
         addItem: 'Adicionar item planejado',
