@@ -256,7 +256,7 @@ describe('SQLite shopping list persistence', () => {
       };
 
       await useCases.saveList(shoppingList);
-      const finalized = await useCases.finalizeList('list-compra-semanal');
+      const finalized = await useCases.finalizeList('list-compra-semanal', { confirmUnpurchased: true });
       const reopened = await useCases.reopenList('list-compra-semanal');
       const loaded = await useCases.loadList('list-compra-semanal', true);
 
