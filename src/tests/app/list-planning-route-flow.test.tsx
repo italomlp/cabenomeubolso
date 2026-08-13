@@ -84,7 +84,7 @@ function getButton(tree: renderer.ReactTestRenderer, testID: string) {
 }
 
 function getUndoButton(tree: renderer.ReactTestRenderer) {
-  const button = tree.root.findAllByType(mockExpoUi.Button).find((node) => node.props.label === 'Undo');
+  const button = tree.root.findAllByType(mockExpoUi.Button).find((node) => node.props.testID === 'home-undo');
 
   if (button === undefined) {
     throw new Error('Undo button not found');

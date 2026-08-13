@@ -143,7 +143,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
           ))}
         </AppColumn>
 
-        <AppButton accessibilityHint={t('home.openCreateListHint')} label={t('home.openCreateList')} onPress={() => onOpenNewList?.()} style={{ alignSelf: 'flex-start' }} />
+        <AppButton accessibilityHint={t('home.openCreateListHint')} label={t('home.openCreateList')} onPress={() => onOpenNewList?.()} style={{ alignSelf: 'flex-start' }} testID="home-primary-create" />
 
         {lists.length === 0 ? (
           <AppEmptyState

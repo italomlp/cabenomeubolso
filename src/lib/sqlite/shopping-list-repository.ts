@@ -25,6 +25,10 @@ export type SQLiteShoppingListRepositoryDatabase = {
   ) => Promise<void>;
 };
 
+export type SQLiteShoppingListRepository = ShoppingListRepository & {
+  resetForDevelopment: () => Promise<void>;
+};
+
 type ShoppingListRow = {
   budget_minor: number;
   created_at: string;
@@ -283,7 +287,7 @@ function buildItemUpsertStatement(): string {
 
 export function createSQLiteShoppingListRepository(
   database: TransactionalDatabase
-): ShoppingListRepository {
+): SQLiteShoppingListRepository {
   return {
     get: async (id, query) => loadShoppingListById(database, id, query),
     list: async (query) => loadShoppingLists(database, query),
@@ -346,6 +350,11 @@ export function createSQLiteShoppingListRepository(
             item.updatedAt
           );
         }
+      });
+    },
+    resetForDevelopment: async () => {
+      await runInTransaction(database, async (transaction) => {
+        await transaction.execAsync(`DELETE FROM ${SHOPPING_LIST_ITEM_TABLE}; DELETE FROM ${SHOPPING_LIST_TABLE};`);
       });
     },
   };
