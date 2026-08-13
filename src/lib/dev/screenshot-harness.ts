@@ -8,11 +8,13 @@ import {
 import { DEV_SCREENSHOT_SEED } from './screenshot-seed';
 
 export const DEV_SCREENSHOT_RESET_URL = 'cabenomeubolso://dev/reset-seed';
+const DEV_SCREENSHOT_RESET_PATH = 'dev/reset-seed';
 
 export type DevScreenshotRepository = Pick<SQLiteShoppingListRepository, 'resetForDevelopment' | 'save'>;
 
 export function isDevScreenshotResetUrl(url: string): boolean {
-  return url.split('?')[0] === DEV_SCREENSHOT_RESET_URL;
+  const path = url.split(/[?#]/, 1)[0];
+  return path === DEV_SCREENSHOT_RESET_URL || path === DEV_SCREENSHOT_RESET_PATH || path === `/${DEV_SCREENSHOT_RESET_PATH}`;
 }
 
 export async function resetAndSeedDevScreenshotDataForRepository(
@@ -48,4 +50,20 @@ export async function handleDevScreenshotDeepLink(url: string): Promise<boolean>
 
   await resetAndSeedDevScreenshotData();
   return true;
+}
+
+/**
+ * Consume the reset link before Expo Router tries to resolve it as a route.
+ * The injected handler keeps this boundary deterministic in unit tests.
+ */
+export async function redirectDevScreenshotSystemPath(
+  path: string,
+  handleDeepLink: (url: string) => Promise<boolean> = handleDevScreenshotDeepLink
+): Promise<string> {
+  if (!__DEV__ || !isDevScreenshotResetUrl(path)) {
+    return path;
+  }
+
+  const consumed = await handleDeepLink(path);
+  return consumed ? '/' : path;
 }
