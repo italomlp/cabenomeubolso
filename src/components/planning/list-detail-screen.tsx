@@ -164,13 +164,17 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
       return;
     }
 
-    await runtime.useCases.reopenList(draft.listId);
-    announceForAccessibility(t('listDetail.reopenedAnnouncement'));
-    setRecentlyRemovedItem(null);
-    setEditingItemId(null);
-    setPlannedItemEditorInitialItem(undefined);
-    setPlannedItemEditorVisible(false);
-    await refreshDraft(draft.listId);
+    try {
+      await runtime.useCases.reopenList(draft.listId);
+      announceForAccessibility(t('listDetail.reopenedAnnouncement'));
+      setRecentlyRemovedItem(null);
+      setEditingItemId(null);
+      setPlannedItemEditorInitialItem(undefined);
+      setPlannedItemEditorVisible(false);
+      await refreshDraft(draft.listId);
+    } catch {
+      setErrorKind('save');
+    }
   };
 
   const canSaveDraft = draft === null ? false : canPersistCreateListDraft(draft, locale);
@@ -349,7 +353,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                 listLabel={t('createList.itemsLabel')}
                 listValue={String(visibleItemCount)}
                 statusIcon={totals.remainingMinor >= 0 ? '✓' : '!'}
-                statusLabel={totals.remainingMinor >= 0 ? t('home.listStatusActive') : t('home.listStatusFinalized')}
+                statusLabel={draft.status === 'active' ? t('home.listStatusActive') : draft.status === 'finalized' ? t('home.listStatusFinalized') : t('home.listStatusDraft')}
                 title={t('createList.summaryTitle')}
               />
             );
@@ -392,13 +396,17 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                           return;
                         }
 
-                        const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
-                        const nextDraft = createCreateListDraftStateFromList(nextList, locale, nextList.id);
-                        setDraft(nextDraft);
-                        announceForAccessibility(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
-                        setRecentlyRemovedItem(item);
-                        setEditingItemId(null);
-                        setPlannedItemEditorInitialItem(undefined);
+                        try {
+                          const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
+                          const nextDraft = createCreateListDraftStateFromList(nextList, locale, nextList.id);
+                          setDraft(nextDraft);
+                          announceForAccessibility(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
+                          setRecentlyRemovedItem(item);
+                          setEditingItemId(null);
+                          setPlannedItemEditorInitialItem(undefined);
+                        } catch {
+                          setErrorKind('save');
+                        }
                       }}
                       testID={`remove-item-${item.id}`}
                       variant="destructive"
@@ -416,11 +424,15 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                 return;
               }
 
-              const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
-              const restoredDraft = createCreateListDraftStateFromList(restoredList, locale, restoredList.id);
-              setDraft(restoredDraft);
-              announceForAccessibility(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
-              setRecentlyRemovedItem(null);
+              try {
+                const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
+                const restoredDraft = createCreateListDraftStateFromList(restoredList, locale, restoredList.id);
+                setDraft(restoredDraft);
+                announceForAccessibility(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
+                setRecentlyRemovedItem(null);
+              } catch {
+                setErrorKind('save');
+              }
             }}
             visible={recentlyRemovedItem !== null}
           />

@@ -14,6 +14,13 @@ import {
 } from './shopping-list';
 import type { ShoppingListRepository } from './shopping-list-repository';
 
+export class ShoppingListFinalizeConfirmationRequiredError extends Error {
+  constructor() {
+    super('Confirmation is required to finalize with unpurchased items.');
+    this.name = 'ShoppingListFinalizeConfirmationRequiredError';
+  }
+}
+
 export type ShoppingListUseCaseDependencies = {
   createId?: (prefix: string) => string;
   now?: () => string;
@@ -94,7 +101,7 @@ export function createShoppingListUseCases({
       const hasUnpurchasedItems = list.items.some((item) => item.deletedAt === null && item.purchasedAt === null);
 
       if (hasUnpurchasedItems && !confirmUnpurchased) {
-        throw new Error('Confirmation is required to finalize with unpurchased items.');
+        throw new ShoppingListFinalizeConfirmationRequiredError();
       }
 
       const updated = finalizeShoppingList(list, now());

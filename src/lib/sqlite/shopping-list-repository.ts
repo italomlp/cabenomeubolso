@@ -417,7 +417,9 @@ export function createSQLiteShoppingListRepository(
     },
     resetForDevelopment: async () => {
       await runInTransaction(database, async (transaction) => {
-        await transaction.execAsync(`DELETE FROM ${SHOPPING_LIST_ITEM_TABLE}; DELETE FROM ${SHOPPING_LIST_TABLE};`);
+        await transaction.execAsync(
+          `DELETE FROM template_items; DELETE FROM recurrence_templates; DELETE FROM ${SHOPPING_LIST_ITEM_TABLE}; DELETE FROM ${SHOPPING_LIST_TABLE};`
+        );
       });
     },
   };

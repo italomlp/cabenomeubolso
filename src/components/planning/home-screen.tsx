@@ -76,14 +76,6 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
     }
   };
 
-  const summaryLists = useMemo(
-    () => ({
-      active: lists.filter((list) => list.status !== 'finalized' && list.deletedAt === null),
-      finalized: lists.filter((list) => list.status === 'finalized' && list.deletedAt === null),
-    }),
-    [lists]
-  );
-
   const summaryByCurrency = useMemo(() => {
     const grouped = new Map<SupportedCurrency, { active: { budget: number; actual: number; remaining: number }; finalized: { budget: number; actual: number; remaining: number } }>();
     for (const list of lists) {
@@ -139,8 +131,8 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
           {[...summaryByCurrency.entries()].map(([currencyCode, totals]) => (
             <AppColumn key={currencyCode} spacing={theme.space.sm}>
               <AppText>{t('home.currencySummaryTitle', { currency: currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl') })}</AppText>
-              <BudgetSummary accentColor={theme.colors.budgetSafe} actualLabel={t('home.activeSummaryListsLabel')} actualValue={String(summaryLists.active.filter((list) => list.currencyCode === currencyCode).length)} body={t('home.activeSummaryBody')} budgetLabel={t('home.activeSummaryBudgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.active.budget, currencyCode)} remainingLabel={t('home.remainingLabel')} remainingValue={formatCurrencyMinor(locale, totals.active.remaining, currencyCode)} title={t('home.activeSummaryTitle')} />
-              <BudgetSummary accentColor={theme.colors.budgetNeutral} actualLabel={t('home.finalizedSummaryListsLabel')} actualValue={String(summaryLists.finalized.filter((list) => list.currencyCode === currencyCode).length)} body={t('home.finalizedSummaryBody')} budgetLabel={t('home.finalizedSummaryBudgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.finalized.budget, currencyCode)} remainingLabel={t('home.remainingLabel')} remainingValue={formatCurrencyMinor(locale, totals.finalized.remaining, currencyCode)} title={t('home.finalizedSummaryTitle')} />
+              <BudgetSummary accentColor={theme.colors.budgetSafe} actualLabel={t('home.actualLabel')} actualValue={formatCurrencyMinor(locale, totals.active.actual, currencyCode)} body={t('home.activeSummaryBody')} budgetLabel={t('home.budgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.active.budget, currencyCode)} title={t('home.activeSummaryTitle')} />
+              <BudgetSummary accentColor={theme.colors.budgetNeutral} actualLabel={t('home.actualLabel')} actualValue={formatCurrencyMinor(locale, totals.finalized.actual, currencyCode)} body={t('home.finalizedSummaryBody')} budgetLabel={t('home.budgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.finalized.budget, currencyCode)} title={t('home.finalizedSummaryTitle')} />
             </AppColumn>
           ))}
         </AppColumn>

@@ -1,6 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
 import { SQLITE_DATABASE_VERSION, applySQLiteMigrations } from './migrations';
+import { getShoppingListTrashCutoff } from '@/domain/shopping-list';
 
 export type SQLiteBootstrapDependencies = {
   databaseName?: string;
@@ -38,15 +39,19 @@ export function createSQLiteBootstrap({
     };
     if (maintenanceDatabase.runAsync !== undefined) {
       try {
+        const cutoff = getShoppingListTrashCutoff(new Date().toISOString());
         await database.withTransactionAsync(async () => {
           await maintenanceDatabase.runAsync?.(
-            `DELETE FROM shopping_list_items WHERE deleted_at IS NOT NULL AND deleted_at <= datetime('now', '-7 days');`
+            `DELETE FROM shopping_list_items WHERE deleted_at IS NOT NULL AND deleted_at <= ?`,
+            cutoff
           );
           await maintenanceDatabase.runAsync?.(
-            `DELETE FROM shopping_list_items WHERE list_id IN (SELECT id FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= datetime('now', '-7 days'));`
+            `DELETE FROM shopping_list_items WHERE list_id IN (SELECT id FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= ?)`,
+            cutoff
           );
           await maintenanceDatabase.runAsync?.(
-            `DELETE FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= datetime('now', '-7 days');`
+            `DELETE FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= ?`,
+            cutoff
           );
         });
       } catch {

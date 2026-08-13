@@ -1,11 +1,11 @@
-# BLOCKED PLACEHOLDER: seed a persisted list with this exact ID and at least
-# one planned item before running this flow. There is intentionally no seed
-# step here; the assertion must fail until that prerequisite exists.
+# Development screenshot seed flow. The dev reset deep link creates the
+# deterministic shopping fixture before the route is opened.
 appId: com.italomlp.cabenomeubolso
 
 ---
 - launchApp:
     clearState: false
-- openLink: "cabenomeubolso:///list/maestro-shopping-seed/shop"
+- openLink: "cabenomeubolso://dev/reset-seed"
+- openLink: "cabenomeubolso:///list/dev-screenshot-list/shop"
 - assertVisible: "Active shopping"
 - assertVisible: "Finish shopping"
