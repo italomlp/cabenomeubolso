@@ -46,7 +46,8 @@
     "ios": "expo run:ios",
     "lint": "expo lint",
     "test": "jest --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ci": "npm run lint && npm run typecheck && npm test && npx expo-doctor@latest"
   },
   "jest": {
     "preset": "jest-expo"

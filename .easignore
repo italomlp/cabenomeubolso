@@ -1,0 +1,7 @@
+node_modules/
+.expo/
+.git/
+.github/
+docs/
+artifacts/
+*.log
