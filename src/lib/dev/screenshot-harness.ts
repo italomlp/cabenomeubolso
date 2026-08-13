@@ -9,8 +9,14 @@ import { DEV_SCREENSHOT_SEED } from './screenshot-seed';
 
 export const DEV_SCREENSHOT_RESET_URL = 'cabenomeubolso://dev/reset-seed';
 const DEV_SCREENSHOT_RESET_PATH = 'dev/reset-seed';
+export const DEV_SCREENSHOT_HOME_PATH = '/(tabs)/home';
 
 export type DevScreenshotRepository = Pick<SQLiteShoppingListRepository, 'resetForDevelopment' | 'save'>;
+export type DevScreenshotResetter = () => Promise<boolean>;
+export type DevScreenshotDataDependencies = {
+  ensureDatabase?: () => Promise<unknown>;
+  createRepository?: (database: unknown) => DevScreenshotRepository;
+};
 
 export function isDevScreenshotResetUrl(url: string): boolean {
   const path = url.split(/[?#]/, 1)[0];
@@ -32,24 +38,29 @@ export async function resetAndSeedDevScreenshotDataForRepository(
   }
 }
 
-export async function resetAndSeedDevScreenshotData(): Promise<boolean> {
+export async function resetAndSeedDevScreenshotData(
+  dependencies: DevScreenshotDataDependencies = {}
+): Promise<boolean> {
   if (!__DEV__) {
     return false;
   }
 
-  const database = await ensureSQLiteBootstrapped();
-  const repository = createSQLiteShoppingListRepository(database as never);
+  const database = await (dependencies.ensureDatabase ?? ensureSQLiteBootstrapped)();
+  const repository = (dependencies.createRepository ?? ((value: unknown) =>
+    createSQLiteShoppingListRepository(value as never)))(database);
   await resetAndSeedDevScreenshotDataForRepository(repository);
   return true;
 }
 
-export async function handleDevScreenshotDeepLink(url: string): Promise<boolean> {
+export async function handleDevScreenshotDeepLink(
+  url: string,
+  resetAndSeed: DevScreenshotResetter = resetAndSeedDevScreenshotData
+): Promise<boolean> {
   if (!__DEV__ || !isDevScreenshotResetUrl(url)) {
     return false;
   }
 
-  await resetAndSeedDevScreenshotData();
-  return true;
+  return resetAndSeed();
 }
 
 /**
@@ -65,5 +76,5 @@ export async function redirectDevScreenshotSystemPath(
   }
 
   const consumed = await handleDeepLink(path);
-  return consumed ? '/' : path;
+  return consumed ? DEV_SCREENSHOT_HOME_PATH : path;
 }
