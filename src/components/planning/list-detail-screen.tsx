@@ -139,7 +139,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
 
     if (finalize) {
       try {
-        await runtime.useCases.finalizeList(draft.listId);
+        await runtime.useCases.finalizeList(draft.listId, { confirmUnpurchased: true });
       } catch {
         setErrorKind('finalize');
         return;

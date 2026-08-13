@@ -69,7 +69,7 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
     await runtime.useCases.saveList(persistedDraft);
 
     if (finalize) {
-      await runtime.useCases.finalizeList(persistedDraft.id);
+      await runtime.useCases.finalizeList(persistedDraft.id, { confirmUnpurchased: true });
     }
 
     const reloaded = await runtime.useCases.loadList(persistedDraft.id, true);
