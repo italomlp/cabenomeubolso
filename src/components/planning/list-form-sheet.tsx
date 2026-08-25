@@ -31,8 +31,8 @@ type ListFormSheetProps = {
   title: string;
   visible: boolean;
   onAddPlannedItem: () => void;
-  onEditPlannedItem: (item: ShoppingListItem) => void;
-  onRemovePlannedItem: (itemId: string) => void;
+  onEditPlannedItem?: (item: ShoppingListItem) => void;
+  onRemovePlannedItem?: (itemId: string) => void;
   onBudgetTextChange: (value: string) => void;
   onClearItems: () => void;
   onClose: () => void;
@@ -44,6 +44,8 @@ type ListFormSheetProps = {
   onSavePlannedItem: (draft: PlannedItemDraft) => void;
   onReopenList?: () => void;
   showClearItems?: boolean;
+  showDraftSummary?: boolean;
+  showItemPreview?: boolean;
   children?: ReactNode;
 };
 
@@ -72,6 +74,8 @@ export function ListFormSheet({
   onNameChange,
   onReopenList,
   showClearItems = true,
+  showDraftSummary = true,
+  showItemPreview = true,
   onSaveDraft,
   onSavePlannedItem,
   children,
@@ -111,7 +115,7 @@ export function ListFormSheet({
         />
       ) : (
         <AppColumn spacing={theme.space.md}>
-          <AppColumn
+          {showDraftSummary ? <AppColumn
             spacing={theme.space.xs}
             style={{
               backgroundColor: theme.colors.backgroundElement,
@@ -175,7 +179,7 @@ export function ListFormSheet({
                 {draftBudgetPreview}
               </AppText>
             </AppRow>
-          </AppColumn>
+          </AppColumn> : null}
 
           {canShowCurrencySelect ? (
             <AppSelect
@@ -293,7 +297,7 @@ export function ListFormSheet({
             ) : null}
           </AppColumn>
 
-          {visibleItems.length > 0 ? (
+          {showItemPreview && visibleItems.length > 0 ? (
             <AppColumn spacing={theme.space.xs}>
               <AppText
                 textStyle={{
@@ -327,7 +331,7 @@ export function ListFormSheet({
                         unit: unitLabel,
                       })}
                     </AppText>
-                    {!isReadOnly ? (
+                    {!isReadOnly && onEditPlannedItem !== undefined && onRemovePlannedItem !== undefined ? (
                       <AppRow spacing={theme.space.sm}>
                         <AppButton
                           accessibilityHint={t('plannedItem.editHint')}
