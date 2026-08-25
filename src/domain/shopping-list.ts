@@ -403,8 +403,7 @@ export function markShoppingListItemUnpurchased(list: ShoppingList, itemId: stri
 
     return {
       ...item,
-      // Retain the entered price for a quick re-completion. The calculation
-      // only includes actualUnitMinor while purchasedAt is set.
+      actualUnitMinor: null,
       purchasedAt: null,
       updatedAt,
     };
@@ -564,12 +563,20 @@ export function markShoppingListRestored(list: ShoppingList, restoredAt: string)
 
 export const SHOPPING_LIST_TRASH_RETENTION_DAYS = 7;
 
-export function isShoppingListTrashExpired(deletedAt: string, now: string): boolean {
-  if (!isValidTimestamp(deletedAt) || !isValidTimestamp(now)) {
+export function getShoppingListTrashCutoff(now: string): string {
+  if (!isValidTimestamp(now)) {
     throw new Error('Trash timestamps must be valid timestamps.');
   }
 
-  return Date.parse(deletedAt) + SHOPPING_LIST_TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000 <= Date.parse(now);
+  return new Date(Date.parse(now) - SHOPPING_LIST_TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+}
+
+export function isShoppingListTrashExpired(deletedAt: string, now: string): boolean {
+  if (!isValidTimestamp(deletedAt)) {
+    throw new Error('Trash timestamps must be valid timestamps.');
+  }
+
+  return Date.parse(deletedAt) <= Date.parse(getShoppingListTrashCutoff(now));
 }
 
 export function finalizeShoppingList(list: ShoppingList, finalizedAt: string): ShoppingList {

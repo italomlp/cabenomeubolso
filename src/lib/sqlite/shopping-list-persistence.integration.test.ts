@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { createShoppingListUseCases } from '@/domain/shopping-list-use-cases';
+import type { ShoppingList } from '@/domain/shopping-list';
 import { buildCreateListDraft, createCreateListDraftStateFromList, createEmptyCreateListDraftState } from '@/app/home-state';
 
 import { createSQLiteBootstrap } from './bootstrap';
@@ -30,6 +31,51 @@ type NodeSQLiteAdapter = {
   withExclusiveTransactionAsync: (task: (database: NodeSQLiteAdapter) => Promise<void>) => Promise<void>;
   withTransactionAsync: (task: (database: NodeSQLiteAdapter) => Promise<void>) => Promise<void>;
 };
+
+function createTrashList(id: string, deletedAt: string | null = null): ShoppingList {
+  const timestamp = '2026-08-01T00:00:00.000Z';
+  return {
+    budgetMinor: 4_000,
+    createdAt: timestamp,
+    currencyCode: 'BRL' as const,
+    deletedAt,
+    finalizedAt: null,
+    id,
+    items: [
+      {
+        actualUnitMinor: null,
+        createdAt: timestamp,
+        deletedAt: null,
+        id: `${id}-item-1`,
+        listId: id,
+        name: 'Milk',
+        plannedUnitMinor: 600,
+        purchasedAt: null,
+        quantityMilli: 1_000,
+        sortOrder: 1,
+        unitCode: 'piece' as const,
+        updatedAt: timestamp,
+      },
+      {
+        actualUnitMinor: null,
+        createdAt: timestamp,
+        deletedAt: null,
+        id: `${id}-item-2`,
+        listId: id,
+        name: 'Rice',
+        plannedUnitMinor: 1_000,
+        purchasedAt: null,
+        quantityMilli: 1_000,
+        sortOrder: 2,
+        unitCode: 'piece' as const,
+        updatedAt: timestamp,
+      },
+    ],
+    name: id,
+    status: 'draft' as const,
+    updatedAt: timestamp,
+  };
+}
 
 async function createNodeSQLiteAdapter(databasePath: string): Promise<NodeSQLiteAdapter> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -112,6 +158,97 @@ describe('SQLite shopping list persistence', () => {
       expect(persistedFirst?.items[0]?.id).not.toBe(persistedSecond?.items[0]?.id);
       expect(persistedFirst?.items[0]?.listId).toBe(persistedFirst?.id);
       expect(persistedSecond?.items[0]?.listId).toBe(persistedSecond?.id);
+    } finally {
+      const walPath = `${databasePath}-wal`;
+      const shmPath = `${databasePath}-shm`;
+
+      for (const path of [databasePath, walPath, shmPath]) {
+        try {
+          unlinkSync(path);
+        } catch {
+          // Ignore cleanup races in tests.
+        }
+      }
+    }
+  });
+
+  it('lists deleted parents only and restores a parent without restoring nested deleted items', async () => {
+    const databaseName = `shopping-list-trash-${Date.now()}-${Math.random().toString(36).slice(2)}.db`;
+    const databasePath = join(tmpdir(), databaseName);
+    const deletedAt = '2026-08-04T00:00:00.000Z';
+
+    try {
+      const bootstrap = createSQLiteBootstrap({
+        databaseName,
+        openDatabaseAsync: (async () => createNodeSQLiteAdapter(databasePath)) as never,
+      });
+      const database = await bootstrap.ensureBootstrapped();
+      const repository = createSQLiteShoppingListRepository(database as never);
+      const useCases = createShoppingListUseCases({ now: () => '2026-08-05T00:00:00.000Z', repository });
+      const activeListBase = createTrashList('active-list');
+      const activeList = {
+        ...activeListBase,
+        items: activeListBase.items.map((item, index) => index === 1 ? { ...item, deletedAt, updatedAt: deletedAt } : item),
+      };
+      const deletedListBase = createTrashList('deleted-list', deletedAt);
+      const deletedList = {
+        ...deletedListBase,
+        items: deletedListBase.items.map((item, index) => index === 1 ? { ...item, deletedAt, updatedAt: deletedAt } : item),
+      };
+
+      await repository.save(activeList);
+      await repository.save(deletedList);
+
+      const trash = await useCases.listTrash();
+
+      expect(trash.map((list) => list.id)).toEqual(['deleted-list']);
+      expect(trash[0]?.items[1]).toMatchObject({ deletedAt });
+
+      const restored = await useCases.restoreList('deleted-list');
+      expect(restored.deletedAt).toBeNull();
+      expect(restored.items[1]?.deletedAt).toBe(deletedAt);
+
+      const restoredFromDatabase = await repository.get('deleted-list', { includeDeleted: true });
+      expect(restoredFromDatabase).toMatchObject({ deletedAt: null });
+      expect(restoredFromDatabase?.items[1]?.deletedAt).toBe(deletedAt);
+    } finally {
+      const walPath = `${databasePath}-wal`;
+      const shmPath = `${databasePath}-shm`;
+
+      for (const path of [databasePath, walPath, shmPath]) {
+        try {
+          unlinkSync(path);
+        } catch {
+          // Ignore cleanup races in tests.
+        }
+      }
+    }
+  });
+
+  it('purges expired parents and cascades all nested rows while retaining recent trash', async () => {
+    const databaseName = `shopping-list-purge-${Date.now()}-${Math.random().toString(36).slice(2)}.db`;
+    const databasePath = join(tmpdir(), databaseName);
+
+    try {
+      const bootstrap = createSQLiteBootstrap({
+        databaseName,
+        openDatabaseAsync: (async () => createNodeSQLiteAdapter(databasePath)) as never,
+      });
+      const database = await bootstrap.ensureBootstrapped();
+      const repository = createSQLiteShoppingListRepository(database as never);
+      const useCases = createShoppingListUseCases({ now: () => '2026-08-08T00:00:00.000Z', repository });
+      const oldDeletedList = createTrashList('old-deleted-list', '2026-08-01T00:00:00.000Z');
+      const recentDeletedList = createTrashList('recent-deleted-list', '2026-08-02T00:00:00.000Z');
+
+      await repository.save(oldDeletedList);
+      await repository.save(recentDeletedList);
+      await useCases.cleanupExpiredTrash();
+
+      expect(await repository.get('old-deleted-list', { includeDeleted: true })).toBeNull();
+      expect(await repository.get('recent-deleted-list', { includeDeleted: true })).not.toBeNull();
+      const trash = await useCases.listTrash();
+      expect(trash).toHaveLength(1);
+      expect(trash[0]?.id).toBe('recent-deleted-list');
     } finally {
       const walPath = `${databasePath}-wal`;
       const shmPath = `${databasePath}-shm`;

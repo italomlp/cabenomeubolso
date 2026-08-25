@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { AppButton, AppColumn, AppScreen, AppText } from '@/components/ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
-import type { ShoppingList } from '@/domain/shopping-list';
+import { calculateShoppingListTotals, type ShoppingList } from '@/domain/shopping-list';
 import { formatCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
 
 import { AppEmptyState } from './app-empty-state';
 import { BudgetSummary } from './budget-summary';
 import { ListCard } from './list-card';
+import { FinalizeConfirmation } from './finalize-confirmation';
 import type { PlanningRuntime } from './planning-runtime';
 import { usePlanningRuntime } from './planning-runtime';
 
@@ -28,6 +29,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
   const [lists, setLists] = useState<readonly ShoppingList[]>([]);
   const [errorKind, setErrorKind] = useState<'finalize' | 'load' | null>(null);
   const [failedFinalizeListId, setFailedFinalizeListId] = useState<string | null>(null);
+  const [pendingFinalizeListId, setPendingFinalizeListId] = useState<string | null>(null);
 
   const refreshLists = useCallback(async () => {
     if (runtime === null) {
@@ -76,6 +78,16 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
     }
   };
 
+  const requestFinalize = (listId: string) => {
+    const list = lists.find((entry) => entry.id === listId);
+    if (list?.items.some((item) => item.deletedAt === null && item.purchasedAt === null)) {
+      setPendingFinalizeListId(listId);
+      return;
+    }
+
+    void finalizeList(listId);
+  };
+
   const summaryLists = useMemo(
     () => ({
       active: lists.filter((list) => list.status !== 'finalized' && list.deletedAt === null),
@@ -83,13 +95,16 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
     }),
     [lists]
   );
-
   const summaryByCurrency = useMemo(() => {
-    const grouped = new Map<SupportedCurrency, { active: number; finalized: number }>();
+    const grouped = new Map<SupportedCurrency, { active: { budget: number; actual: number; remaining: number }; finalized: { budget: number; actual: number; remaining: number } }>();
     for (const list of lists) {
       if (list.deletedAt !== null) continue;
-      const current = grouped.get(list.currencyCode) ?? { active: 0, finalized: 0 };
-      current[list.status === 'finalized' ? 'finalized' : 'active'] += list.budgetMinor;
+      const bucket = list.status === 'finalized' ? 'finalized' : 'active';
+      const totals = calculateShoppingListTotals(list);
+      const current = grouped.get(list.currencyCode) ?? { active: { budget: 0, actual: 0, remaining: 0 }, finalized: { budget: 0, actual: 0, remaining: 0 } };
+      current[bucket].budget += list.budgetMinor;
+      current[bucket].actual += totals.actualMinor;
+      current[bucket].remaining += totals.remainingMinor;
       grouped.set(list.currencyCode, current);
     }
     return grouped;
@@ -135,24 +150,8 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
           {[...summaryByCurrency.entries()].map(([currencyCode, totals]) => (
             <AppColumn key={currencyCode} spacing={theme.space.sm}>
               <AppText>{t('home.currencySummaryTitle', { currency: currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl') })}</AppText>
-              <BudgetSummary
-                accentColor={theme.colors.budgetSafe}
-                body={t('home.activeSummaryBody')}
-                budgetLabel={t('home.activeSummaryBudgetLabel')}
-                budgetValue={formatCurrencyMinor(locale, totals.active, currencyCode)}
-                listLabel={t('home.activeSummaryListsLabel')}
-                listValue={String(summaryLists.active.filter((list) => list.currencyCode === currencyCode).length)}
-                title={t('home.activeSummaryTitle')}
-              />
-              <BudgetSummary
-                accentColor={theme.colors.budgetNeutral}
-                body={t('home.finalizedSummaryBody')}
-                budgetLabel={t('home.finalizedSummaryBudgetLabel')}
-                budgetValue={formatCurrencyMinor(locale, totals.finalized, currencyCode)}
-                listLabel={t('home.finalizedSummaryListsLabel')}
-                listValue={String(summaryLists.finalized.filter((list) => list.currencyCode === currencyCode).length)}
-                title={t('home.finalizedSummaryTitle')}
-              />
+              <BudgetSummary accentColor={theme.colors.budgetSafe} actualLabel={t('home.actualLabel')} actualValue={formatCurrencyMinor(locale, totals.active.actual, currencyCode)} body={t('home.activeSummaryBody')} budgetLabel={t('home.budgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.active.budget, currencyCode)} title={t('home.activeSummaryTitle')} />
+              <BudgetSummary accentColor={theme.colors.budgetNeutral} actualLabel={t('home.actualLabel')} actualValue={formatCurrencyMinor(locale, totals.finalized.actual, currencyCode)} body={t('home.finalizedSummaryBody')} budgetLabel={t('home.budgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.finalized.budget, currencyCode)} title={t('home.finalizedSummaryTitle')} />
             </AppColumn>
           ))}
         </AppColumn>
@@ -195,7 +194,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
                 finalizeLabel={t('createList.finalize')}
                 key={list.id}
                 list={list}
-                onFinalize={(listId) => void finalizeList(listId)}
+                onFinalize={requestFinalize}
                 onLoad={(entry) => onOpenList?.(entry.id)}
                 onReopenAndEdit={(listId) => onOpenList?.(listId)}
                 resolveBudget={(entry) => formatCurrencyMinor(locale, entry.budgetMinor, entry.currencyCode)}
@@ -213,6 +212,21 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
           </AppColumn>
         )}
       </AppColumn>
+      <FinalizeConfirmation
+        cancelHint={t('home.finalizeCancelHint')}
+        cancelLabel={t('home.finalizeCancel')}
+        confirmHint={t('home.finalizeConfirmHint')}
+        confirmLabel={t('home.finalizeConfirm')}
+        message={t('home.finalizeUnpurchasedMessage')}
+        title={t('home.finalizeConfirmationTitle')}
+        visible={pendingFinalizeListId !== null}
+        onCancel={() => setPendingFinalizeListId(null)}
+        onConfirm={() => {
+          const listId = pendingFinalizeListId;
+          setPendingFinalizeListId(null);
+          if (listId !== null) void finalizeList(listId);
+        }}
+      />
     </AppScreen>
   );
 }

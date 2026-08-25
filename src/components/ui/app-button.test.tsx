@@ -26,4 +26,24 @@ describe('AppButton', () => {
     expect(button.props.variant).toBe('filled');
     expect(button.props.style.backgroundColor).toBe('#B94D3C');
   });
+
+  it.each([
+    ['light', '#087F73'],
+    ['dark', '#54C5B5'],
+  ])('maps primary buttons to the %s focus token', (scheme, focusColor) => {
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme={scheme as 'light' | 'dark'} themePreference="system">
+          <AppButton label="Continue" />
+        </AppThemeProvider>
+      );
+    });
+
+    const button = tree!.root.findByType(Button);
+
+    expect(button.props.variant).toBe('filled');
+    expect(button.props.style.backgroundColor).toBe(focusColor);
+  });
 });

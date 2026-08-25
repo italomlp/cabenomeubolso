@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { isShoppingListTrashExpired, markShoppingListDeleted, markShoppingListRestored } from './shopping-list';
+import { getShoppingListTrashCutoff, isShoppingListTrashExpired, markShoppingListDeleted, markShoppingListRestored } from './shopping-list';
 
 const list = {
   budgetMinor: 100,
@@ -21,5 +21,14 @@ describe('trash retention', () => {
     expect(isShoppingListTrashExpired(deleted.deletedAt!, '2026-08-07T23:59:59.999Z')).toBe(false);
     expect(isShoppingListTrashExpired(deleted.deletedAt!, '2026-08-08T00:00:00.000Z')).toBe(true);
     expect(markShoppingListRestored(deleted, '2026-08-02T00:00:00.000Z').deletedAt).toBeNull();
+  });
+
+  it('uses one ISO cutoff for cleanup and expiry checks', () => {
+    const now = '2026-08-13T12:34:56.789Z';
+    const cutoff = getShoppingListTrashCutoff(now);
+
+    expect(cutoff).toBe('2026-08-06T12:34:56.789Z');
+    expect(isShoppingListTrashExpired(cutoff, now)).toBe(true);
+    expect(isShoppingListTrashExpired('2026-08-06T12:34:56.790Z', now)).toBe(false);
   });
 });
