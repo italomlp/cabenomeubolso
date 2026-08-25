@@ -28,7 +28,7 @@ function createRuntime(lists: readonly ShoppingList[] = []): HomeScreenDependenc
       save: jest.fn(async () => undefined),
     },
     useCases: {
-      finalizeList: jest.fn(async () => undefined),
+      finalizeList: jest.fn(async () => lists[0]!),
       loadList: jest.fn(async () => null),
       removeItem: jest.fn(async () => {
         throw new Error('not expected');
@@ -129,6 +129,6 @@ describe('HomeScreen', () => {
       tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')!.props.onPress();
     });
 
-    expect(runtime.useCases.finalizeList).toHaveBeenCalledWith(list.id);
+    expect(runtime.useCases.finalizeList).toHaveBeenCalledWith(list.id, { confirmUnpurchased: true });
   });
 });
