@@ -161,7 +161,7 @@ describe('ListDetailScreen', () => {
     expect(updatedTexts).toContain('1.5 kg');
   });
 
-  it('does not render the create-only preview actions in list detail', async () => {
+  it('suppresses the sheet-owned item preview in list detail', async () => {
     const runtime = createRuntime(createCompraSemanalList('draft'));
     let tree: renderer.ReactTestRenderer;
 
@@ -169,6 +169,12 @@ describe('ListDetailScreen', () => {
       await i18n.changeLanguage('en');
       tree = renderer.create(<ListDetailScreen dependencies={runtime} listId="list-compra-semanal" />);
     });
+
+    const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
+    expect(texts).not.toContain('Review planned items');
+    expect(texts.filter((text) => text === 'Eggs')).toHaveLength(1);
+    expect(texts.filter((text) => text === 'Rice')).toHaveLength(1);
+    expect(texts.filter((text) => text === 'Potatoes')).toHaveLength(1);
 
     const buttonTestIDs = tree!.root.findAllByType(mockExpoUi.Button).map((button) => button.props.testID);
 
