@@ -81,12 +81,14 @@ export function createShoppingListUseCases({
     },
     loadList: async (id, includeDeleted = false) => repository.get(id, { includeDeleted }),
     listTrash: async () => {
-      await (repository.purgeExpired?.(now()) ?? Promise.resolve());
+      const currentTime = now();
+      await (repository.purgeExpired?.(currentTime) ?? Promise.resolve());
       if (repository.listTrash === undefined) {
-        return repository.list({ includeDeleted: true });
+        const lists = await repository.list({ includeDeleted: true });
+        return lists.filter((list) => list.deletedAt !== null);
       }
 
-      return repository.listTrash({ now: now() });
+      return repository.listTrash({ now: currentTime });
     },
     finalizeList: async (listId, options = false) => {
       const list = requireLoadedList(await repository.get(listId), listId);

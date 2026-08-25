@@ -173,7 +173,7 @@ async function runInTransaction(
     return;
   }
 
-  await database.withTransactionAsync(task);
+  await database.withTransactionAsync(async () => task(database));
 }
 
 async function loadShoppingLists(
@@ -251,10 +251,7 @@ async function loadTrashLists(database: SQLiteShoppingListRepositoryDatabase): P
   const rows = await database.getAllAsync<ShoppingListRow>(
     `SELECT id, name, currency_code, budget_minor, status, finalized_at, deleted_at, created_at, updated_at
      FROM ${SHOPPING_LIST_TABLE}
-     WHERE deleted_at IS NOT NULL OR EXISTS (
-       SELECT 1 FROM ${SHOPPING_LIST_ITEM_TABLE} item
-       WHERE item.list_id = shopping_lists.id AND item.deleted_at IS NOT NULL
-     )
+     WHERE deleted_at IS NOT NULL
      ORDER BY updated_at DESC, created_at DESC, id DESC`
   );
 
@@ -342,7 +339,7 @@ export function createSQLiteShoppingListRepository(
     permanentlyDeleteItem: async (listId, itemId) => {
       await runInTransaction(database, async (transaction) => {
         await transaction.runAsync(
-          `DELETE FROM ${SHOPPING_LIST_ITEM_TABLE} WHERE id = ? AND list_id = ?`,
+          `DELETE FROM ${SHOPPING_LIST_ITEM_TABLE} WHERE id = ? AND list_id = ? AND deleted_at IS NOT NULL`,
           itemId,
           listId
         );
@@ -350,7 +347,7 @@ export function createSQLiteShoppingListRepository(
     },
     permanentlyDeleteList: async (listId) => {
       await runInTransaction(database, async (transaction) => {
-        await transaction.runAsync(`DELETE FROM ${SHOPPING_LIST_TABLE} WHERE id = ?`, listId);
+        await transaction.runAsync(`DELETE FROM ${SHOPPING_LIST_TABLE} WHERE id = ? AND deleted_at IS NOT NULL`, listId);
       });
     },
     save: async (shoppingList) => {

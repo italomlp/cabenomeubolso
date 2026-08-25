@@ -298,6 +298,25 @@ describe('createShoppingListUseCases', () => {
     expect(repository.save).toHaveBeenCalledTimes(2);
   });
 
+  it('cleans expired trash before loading Trash', async () => {
+    const repository: ShoppingListRepository = {
+      get: jest.fn(async () => null),
+      list: jest.fn(async () => []),
+      listTrash: jest.fn(async () => []),
+      purgeExpired: jest.fn(async () => undefined),
+      save: jest.fn(async () => undefined),
+    };
+    const useCases = createShoppingListUseCases({
+      now: () => '2026-08-08T00:00:00.000Z',
+      repository,
+    });
+
+    await useCases.listTrash();
+
+    expect(repository.purgeExpired).toHaveBeenCalledWith('2026-08-08T00:00:00.000Z');
+    expect(repository.listTrash).toHaveBeenCalledWith({ now: '2026-08-08T00:00:00.000Z' });
+  });
+
   it('refuses to remove the last remaining visible item', async () => {
     const repository = createRepository({
       ...createShoppingList(),
