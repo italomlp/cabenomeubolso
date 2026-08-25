@@ -5,6 +5,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 
 import { i18n } from '@/lib/localization/i18n';
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
+import type { ShoppingList } from '@/domain/shopping-list';
 
 import HomeScreen from '@/components/planning/home-screen';
 
@@ -19,17 +20,15 @@ jest.mock('expo-localization', () => ({
   getLocales: () => [{ currencyCode: 'BRL', languageTag: 'pt-BR', regionCode: 'BR' }],
 }));
 
-function createRuntime(): HomeScreenDependencies {
+function createRuntime(lists: readonly ShoppingList[] = []): HomeScreenDependencies {
   return {
     repository: {
       get: jest.fn(async () => null),
-      list: jest.fn(async () => []),
+      list: jest.fn(async () => lists),
       save: jest.fn(async () => undefined),
     },
     useCases: {
-      finalizeList: jest.fn(async () => {
-        throw new Error('not expected');
-      }),
+      finalizeList: jest.fn(async () => undefined),
       loadList: jest.fn(async () => null),
       removeItem: jest.fn(async () => {
         throw new Error('not expected');
@@ -43,6 +42,36 @@ function createRuntime(): HomeScreenDependencies {
       saveList: jest.fn(async () => undefined),
     },
   } as const;
+}
+
+function createListWithUnpurchasedItem(): ShoppingList {
+  return {
+    budgetMinor: 1_000,
+    createdAt: '2026-08-01T00:00:00.000Z',
+    currencyCode: 'BRL',
+    deletedAt: null,
+    finalizedAt: null,
+    id: 'list-with-unpurchased-item',
+    items: [
+      {
+        actualUnitMinor: null,
+        createdAt: '2026-08-01T00:00:00.000Z',
+        deletedAt: null,
+        id: 'item-unpurchased',
+        listId: 'list-with-unpurchased-item',
+        name: 'Coffee',
+        plannedUnitMinor: 1_000,
+        purchasedAt: null,
+        quantityMilli: 1_000,
+        sortOrder: 1,
+        unitCode: 'piece',
+        updatedAt: '2026-08-01T00:00:00.000Z',
+      },
+    ],
+    name: 'Weekly groceries',
+    status: 'draft',
+    updatedAt: '2026-08-01T00:00:00.000Z',
+  };
 }
 
 describe('HomeScreen', () => {
@@ -77,5 +106,29 @@ describe('HomeScreen', () => {
     expect(texts).toContain('Planeje a próxima lista offline antes de comprar.');
     expect(texts).toContain('Criar lista');
     expect(texts).toContain('Nada para revisar ainda');
+  });
+
+  it('waits for confirmation before finalizing a list with an unpurchased item', async () => {
+    const list = createListWithUnpurchasedItem();
+    const runtime = createRuntime([list]);
+    let tree: renderer.ReactTestRenderer;
+
+    await act(async () => {
+      await i18n.changeLanguage('en');
+      tree = renderer.create(<HomeScreen dependencies={runtime} />);
+    });
+
+    await act(async () => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === `finalize-${list.id}`)!.props.onPress();
+    });
+
+    expect(runtime.useCases.finalizeList).not.toHaveBeenCalled();
+    expect(tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')).toBeDefined();
+
+    await act(async () => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')!.props.onPress();
+    });
+
+    expect(runtime.useCases.finalizeList).toHaveBeenCalledWith(list.id);
   });
 });
