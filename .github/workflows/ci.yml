@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Check
-        run: npm run check
+        run: npm run ci
 
   maestro-syntax:
     name: Maestro flow syntax
