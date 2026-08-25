@@ -11,6 +11,7 @@ import { i18n } from '@/lib/localization/i18n';
 import { AppEmptyState } from './app-empty-state';
 import { BudgetSummary } from './budget-summary';
 import { ListCard } from './list-card';
+import { FinalizeConfirmation } from './finalize-confirmation';
 import type { PlanningRuntime } from './planning-runtime';
 import { usePlanningRuntime } from './planning-runtime';
 
@@ -28,6 +29,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
   const [lists, setLists] = useState<readonly ShoppingList[]>([]);
   const [errorKind, setErrorKind] = useState<'finalize' | 'load' | null>(null);
   const [failedFinalizeListId, setFailedFinalizeListId] = useState<string | null>(null);
+  const [pendingFinalizeListId, setPendingFinalizeListId] = useState<string | null>(null);
 
   const refreshLists = useCallback(async () => {
     if (runtime === null) {
@@ -74,6 +76,16 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
       setErrorKind('finalize');
       setFailedFinalizeListId(listId);
     }
+  };
+
+  const requestFinalize = (listId: string) => {
+    const list = lists.find((entry) => entry.id === listId);
+    if (list?.items.some((item) => item.deletedAt === null && item.purchasedAt === null)) {
+      setPendingFinalizeListId(listId);
+      return;
+    }
+
+    void finalizeList(listId);
   };
 
   const summaryLists = useMemo(
@@ -195,7 +207,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
                 finalizeLabel={t('createList.finalize')}
                 key={list.id}
                 list={list}
-                onFinalize={(listId) => void finalizeList(listId)}
+                onFinalize={requestFinalize}
                 onLoad={(entry) => onOpenList?.(entry.id)}
                 onReopenAndEdit={(listId) => onOpenList?.(listId)}
                 resolveBudget={(entry) => formatCurrencyMinor(locale, entry.budgetMinor, entry.currencyCode)}
@@ -213,6 +225,21 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
           </AppColumn>
         )}
       </AppColumn>
+      <FinalizeConfirmation
+        cancelHint={t('home.finalizeCancelHint')}
+        cancelLabel={t('home.finalizeCancel')}
+        confirmHint={t('home.finalizeConfirmHint')}
+        confirmLabel={t('home.finalizeConfirm')}
+        message={t('home.finalizeUnpurchasedMessage')}
+        title={t('home.finalizeConfirmationTitle')}
+        visible={pendingFinalizeListId !== null}
+        onCancel={() => setPendingFinalizeListId(null)}
+        onConfirm={() => {
+          const listId = pendingFinalizeListId;
+          setPendingFinalizeListId(null);
+          if (listId !== null) void finalizeList(listId);
+        }}
+      />
     </AppScreen>
   );
 }

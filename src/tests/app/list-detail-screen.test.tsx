@@ -175,4 +175,27 @@ describe('ListDetailScreen', () => {
     expect(buttonTestIDs).toEqual(expect.arrayContaining(['edit-item-item-1', 'remove-item-item-1']));
     expect(buttonTestIDs).not.toEqual(expect.arrayContaining(['edit-planned-item-item-1', 'remove-planned-item-item-1']));
   });
+
+  it('asks before finalizing while items remain unpurchased', async () => {
+    const runtime = createRuntime(createCompraSemanalList('draft'));
+    let tree: renderer.ReactTestRenderer;
+
+    await act(async () => {
+      await i18n.changeLanguage('en');
+      tree = renderer.create(<ListDetailScreen dependencies={runtime} listId="list-compra-semanal" />);
+    });
+
+    await act(async () => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'create-list-finalize')!.props.onPress();
+    });
+
+    expect(tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')).toBeDefined();
+    expect((await runtime.repository.get('list-compra-semanal'))?.status).toBe('draft');
+
+    await act(async () => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')!.props.onPress();
+    });
+
+    expect((await runtime.repository.get('list-compra-semanal'))?.status).toBe('finalized');
+  });
 });
