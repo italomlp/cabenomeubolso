@@ -16,6 +16,7 @@ import { calculateShoppingListTotals } from '@/domain/shopping-list';
 
 import { GroceryItemRow } from './grocery-item-row';
 import { ListFormSheet } from './list-form-sheet';
+import { FinalizeConfirmation } from './finalize-confirmation';
 import type { PlannedItemDraft } from './planned-item-editor';
 import { usePlanningRuntime, type PlanningRuntime } from './planning-runtime';
 
@@ -60,6 +61,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [recentlyRemovedItem, setRecentlyRemovedItem] = useState<ShoppingListItem | null>(null);
   const [errorKind, setErrorKind] = useState<'finalize' | 'load' | 'save' | null>(null);
+  const [finalizeConfirmationVisible, setFinalizeConfirmationVisible] = useState(false);
   const draftNameState = useNativeState('');
   const draftBudgetTextState = useNativeState('');
 
@@ -195,6 +197,15 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   const visibleItemCount = visibleItems.length;
   const isReadOnly = draft?.status === 'finalized';
   const selectedCurrencyLabel = draft?.currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl');
+  const hasUnpurchasedItems = visibleItems.some((item) => item.purchasedAt === null);
+  const requestFinalize = () => {
+    if (hasUnpurchasedItems) {
+      setFinalizeConfirmationVisible(true);
+      return;
+    }
+
+    void saveCurrentDraft(true);
+  };
 
   const budgetStatusAnnouncement = (nextDraft: CreateListDraftState) => {
     const budgetMinor = (() => {
@@ -267,7 +278,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
           setPlannedItemEditorInitialItem(undefined);
         }}
         onCurrencyChange={(value) => setDraft((current) => (current === null ? null : { ...current, currencyCode: value }))}
-        onFinalizeDraft={() => void saveCurrentDraft(true)}
+        onFinalizeDraft={requestFinalize}
         onNameChange={(value) => setDraft((current) => (current === null ? null : { ...current, name: value }))}
         onReopenList={draft.status === 'finalized' ? () => void reopenList() : undefined}
         onSaveDraft={() => void saveCurrentDraft(false)}
@@ -322,6 +333,8 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
         }}
         showClearItems={false}
         showItemActions={false}
+        showDraftSummary={false}
+        showItemPreview={false}
       >
         <AppColumn spacing={theme.space.sm}>
           {errorKind !== null ? (
@@ -353,7 +366,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                 listLabel={t('createList.itemsLabel')}
                 listValue={String(visibleItemCount)}
                 statusIcon={totals.remainingMinor >= 0 ? '✓' : '!'}
-                statusLabel={draft.status === 'active' ? t('home.listStatusActive') : draft.status === 'finalized' ? t('home.listStatusFinalized') : t('home.listStatusDraft')}
+                statusLabel={totals.remainingMinor >= 0 ? t('listDetail.withinBudget') : t('listDetail.overBudget')}
                 title={t('createList.summaryTitle')}
               />
             );
@@ -438,6 +451,20 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
           />
         </AppColumn>
       </ListFormSheet>
+      <FinalizeConfirmation
+        cancelHint={t('listDetail.finalizeCancelHint')}
+        cancelLabel={t('listDetail.finalizeCancel')}
+        confirmHint={t('listDetail.finalizeConfirmHint')}
+        confirmLabel={t('listDetail.finalizeConfirm')}
+        message={t('listDetail.finalizeUnpurchasedMessage')}
+        title={t('listDetail.finalizeConfirmationTitle')}
+        visible={finalizeConfirmationVisible}
+        onCancel={() => setFinalizeConfirmationVisible(false)}
+        onConfirm={() => {
+          setFinalizeConfirmationVisible(false);
+          void saveCurrentDraft(true);
+        }}
+      />
     </AppScreen>
   );
 }

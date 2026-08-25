@@ -45,6 +45,8 @@ type ListFormSheetProps = {
   onReopenList?: () => void;
   showClearItems?: boolean;
   showItemActions?: boolean;
+  showDraftSummary?: boolean;
+  showItemPreview?: boolean;
   children?: ReactNode;
 };
 
@@ -74,6 +76,8 @@ export function ListFormSheet({
   onReopenList,
   showClearItems = true,
   showItemActions = true,
+  showDraftSummary = true,
+  showItemPreview = true,
   onSaveDraft,
   onSavePlannedItem,
   children,
@@ -113,7 +117,7 @@ export function ListFormSheet({
         />
       ) : (
         <AppColumn spacing={theme.space.md}>
-          <AppColumn
+          {showDraftSummary ? <AppColumn
             spacing={theme.space.xs}
             style={{
               backgroundColor: theme.colors.backgroundElement,
@@ -177,7 +181,7 @@ export function ListFormSheet({
                 {draftBudgetPreview}
               </AppText>
             </AppRow>
-          </AppColumn>
+          </AppColumn> : null}
 
           {canShowCurrencySelect ? (
             <AppSelect
@@ -295,7 +299,7 @@ export function ListFormSheet({
             ) : null}
           </AppColumn>
 
-          {visibleItems.length > 0 ? (
+          {showItemPreview && visibleItems.length > 0 ? (
             <AppColumn spacing={theme.space.xs}>
               <AppText
                 textStyle={{

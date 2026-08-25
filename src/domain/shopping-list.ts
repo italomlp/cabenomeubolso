@@ -403,8 +403,7 @@ export function markShoppingListItemUnpurchased(list: ShoppingList, itemId: stri
 
     return {
       ...item,
-      // Retain the entered price for a quick re-completion. The calculation
-      // only includes actualUnitMinor while purchasedAt is set.
+      actualUnitMinor: null,
       purchasedAt: null,
       updatedAt,
     };

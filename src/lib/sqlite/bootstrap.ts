@@ -1,7 +1,9 @@
 import * as SQLite from 'expo-sqlite';
 
+import { createShoppingListUseCases } from '@/domain/shopping-list-use-cases';
+
 import { SQLITE_DATABASE_VERSION, applySQLiteMigrations } from './migrations';
-import { getShoppingListTrashCutoff } from '@/domain/shopping-list';
+import { createSQLiteShoppingListRepository } from './shopping-list-repository';
 
 export type SQLiteBootstrapDependencies = {
   databaseName?: string;
@@ -33,27 +35,16 @@ export function createSQLiteBootstrap({
     }
 
     // Expired trash is best-effort foreground maintenance. A failed cleanup must
-    // not prevent an otherwise usable database from opening.
+    // not prevent an otherwise usable database from opening. The repository owns
+    // the ISO cutoff and transaction/cascade ordering; Trash opening uses the
+    // same use case for its own foreground trigger.
     const maintenanceDatabase = database as SQLiteDatabase & {
       runAsync?: (sql: string, ...params: readonly unknown[]) => Promise<unknown>;
     };
     if (maintenanceDatabase.runAsync !== undefined) {
       try {
-        const cutoff = getShoppingListTrashCutoff(new Date().toISOString());
-        await database.withTransactionAsync(async () => {
-          await maintenanceDatabase.runAsync?.(
-            `DELETE FROM shopping_list_items WHERE deleted_at IS NOT NULL AND deleted_at <= ?`,
-            cutoff
-          );
-          await maintenanceDatabase.runAsync?.(
-            `DELETE FROM shopping_list_items WHERE list_id IN (SELECT id FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= ?)`,
-            cutoff
-          );
-          await maintenanceDatabase.runAsync?.(
-            `DELETE FROM shopping_lists WHERE deleted_at IS NOT NULL AND deleted_at <= ?`,
-            cutoff
-          );
-        });
+        const repository = createSQLiteShoppingListRepository(database as never);
+        await createShoppingListUseCases({ repository }).cleanupExpiredTrash();
       } catch {
         // Maintenance is retryable on the next foreground event.
       }

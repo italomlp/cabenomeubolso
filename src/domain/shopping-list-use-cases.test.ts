@@ -105,7 +105,7 @@ function createRepository(initialList: ShoppingList): ShoppingListRepository {
 }
 
 describe('createShoppingListUseCases', () => {
-  it('sets actual price explicitly when purchasing and preserves it on unpurchase', async () => {
+  it('sets actual price explicitly when purchasing and clears it on unpurchase', async () => {
     const list = createShoppingList();
     const repository = createRepository(list);
     const useCases = createShoppingListUseCases({
@@ -121,13 +121,13 @@ describe('createShoppingListUseCases', () => {
       purchasedAt: '2026-07-31T10:00:00.000Z',
     });
     expect(unpurchased.items[0]).toMatchObject({
-      actualUnitMinor: 650,
+      actualUnitMinor: null,
       purchasedAt: null,
     });
     expect(repository.save).toHaveBeenCalledTimes(2);
   });
 
-  it('reuses the retained actual price when purchasing again without a new price', async () => {
+  it('requires a new actual price when purchasing again after unpurchase', async () => {
     const repository = createRepository(createShoppingList());
     const useCases = createShoppingListUseCases({
       now: () => '2026-07-31T10:00:00.000Z',
@@ -136,9 +136,10 @@ describe('createShoppingListUseCases', () => {
 
     await useCases.setItemPurchased('list-1', 'item-1', 650);
     await useCases.setItemUnpurchased('list-1', 'item-1');
-    const repurchased = await useCases.setItemPurchased('list-1', 'item-1');
 
-    expect(repurchased.items[0]).toMatchObject({ actualUnitMinor: 650, purchasedAt: '2026-07-31T10:00:00.000Z' });
+    await expect(useCases.setItemPurchased('list-1', 'item-1')).rejects.toThrow(
+      'Actual unit price must be a non-negative integer.'
+    );
   });
 
   it('refuses to mutate deleted lists or deleted items', async () => {
@@ -306,6 +307,25 @@ describe('createShoppingListUseCases', () => {
       { deletedAt: null, quantityMilli: 1500, unitCode: 'kg' },
     ]);
     expect(repository.save).toHaveBeenCalledTimes(2);
+  });
+
+  it('cleans expired trash before loading Trash', async () => {
+    const repository: ShoppingListRepository = {
+      get: jest.fn(async () => null),
+      list: jest.fn(async () => []),
+      listTrash: jest.fn(async () => []),
+      purgeExpired: jest.fn(async () => undefined),
+      save: jest.fn(async () => undefined),
+    };
+    const useCases = createShoppingListUseCases({
+      now: () => '2026-08-08T00:00:00.000Z',
+      repository,
+    });
+
+    await useCases.listTrash();
+
+    expect(repository.purgeExpired).toHaveBeenCalledWith('2026-08-08T00:00:00.000Z');
+    expect(repository.listTrash).toHaveBeenCalledWith({ now: '2026-08-08T00:00:00.000Z' });
   });
 
   it('refuses to remove the last remaining visible item', async () => {
