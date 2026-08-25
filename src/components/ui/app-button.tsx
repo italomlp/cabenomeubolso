@@ -38,7 +38,7 @@ export function AppButton({
     borderRadius: theme.radius.pill,
     paddingHorizontal: theme.space.md,
     paddingVertical: theme.space.sm,
-    ...(variant === 'primary' ? {} : {}),
+    ...(variant === 'primary' ? { backgroundColor: theme.colors.focus } : {}),
     ...(variant === 'secondary'
       ? {
           backgroundColor: theme.colors.surfaceRaised,
