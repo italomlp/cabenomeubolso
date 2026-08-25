@@ -194,5 +194,18 @@ describe('create list shell rules', () => {
         ],
       })
     );
+
+    await act(async () => {
+      tree!.root.findAllByProps({ testID: 'create-list-finalize' })[0].props.onPress();
+    });
+
+    expect(runtime.useCases.finalizeList).not.toHaveBeenCalled();
+    expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'finalize-confirm')).toHaveLength(1);
+
+    await act(async () => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')!.props.onPress();
+    });
+
+    expect(runtime.useCases.finalizeList).toHaveBeenCalledTimes(1);
   });
 });
