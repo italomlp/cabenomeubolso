@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
 
 permissions:
@@ -33,15 +33,14 @@ jobs:
         run: npm run ci
 
   maestro-syntax:
-    name: Maestro flow syntax
+    name: Maestro flow syntax (scaffolding)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Best-effort gate: validates Maestro flow syntax only when the CLI is
-      # present on the runner. Install Maestro (and Java) here to make it a
-      # hard gate.
+      # Scaffolding only: the Maestro CLI is not provisioned on this runner
+      # yet, so this remains optional until CLI provisioning exists.
       - name: Validate Maestro flows
         env:
           MAESTRO_OPTIONAL: "1"
