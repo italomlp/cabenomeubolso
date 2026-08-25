@@ -43,9 +43,11 @@ Proposed channel map (production values are **gated on owner question 8** and mu
 
 Procedure:
 
-1. Set a `runtimeVersion` policy in `app.json` (`expo-updates`). Recommended default:
-   `{ "policy": "appVersion" }`; use `{ "policy": "nativeVersion" }` if you want updates rejected unless the native
-   binary itself was rebuilt.
+1. Set a `runtimeVersion` policy in `app.json` (`expo-updates`). For a native-module app, lead with
+   `{ "policy": "nativeVersion" }` (rejects updates unless the native binary itself was rebuilt) or
+   `{ "policy": "fingerprint" }` (rejects on any native change detected by the build fingerprint).
+   If `appVersion` is used, it is safe only when every native change bumps the app version — native-only
+   patches that do not touch `android.versionCode` or `ios.bundleVersion` will bypass this check.
 2. Publish JS/assets to a channel with `npx eas update --branch <channel>`.
 3. Configure the build profile to embed its channel so installs receive that channel's updates.
 
@@ -67,7 +69,7 @@ provided the native runtime already supports it.
 
 ## AdMob enablement procedure
 
-Do not flip the flag until the release decision (owner question 7, confirmed) and the privacy prerequisites below are met.
+Owner question 7 confirms only that ads are **disabled by default** with restricted placements; no ad request is made. Enabling ads is a **separate, still-open release decision** that requires the privacy prerequisites below. Do not flip the flag until that decision and its prerequisites are resolved.
 
 1. Supply the **Android App ID** (never ad-unit IDs in the config plugin).
 2. Obtain consent **before** `initialize()`. `AdService.prepare()` already orders this:
