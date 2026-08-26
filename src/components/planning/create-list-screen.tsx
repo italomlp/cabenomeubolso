@@ -18,6 +18,7 @@ import {
 } from '@/app/home-state';
 
 import { ListFormSheet } from './list-form-sheet';
+import { FinalizeConfirmation } from './finalize-confirmation';
 import type { PlannedItemDraft } from './planned-item-editor';
 import { usePlanningRuntime, type PlanningRuntime } from './planning-runtime';
 
@@ -49,6 +50,7 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
   const [plannedItemEditorVisible, setPlannedItemEditorVisible] = useState(false);
   const [plannedItemEditorInitialItem, setPlannedItemEditorInitialItem] = useState<PlannedItemDraft | undefined>();
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [finalizeConfirmationVisible, setFinalizeConfirmationVisible] = useState(false);
   const draftNameState = useNativeState('');
   const draftBudgetTextState = useNativeState('');
 
@@ -90,6 +92,15 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
   const draftBudgetPreview = formatCurrencyMinor(locale, draftBudgetMinor, draft.currencyCode);
   const draftItemCount = draft.items.length;
   const selectedCurrencyLabel = draft.currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl');
+  const requestFinalize = () => {
+    const hasUnpurchasedItems = draft.items.some((item) => item.deletedAt === null && item.purchasedAt === null);
+    if (hasUnpurchasedItems) {
+      setFinalizeConfirmationVisible(true);
+      return;
+    }
+
+    void saveCurrentDraft(true);
+  };
 
   if (runtime === null) {
     return (
@@ -128,7 +139,7 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
           setPlannedItemEditorVisible(false);
         }}
         onCurrencyChange={(value) => setDraft((current) => ({ ...current, currencyCode: value }))}
-        onFinalizeDraft={() => void saveCurrentDraft(true)}
+        onFinalizeDraft={requestFinalize}
         onNameChange={(value) => setDraft((current) => ({ ...current, name: value }))}
         onEditPlannedItem={(item) => {
           setEditingItemId(item.id);
@@ -170,6 +181,20 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
           setEditingItemId(null);
           setPlannedItemEditorInitialItem(undefined);
           setPlannedItemEditorVisible(false);
+        }}
+      />
+      <FinalizeConfirmation
+        cancelHint={t('createList.finalizeCancelHint')}
+        cancelLabel={t('createList.finalizeCancel')}
+        confirmHint={t('createList.finalizeConfirmHint')}
+        confirmLabel={t('createList.finalizeConfirm')}
+        message={t('createList.finalizeUnpurchasedMessage')}
+        title={t('createList.finalizeConfirmationTitle')}
+        visible={finalizeConfirmationVisible}
+        onCancel={() => setFinalizeConfirmationVisible(false)}
+        onConfirm={() => {
+          setFinalizeConfirmationVisible(false);
+          void saveCurrentDraft(true);
         }}
       />
     </AppScreen>
