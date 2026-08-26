@@ -116,13 +116,13 @@ describe('shopping list domain', () => {
     expect(validation.success).toBe(false);
   });
 
-  it('clears actual price when an item is marked unpurchased', () => {
+  it('retains actual price when an item is marked unpurchased', () => {
     const list = createShoppingList();
     const purchased = markShoppingListItemPurchased(list, 'item-2', 2500, '2026-07-31T00:00:00.000Z');
     const unpurchased = markShoppingListItemUnpurchased(purchased, 'item-2', '2026-07-31T00:00:01.000Z');
 
     expect(unpurchased.items[1]).toMatchObject({
-      actualUnitMinor: null,
+      actualUnitMinor: 2500,
       purchasedAt: null,
     });
     expect(calculateShoppingListTotals(unpurchased)).toEqual({
@@ -133,7 +133,7 @@ describe('shopping list domain', () => {
     });
   });
 
-  it('requires a new actual price when purchase is toggled back on', () => {
+  it('reuses the retained actual price when purchase is toggled back on', () => {
     const purchased = markShoppingListItemPurchased(
       createShoppingList({ items: [createItem()] }),
       'item-1',
@@ -142,10 +142,19 @@ describe('shopping list domain', () => {
     );
     const unpurchased = markShoppingListItemUnpurchased(purchased, 'item-1', '2026-07-31T00:00:01.000Z');
 
-    expect(unpurchased.items[0].actualUnitMinor).toBeNull();
-    expect(() =>
-      markShoppingListItemPurchased(unpurchased, 'item-1', undefined, '2026-07-31T00:00:02.000Z')
-    ).toThrow('Actual unit price must be a non-negative integer.');
+    expect(unpurchased.items[0].actualUnitMinor).toBe(2500);
+
+    const repurchased = markShoppingListItemPurchased(
+      unpurchased,
+      'item-1',
+      undefined,
+      '2026-07-31T00:00:02.000Z'
+    );
+
+    expect(repurchased.items[0]).toMatchObject({
+      actualUnitMinor: 2500,
+      purchasedAt: '2026-07-31T00:00:02.000Z',
+    });
   });
 
   it('clones only visible planned items with isolated identities and purchase state', () => {

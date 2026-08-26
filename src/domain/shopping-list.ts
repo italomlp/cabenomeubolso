@@ -403,7 +403,6 @@ export function markShoppingListItemUnpurchased(list: ShoppingList, itemId: stri
 
     return {
       ...item,
-      actualUnitMinor: null,
       purchasedAt: null,
       updatedAt,
     };
