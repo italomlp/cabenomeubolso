@@ -45,3 +45,8 @@ example
 
 # UI audit artifacts
 artifacts/ui-audit/
+
+# BEGIN oh-my-opencode-slim worktrees
+.slim/worktrees/
+.slim/worktrees.json
+# END oh-my-opencode-slim worktrees
