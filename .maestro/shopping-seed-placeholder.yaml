@@ -1,0 +1,11 @@
+# Development screenshot seed flow. The dev reset deep link creates the
+# deterministic shopping fixture before the route is opened.
+appId: com.italomlp.cabenomeubolso
+
+---
+- launchApp:
+    clearState: false
+- openLink: "cabenomeubolso://dev/reset-seed"
+- openLink: "cabenomeubolso:///list/dev-screenshot-list/shop"
+- assertVisible: "Active shopping"
+- assertVisible: "Finish shopping"

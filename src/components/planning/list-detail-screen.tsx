@@ -161,18 +161,28 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     }
   };
 
+  const announceSaveError = () => {
+    const message = t('listDetail.saveError');
+    setErrorKind('save');
+    announceForAccessibility(message);
+  };
+
   const reopenList = async () => {
     if (runtime === null || draft === null) {
       return;
     }
 
-    await runtime.useCases.reopenList(draft.listId);
-    announceForAccessibility(t('listDetail.reopenedAnnouncement'));
-    setRecentlyRemovedItem(null);
-    setEditingItemId(null);
-    setPlannedItemEditorInitialItem(undefined);
-    setPlannedItemEditorVisible(false);
-    await refreshDraft(draft.listId);
+    try {
+      await runtime.useCases.reopenList(draft.listId);
+      announceForAccessibility(t('listDetail.reopenedAnnouncement'));
+      setRecentlyRemovedItem(null);
+      setEditingItemId(null);
+      setPlannedItemEditorInitialItem(undefined);
+      setPlannedItemEditorVisible(false);
+      await refreshDraft(draft.listId);
+    } catch {
+      announceSaveError();
+    }
   };
 
   const canSaveDraft = draft === null ? false : canPersistCreateListDraft(draft, locale);
@@ -405,13 +415,17 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                           return;
                         }
 
-                        const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
-                        const nextDraft = createCreateListDraftStateFromList(nextList, locale, nextList.id);
-                        setDraft(nextDraft);
-                        announceForAccessibility(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
-                        setRecentlyRemovedItem(item);
-                        setEditingItemId(null);
-                        setPlannedItemEditorInitialItem(undefined);
+                        try {
+                          const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
+                          const nextDraft = createCreateListDraftStateFromList(nextList, locale, nextList.id);
+                          setDraft(nextDraft);
+                          announceForAccessibility(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
+                          setRecentlyRemovedItem(item);
+                          setEditingItemId(null);
+                          setPlannedItemEditorInitialItem(undefined);
+                        } catch {
+                          announceSaveError();
+                        }
                       }}
                       testID={`remove-item-${item.id}`}
                       variant="destructive"
@@ -429,11 +443,15 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                 return;
               }
 
-              const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
-              const restoredDraft = createCreateListDraftStateFromList(restoredList, locale, restoredList.id);
-              setDraft(restoredDraft);
-              announceForAccessibility(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
-              setRecentlyRemovedItem(null);
+              try {
+                const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
+                const restoredDraft = createCreateListDraftStateFromList(restoredList, locale, restoredList.id);
+                setDraft(restoredDraft);
+                announceForAccessibility(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
+                setRecentlyRemovedItem(null);
+              } catch {
+                announceSaveError();
+              }
             }}
             visible={recentlyRemovedItem !== null}
           />

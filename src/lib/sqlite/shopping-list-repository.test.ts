@@ -124,6 +124,34 @@ describe('createSQLiteShoppingListRepository', () => {
     });
   });
 
+  it('treats expo-sqlite null as an absent list when saving the first list', async () => {
+    const getFirstAsync = jest.fn(async () => null);
+    const database = {
+      getAllAsync: jest.fn(async () => []),
+      getFirstAsync,
+      runAsync: jest.fn(async () => undefined),
+      withExclusiveTransactionAsync: jest.fn(async (task: TransactionTask) => task(database as never)),
+      withTransactionAsync: jest.fn(async (task: TransactionTask) => task(database as never)),
+    } as unknown as SQLiteShoppingListRepositoryDatabase;
+
+    const repository = createSQLiteShoppingListRepository(database);
+
+    await expect(repository.save(createCompraSemanalShoppingList())).resolves.toBeUndefined();
+    expect(getFirstAsync).toHaveBeenCalledTimes(1);
+    expect(database.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO shopping_lists'),
+      'list-compra-semanal',
+      'Compra semanal',
+      'BRL',
+      12_345,
+      'draft',
+      null,
+      null,
+      '2026-07-31T00:00:00.000Z',
+      '2026-07-31T00:00:00.000Z'
+    );
+  });
+
   it('preserves soft-deleted item rows when saving the current list graph', async () => {
     const shoppingList = {
       budgetMinor: 4000,

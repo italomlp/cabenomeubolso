@@ -4,9 +4,11 @@ import type { ShoppingList } from '@/domain/shopping-list';
 
 import {
   DEV_SCREENSHOT_RESET_URL,
+  DEV_SCREENSHOT_HOME_PATH,
   handleDevScreenshotDeepLink,
   isDevScreenshotResetUrl,
   redirectDevScreenshotSystemPath,
+  resetAndSeedDevScreenshotData,
   resetAndSeedDevScreenshotDataForRepository,
 } from './screenshot-harness';
 
@@ -21,8 +23,22 @@ describe('development screenshot harness', () => {
   it('consumes the reset path before Expo Router can route it', async () => {
     const handleDeepLink = jest.fn(async () => true);
 
-    await expect(redirectDevScreenshotSystemPath('dev/reset-seed', handleDeepLink)).resolves.toBe('/');
+    await expect(redirectDevScreenshotSystemPath('dev/reset-seed', handleDeepLink)).resolves.toBe(DEV_SCREENSHOT_HOME_PATH);
     expect(handleDeepLink).toHaveBeenCalledWith('dev/reset-seed');
+  });
+
+  it('invokes the reset and seed operation when consuming the reset link', async () => {
+    const resetAndSeed = jest.fn(async () => true);
+
+    await expect(handleDevScreenshotDeepLink(DEV_SCREENSHOT_RESET_URL, resetAndSeed)).resolves.toBe(true);
+    expect(resetAndSeed).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not consume the reset link when the injected seed operation is unavailable', async () => {
+    const resetAndSeed = jest.fn(async () => false);
+
+    await expect(handleDevScreenshotDeepLink(DEV_SCREENSHOT_RESET_URL, resetAndSeed)).resolves.toBe(false);
+    expect(resetAndSeed).toHaveBeenCalledTimes(1);
   });
 
   it('resets through the repository and saves the supplied seed in order', async () => {
@@ -39,6 +55,23 @@ describe('development screenshot harness', () => {
 
     expect(repository.resetForDevelopment).toHaveBeenCalledTimes(1);
     expect(savedIds).toEqual(['first', 'second']);
+  });
+
+  it('wires the native reset operation to the bootstrapped database repository', async () => {
+    const repository = {
+      resetForDevelopment: jest.fn(async () => undefined),
+      save: jest.fn(async () => undefined),
+    };
+    const ensureDatabase = jest.fn(async () => ({ database: true }));
+    const createRepository = jest.fn(() => repository);
+
+    await expect(resetAndSeedDevScreenshotData({ ensureDatabase, createRepository })).resolves.toBe(true);
+
+    expect(ensureDatabase).toHaveBeenCalledTimes(1);
+    expect(createRepository).toHaveBeenCalledWith({ database: true });
+    expect(repository.resetForDevelopment).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 'dev-screenshot-list' }));
   });
 
   it('ignores non-harness deep links', async () => {

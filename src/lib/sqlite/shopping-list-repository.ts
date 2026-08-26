@@ -15,7 +15,8 @@ import type { SupportedCurrency } from '@/domain/currency';
 export type SQLiteShoppingListRepositoryDatabase = {
   execAsync: (sql: string) => Promise<void>;
   getAllAsync: <T>(sql: string, ...params: readonly unknown[]) => Promise<readonly T[]>;
-  getFirstAsync: <T>(sql: string, ...params: readonly unknown[]) => Promise<T | undefined>;
+  // expo-sqlite returns null when a SELECT ... LIMIT 1 query has no row.
+  getFirstAsync: <T>(sql: string, ...params: readonly unknown[]) => Promise<T | null | undefined>;
   runAsync: (sql: string, ...params: readonly unknown[]) => Promise<unknown>;
   withExclusiveTransactionAsync?: (
     task: (database: SQLiteShoppingListRepositoryDatabase) => Promise<void>
@@ -227,7 +228,7 @@ async function loadShoppingListById(
     id
   );
 
-  if (listRow === undefined) {
+  if (listRow === undefined || listRow === null) {
     return null;
   }
 
@@ -413,7 +414,9 @@ export function createSQLiteShoppingListRepository(
     },
     resetForDevelopment: async () => {
       await runInTransaction(database, async (transaction) => {
-        await transaction.execAsync(`DELETE FROM ${SHOPPING_LIST_ITEM_TABLE}; DELETE FROM ${SHOPPING_LIST_TABLE};`);
+        await transaction.execAsync(
+          `DELETE FROM template_items; DELETE FROM recurrence_templates; DELETE FROM ${SHOPPING_LIST_ITEM_TABLE}; DELETE FROM ${SHOPPING_LIST_TABLE};`
+        );
       });
     },
   };

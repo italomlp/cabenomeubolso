@@ -1,0 +1,23 @@
+appId: com.italomlp.cabenomeubolso
+
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 10000
+- tapOn:
+    id: home-primary-create
+- tapOn:
+    id: create-list-add-item
+- assertVisible: "Planned item"
+- assertVisible:
+    id: planned-item-name
+- assertVisible:
+    id: planned-item-quantity
+- assertVisible:
+    id: planned-item-price
+- tapOn:
+    id: planned-item-save
+- assertVisible: "Enter an item name."
+- assertVisible: "Enter a value."

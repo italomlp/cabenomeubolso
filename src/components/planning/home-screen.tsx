@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppButton, AppColumn, AppScreen, AppText } from '@/components/ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
-import type { ShoppingList } from '@/domain/shopping-list';
+import { calculateShoppingListTotals, type ShoppingList } from '@/domain/shopping-list';
 import { formatCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
 
@@ -95,13 +95,16 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
     }),
     [lists]
   );
-
   const summaryByCurrency = useMemo(() => {
-    const grouped = new Map<SupportedCurrency, { active: number; finalized: number }>();
+    const grouped = new Map<SupportedCurrency, { active: { budget: number; actual: number; remaining: number }; finalized: { budget: number; actual: number; remaining: number } }>();
     for (const list of lists) {
       if (list.deletedAt !== null) continue;
-      const current = grouped.get(list.currencyCode) ?? { active: 0, finalized: 0 };
-      current[list.status === 'finalized' ? 'finalized' : 'active'] += list.budgetMinor;
+      const bucket = list.status === 'finalized' ? 'finalized' : 'active';
+      const totals = calculateShoppingListTotals(list);
+      const current = grouped.get(list.currencyCode) ?? { active: { budget: 0, actual: 0, remaining: 0 }, finalized: { budget: 0, actual: 0, remaining: 0 } };
+      current[bucket].budget += list.budgetMinor;
+      current[bucket].actual += totals.actualMinor;
+      current[bucket].remaining += totals.remainingMinor;
       grouped.set(list.currencyCode, current);
     }
     return grouped;
@@ -147,24 +150,8 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
           {[...summaryByCurrency.entries()].map(([currencyCode, totals]) => (
             <AppColumn key={currencyCode} spacing={theme.space.sm}>
               <AppText>{t('home.currencySummaryTitle', { currency: currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl') })}</AppText>
-              <BudgetSummary
-                accentColor={theme.colors.budgetSafe}
-                body={t('home.activeSummaryBody')}
-                budgetLabel={t('home.activeSummaryBudgetLabel')}
-                budgetValue={formatCurrencyMinor(locale, totals.active, currencyCode)}
-                listLabel={t('home.activeSummaryListsLabel')}
-                listValue={String(summaryLists.active.filter((list) => list.currencyCode === currencyCode).length)}
-                title={t('home.activeSummaryTitle')}
-              />
-              <BudgetSummary
-                accentColor={theme.colors.budgetNeutral}
-                body={t('home.finalizedSummaryBody')}
-                budgetLabel={t('home.finalizedSummaryBudgetLabel')}
-                budgetValue={formatCurrencyMinor(locale, totals.finalized, currencyCode)}
-                listLabel={t('home.finalizedSummaryListsLabel')}
-                listValue={String(summaryLists.finalized.filter((list) => list.currencyCode === currencyCode).length)}
-                title={t('home.finalizedSummaryTitle')}
-              />
+              <BudgetSummary accentColor={theme.colors.budgetSafe} actualLabel={t('home.actualLabel')} actualValue={formatCurrencyMinor(locale, totals.active.actual, currencyCode)} body={t('home.activeSummaryBody')} budgetLabel={t('home.budgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.active.budget, currencyCode)} title={t('home.activeSummaryTitle')} />
+              <BudgetSummary accentColor={theme.colors.budgetNeutral} actualLabel={t('home.actualLabel')} actualValue={formatCurrencyMinor(locale, totals.finalized.actual, currencyCode)} body={t('home.finalizedSummaryBody')} budgetLabel={t('home.budgetLabel')} budgetValue={formatCurrencyMinor(locale, totals.finalized.budget, currencyCode)} title={t('home.finalizedSummaryTitle')} />
             </AppColumn>
           ))}
         </AppColumn>

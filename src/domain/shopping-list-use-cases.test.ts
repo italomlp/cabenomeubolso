@@ -226,6 +226,17 @@ describe('createShoppingListUseCases', () => {
     );
   });
 
+  it('only raises the typed confirmation condition for unpurchased items', async () => {
+    const list = createShoppingList();
+    const repository = createRepository(list);
+    const useCases = createShoppingListUseCases({ now: () => '2026-07-31T10:00:00.000Z', repository });
+
+    await expect(useCases.finalizeList(list.id)).rejects.toMatchObject({
+      name: 'ShoppingListFinalizeConfirmationRequiredError',
+    });
+    await expect(useCases.finalizeList(list.id, { confirmUnpurchased: true })).resolves.toMatchObject({ status: 'finalized' });
+  });
+
   it('requires explicit confirmation before finalizing with unpurchased items', async () => {
     const repository = createRepository(createShoppingList());
     const useCases = createShoppingListUseCases({ repository });
