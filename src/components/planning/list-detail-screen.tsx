@@ -161,6 +161,12 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     }
   };
 
+  const announceSaveError = () => {
+    const message = t('listDetail.saveError');
+    setErrorKind('save');
+    announceForAccessibility(message);
+  };
+
   const reopenList = async () => {
     if (runtime === null || draft === null) {
       return;
@@ -175,7 +181,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
       setPlannedItemEditorVisible(false);
       await refreshDraft(draft.listId);
     } catch {
-      setErrorKind('save');
+      announceSaveError();
     }
   };
 
@@ -418,7 +424,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                           setEditingItemId(null);
                           setPlannedItemEditorInitialItem(undefined);
                         } catch {
-                          setErrorKind('save');
+                          announceSaveError();
                         }
                       }}
                       testID={`remove-item-${item.id}`}
@@ -444,7 +450,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                 announceForAccessibility(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
                 setRecentlyRemovedItem(null);
               } catch {
-                setErrorKind('save');
+                announceSaveError();
               }
             }}
             visible={recentlyRemovedItem !== null}
