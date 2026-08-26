@@ -1,4 +1,5 @@
 export { AppColumn } from './app-column';
+export { announceForAccessibility } from './app-accessibility';
 export { AppButton } from './app-button';
 export { AppFormSheet } from './app-form-sheet';
 export { AppHost } from './app-host';

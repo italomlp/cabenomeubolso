@@ -89,6 +89,7 @@ describe('HomeScreen', () => {
     expect(texts).toContain('Plan the next list offline before you shop.');
     expect(texts).toContain('Create list');
     expect(texts).toContain('Nothing to review yet');
+    expect(tree!.root.findAllByType(mockExpoUi.Button).some((button) => button.props.testID === 'home-primary-create')).toBe(true);
   });
 
   it('renders the pt-BR shell copy', async () => {

@@ -45,7 +45,7 @@ export function AppUndoNotice({ message, onUndo, visible }: AppUndoNoticeProps) 
           {message}
         </AppText>
       </AppColumn>
-      <AppButton accessibilityHint={t('feedback.undoHint')} label={t('feedback.undo')} onPress={onUndo} variant="secondary" />
+      <AppButton accessibilityHint={t('feedback.undoHint')} label={t('feedback.undo')} onPress={onUndo} testID="home-undo" variant="secondary" />
     </AppRow>
   );
 }

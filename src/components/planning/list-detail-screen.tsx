@@ -1,9 +1,8 @@
 import { getLocales } from 'expo-localization';
-import { AccessibilityInfo } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppColumn, AppRow, AppScreen, AppText, AppUndoNotice } from '@/components/ui';
+import { announceForAccessibility, AppButton, AppColumn, AppRow, AppScreen, AppText, AppUndoNotice } from '@/components/ui';
 import { BudgetSummary } from './budget-summary';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
@@ -36,10 +35,6 @@ function toPlannedItemDraft(item: ShoppingListItem): PlannedItemDraft {
   };
 }
 
-function announce(message: string) {
-  AccessibilityInfo.announceForAccessibility(message);
-}
-
 export default function ListDetailScreen({ dependencies, listId, onClose = () => undefined }: ListDetailScreenProps) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
@@ -65,6 +60,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   const [plannedItemEditorInitialItem, setPlannedItemEditorInitialItem] = useState<PlannedItemDraft | undefined>(undefined);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [recentlyRemovedItem, setRecentlyRemovedItem] = useState<ShoppingListItem | null>(null);
+  const [errorKind, setErrorKind] = useState<'finalize' | 'load' | 'save' | null>(null);
   const [finalizeConfirmationVisible, setFinalizeConfirmationVisible] = useState(false);
   const draftNameState = useNativeState('');
   const draftBudgetTextState = useNativeState('');
@@ -77,14 +73,24 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     let isActive = true;
 
     void runtime.useCases.loadList(listId, true).then((loaded) => {
-      if (!isActive || loaded === null) {
+      if (!isActive) {
+        return;
+      }
+
+      if (loaded === null) {
+        setErrorKind('load');
         return;
       }
 
       setDraft(createCreateListDraftStateFromList(loaded, locale, loaded.id));
+      setErrorKind(null);
       setRecentlyRemovedItem(null);
       setEditingItemId(null);
       setPlannedItemEditorInitialItem(undefined);
+    }).catch(() => {
+      if (isActive) {
+        setErrorKind('load');
+      }
     });
 
     return () => {
@@ -105,10 +111,18 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
       return;
     }
 
-    const reloaded = await runtime.useCases.loadList(nextListId, true);
+    try {
+      const reloaded = await runtime.useCases.loadList(nextListId, true);
 
-    if (reloaded !== null) {
+      if (reloaded === null) {
+        throw new Error('List not found');
+      }
+
       setDraft(createCreateListDraftStateFromList(reloaded, locale, reloaded.id));
+      setErrorKind(null);
+    } catch (error) {
+      setErrorKind('load');
+      throw error;
     }
   };
 
@@ -117,14 +131,34 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
       return;
     }
 
-    const persistedDraft = buildCreateListDraft(draft, new Date().toISOString(), locale);
-    await runtime.useCases.saveList(persistedDraft);
-
-    if (finalize) {
-      await runtime.useCases.finalizeList(persistedDraft.id);
+    try {
+      const persistedDraft = buildCreateListDraft(draft, new Date().toISOString(), locale);
+      await runtime.useCases.saveList(persistedDraft);
+    } catch {
+      setErrorKind('save');
+      return;
     }
 
-    await refreshDraft(persistedDraft.id);
+    if (finalize) {
+      try {
+        await runtime.useCases.finalizeList(draft.listId);
+      } catch {
+        setErrorKind('finalize');
+        return;
+      }
+    }
+
+    await refreshDraft(draft.listId).catch(() => undefined);
+  };
+
+  const retry = () => {
+    if (errorKind === 'load') {
+      void refreshDraft().catch(() => undefined);
+    } else if (errorKind === 'save') {
+      void saveCurrentDraft(false);
+    } else if (errorKind === 'finalize') {
+      void saveCurrentDraft(true);
+    }
   };
 
   const reopenList = async () => {
@@ -133,7 +167,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
     }
 
     await runtime.useCases.reopenList(draft.listId);
-    announce(t('listDetail.reopenedAnnouncement'));
+    announceForAccessibility(t('listDetail.reopenedAnnouncement'));
     setRecentlyRemovedItem(null);
     setEditingItemId(null);
     setPlannedItemEditorInitialItem(undefined);
@@ -201,7 +235,12 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
   if (runtime === null || draft === null) {
     return (
       <AppScreen>
-        <AppText>{t('app.loading')}</AppText>
+        {errorKind === 'load' ? (
+          <AppColumn spacing={theme.space.sm} style={{ padding: theme.space.content }}>
+            <AppText>{t('listDetail.loadError')}</AppText>
+            <AppButton label={t('listDetail.retry')} onPress={retry} testID="list-detail-retry" variant="secondary" />
+          </AppColumn>
+        ) : <AppText>{t('app.loading')}</AppText>}
       </AppScreen>
     );
   }
@@ -282,17 +321,24 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                 };
 
             setDraft(nextDraft);
-            announce(`${t(editingItemId === null ? 'listDetail.itemAddedAnnouncement' : 'listDetail.itemUpdatedAnnouncement', { name: plannedItemDraft.name })} ${budgetStatusAnnouncement(nextDraft)}`);
+            announceForAccessibility(`${t(editingItemId === null ? 'listDetail.itemAddedAnnouncement' : 'listDetail.itemUpdatedAnnouncement', { name: plannedItemDraft.name })} ${budgetStatusAnnouncement(nextDraft)}`);
           }
           setEditingItemId(null);
           setPlannedItemEditorInitialItem(undefined);
           setPlannedItemEditorVisible(false);
         }}
         showClearItems={false}
+        showItemActions={false}
         showDraftSummary={false}
         showItemPreview={false}
       >
         <AppColumn spacing={theme.space.sm}>
+          {errorKind !== null ? (
+            <AppColumn spacing={theme.space.sm}>
+              <AppText>{t(errorKind === 'load' ? 'listDetail.loadError' : errorKind === 'save' ? 'listDetail.saveError' : 'listDetail.finalizeError')}</AppText>
+              <AppButton label={t('listDetail.retry')} onPress={retry} testID="list-detail-retry" variant="secondary" />
+            </AppColumn>
+          ) : null}
           {(() => {
             const totals = calculateShoppingListTotals({
               ...draft,
@@ -362,7 +408,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
                         const nextList = await runtime.useCases.removeItem(draft.listId, item.id);
                         const nextDraft = createCreateListDraftStateFromList(nextList, locale, nextList.id);
                         setDraft(nextDraft);
-                        announce(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
+                        announceForAccessibility(`${t('listDetail.itemRemovedAnnouncement', { name: item.name })} ${budgetStatusAnnouncement(nextDraft)}`);
                         setRecentlyRemovedItem(item);
                         setEditingItemId(null);
                         setPlannedItemEditorInitialItem(undefined);
@@ -386,7 +432,7 @@ export default function ListDetailScreen({ dependencies, listId, onClose = () =>
               const restoredList = await runtime.useCases.restoreItem(draft.listId, recentlyRemovedItem.id);
               const restoredDraft = createCreateListDraftStateFromList(restoredList, locale, restoredList.id);
               setDraft(restoredDraft);
-              announce(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
+              announceForAccessibility(`${t('listDetail.itemRestoredAnnouncement', { name: recentlyRemovedItem.name })} ${budgetStatusAnnouncement(restoredDraft)}`);
               setRecentlyRemovedItem(null);
             }}
             visible={recentlyRemovedItem !== null}

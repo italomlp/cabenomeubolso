@@ -125,6 +125,8 @@ describe('ListDetailScreen', () => {
     expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'list-detail-reopen')).toHaveLength(0);
     expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'create-list-save')).toHaveLength(1);
     expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'edit-item-item-3')).toHaveLength(1);
+    expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'edit-planned-item-item-3')).toHaveLength(0);
+    expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'remove-planned-item-item-3')).toHaveLength(0);
   });
 
   it('prefills the editor for an existing item and replaces it in place after save', async () => {
@@ -157,6 +159,27 @@ describe('ListDetailScreen', () => {
     expect(updatedTexts).toContain('2 piece');
     expect(updatedTexts).toContain('500 g');
     expect(updatedTexts).toContain('1.5 kg');
+  });
+
+  it('suppresses the sheet-owned item preview in list detail', async () => {
+    const runtime = createRuntime(createCompraSemanalList('draft'));
+    let tree: renderer.ReactTestRenderer;
+
+    await act(async () => {
+      await i18n.changeLanguage('en');
+      tree = renderer.create(<ListDetailScreen dependencies={runtime} listId="list-compra-semanal" />);
+    });
+
+    const texts = tree!.root.findAllByType(Text).map((node) => node.props.children);
+    expect(texts).not.toContain('Review planned items');
+    expect(texts.filter((text) => text === 'Eggs')).toHaveLength(1);
+    expect(texts.filter((text) => text === 'Rice')).toHaveLength(1);
+    expect(texts.filter((text) => text === 'Potatoes')).toHaveLength(1);
+
+    const buttonTestIDs = tree!.root.findAllByType(mockExpoUi.Button).map((button) => button.props.testID);
+
+    expect(buttonTestIDs).toEqual(expect.arrayContaining(['edit-item-item-1', 'remove-item-item-1']));
+    expect(buttonTestIDs).not.toEqual(expect.arrayContaining(['edit-planned-item-item-1', 'remove-planned-item-item-1']));
   });
 
   it('asks before finalizing while items remain unpurchased', async () => {

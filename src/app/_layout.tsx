@@ -1,5 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router/react-navigation';
 import { Stack } from 'expo-router/stack';
+import * as Linking from 'expo-linking';
 import { getLocales } from 'expo-localization';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -31,6 +32,14 @@ export default function RootLayout() {
           useThemePreferencesStore.persist.rehydrate(),
         ]);
 
+        if (__DEV__) {
+          const initialUrl = await Linking.getInitialURL();
+          if (initialUrl !== null) {
+            const { handleDevScreenshotDeepLink } = await import('@/lib/dev/screenshot-harness');
+            await handleDevScreenshotDeepLink(initialUrl);
+          }
+        }
+
         const locales = getLocales();
         const preferences = useLocalizationPreferencesStore.getState();
         const { language } = resolveLocalizationPreferences(preferences, locales);
@@ -52,6 +61,18 @@ export default function RootLayout() {
     return () => {
       isActive = false;
     };
+  }, []);
+
+  useEffect(() => {
+    if (!__DEV__) {
+      return;
+    }
+
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      void import('@/lib/dev/screenshot-harness').then(({ handleDevScreenshotDeepLink }) => handleDevScreenshotDeepLink(url));
+    });
+
+    return () => subscription.remove();
   }, []);
 
   useEffect(() => {
