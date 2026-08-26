@@ -76,7 +76,7 @@ export function BudgetSummary({ accentColor, actualLabel, actualValue, body, bud
           {statusLabel}
         </AppText>
       ) : null}
-      <AppRow spacing={theme.space.lg}>
+      <AppColumn spacing={theme.space.lg}>
         <AppColumn spacing={theme.space.xxs}>
           <AppText
             textStyle={{
@@ -121,7 +121,7 @@ export function BudgetSummary({ accentColor, actualLabel, actualValue, body, bud
             {actualValue ?? budgetValue}
           </AppText>
         </AppColumn>
-      </AppRow>
+      </AppColumn>
     </AppColumn>
   );
 }

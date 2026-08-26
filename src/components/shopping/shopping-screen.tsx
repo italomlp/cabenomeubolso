@@ -26,7 +26,11 @@ export default function ShoppingScreen({ listId, dependencies, onSummary }: Prop
   const price = useNativeState('');
 
   useEffect(() => {
-    if (runtime) void runtime.useCases.loadList(listId).then(setList).catch(() => setError(t('shopping.loadError')));
+    if (runtime) void runtime.useCases.loadList(listId).then(setList).catch(() => {
+      const message = t('shopping.loadError');
+      setError(message);
+      announceForAccessibility(message);
+    });
   }, [listId, runtime, t]);
 
   const totals = useMemo(() => list ? calculateShoppingListTotals(list) : null, [list]);
@@ -39,7 +43,9 @@ export default function ShoppingScreen({ listId, dependencies, onSummary }: Prop
     try {
       minor = text === undefined ? undefined : parseCurrencyMinor(locale, text, list.currencyCode);
     } catch {
-      setError(t('shopping.priceError'));
+      const message = t('shopping.priceError');
+      setError(message);
+      announceForAccessibility(message);
       return false;
     }
 
@@ -49,7 +55,9 @@ export default function ShoppingScreen({ listId, dependencies, onSummary }: Prop
       announceForAccessibility(t('shopping.purchasedAnnouncement'));
       return true;
     } catch {
-      setError(t('shopping.mutationError'));
+      const message = t('shopping.mutationError');
+      setError(message);
+      announceForAccessibility(message);
       return false;
     }
   };
@@ -67,7 +75,9 @@ export default function ShoppingScreen({ listId, dependencies, onSummary }: Prop
       if (caughtError instanceof ShoppingListFinalizeConfirmationRequiredError) {
         setConfirm(true);
       } else {
-        setError(t('shopping.finalizeError'));
+        const message = t('shopping.finalizeError');
+        setError(message);
+        announceForAccessibility(message);
       }
     }
   };
@@ -84,7 +94,7 @@ export default function ShoppingScreen({ listId, dependencies, onSummary }: Prop
         const unit = t(`units.${item.unitCode}`);
 
         return <AppColumn key={item.id} spacing={theme.space.xs} style={{ borderColor: theme.colors.border, borderWidth: 1, padding: theme.space.sm }}>
-          <AppRow spacing={theme.space.sm}><AppColumn spacing={0}><AppText textStyle={{ fontWeight: '600' }}>{item.name}</AppText><AppText>{`${formatQuantityMilli(locale, item.unitCode, item.quantityMilli)} ${unit} · ${formatCurrencyMinor(locale, bought && item.actualUnitMinor !== null ? item.actualUnitMinor : item.plannedUnitMinor, list.currencyCode)} / ${unit}`}</AppText></AppColumn><AppButton label={bought ? t('shopping.undo') : t('shopping.buy')} accessibilitySelected={bought} onPress={() => { if (bought) { void runtime?.useCases.setItemUnpurchased?.(list.id, item.id).then(setList).catch(() => setError(t('shopping.mutationError'))); } else { setEditing(item.id); price.set(item.actualUnitMinor === null ? formatCurrencyMinor(locale, item.plannedUnitMinor, list.currencyCode) : formatCurrencyMinor(locale, item.actualUnitMinor, list.currencyCode)); } }} testID={`purchase-${item.id}`} variant={bought ? 'secondary' : 'primary'} /></AppRow>
+          <AppRow spacing={theme.space.sm}><AppColumn spacing={0}><AppText textStyle={{ fontWeight: '600' }}>{item.name}</AppText><AppText>{`${formatQuantityMilli(locale, item.unitCode, item.quantityMilli)} ${unit} · ${formatCurrencyMinor(locale, bought && item.actualUnitMinor !== null ? item.actualUnitMinor : item.plannedUnitMinor, list.currencyCode)} / ${unit}`}</AppText></AppColumn><AppButton label={bought ? t('shopping.undo') : t('shopping.buy')} accessibilitySelected={bought} onPress={() => { if (bought) { void runtime?.useCases.setItemUnpurchased?.(list.id, item.id).then(setList).catch(() => { const message = t('shopping.mutationError'); setError(message); announceForAccessibility(message); }); } else { setEditing(item.id); price.set(item.actualUnitMinor === null ? formatCurrencyMinor(locale, item.plannedUnitMinor, list.currencyCode) : formatCurrencyMinor(locale, item.actualUnitMinor, list.currencyCode)); } }} testID={`purchase-${item.id}`} variant={bought ? 'secondary' : 'primary'} /></AppRow>
         </AppColumn>;
       })}
       <AppButton label={t('shopping.finalize')} onPress={() => void finalize(false)} accessibilityHint={t('shopping.finalizeHint')} testID="finalize-shopping" />
