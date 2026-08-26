@@ -3,6 +3,7 @@ import renderer, { act } from 'react-test-renderer';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { AppThemeProvider } from '@/design-system/theme-context';
+import { resolveSemanticTheme } from '@/design-system/theme';
 
 import * as mockExpoUi from './expo-ui.mock';
 import { AppButton, AppSelect, AppSheet, AppTextField } from './index';
@@ -56,7 +57,7 @@ describe('universal adapters', () => {
     const input = tree!.root.findByType(mockExpoUi.TextInput);
 
     expect(input.props.placeholderTextColor).toBe('#8FA29A');
-    expect(input.props.textStyle.color).toBe('#F4F0E8');
+    expect(input.props.textStyle.color).toBe(resolveSemanticTheme('system', 'dark').colors.onSurface);
     expect(input.props.placeholderTextColor).not.toBe(input.props.textStyle.color);
   });
 });
