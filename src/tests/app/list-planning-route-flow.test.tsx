@@ -170,7 +170,20 @@ describe('app planning route flows', () => {
     await fillPlannedItem(tree!, { name: 'Potatoes', quantity: '1.5', price: '5.00', unitTestID: 'app-select-option-kg' });
 
     await act(async () => {
+      getButton(tree!, 'create-list-save').props.onPress();
+      await Promise.resolve();
+    });
+
+    const savedDraft = mockRuntime.saveMock.mock.calls[mockRuntime.saveMock.mock.calls.length - 1]?.[0] as ShoppingList | undefined;
+    expect(savedDraft).toMatchObject({ status: 'draft' });
+
+    await act(async () => {
       getButton(tree!, 'create-list-finalize').props.onPress();
+    });
+    expect(getButton(tree!, 'finalize-confirm')).toBeDefined();
+
+    await act(async () => {
+      getButton(tree!, 'finalize-confirm').props.onPress();
       await Promise.resolve();
     });
 
@@ -277,6 +290,14 @@ describe('app planning route flows', () => {
 
     await act(async () => {
       getButton(tree!, 'create-list-finalize').props.onPress();
+    });
+
+    const draftBeforeConfirmation = mockRuntime.saveMock.mock.calls[mockRuntime.saveMock.mock.calls.length - 1]?.[0] as ShoppingList;
+    expect(draftBeforeConfirmation).toMatchObject({ status: 'draft' });
+    expect(getButton(tree!, 'finalize-confirm')).toBeDefined();
+
+    await act(async () => {
+      getButton(tree!, 'finalize-confirm').props.onPress();
       await Promise.resolve();
     });
 

@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck, lint, test (Node 22.13)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check
+        run: npm run ci
+
+  maestro-syntax:
+    name: Maestro flow syntax (scaffolding)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Scaffolding only: the Maestro CLI is not provisioned on this runner
+      # yet, so this remains optional until CLI provisioning exists.
+      - name: Validate Maestro flows
+        env:
+          MAESTRO_OPTIONAL: "1"
+        run: bash scripts/validate-maestro-flows.sh
