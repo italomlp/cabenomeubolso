@@ -2,6 +2,7 @@ import renderer, { act } from 'react-test-renderer';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { AppThemeProvider } from '@/design-system/theme-context';
+import { resolveSemanticTheme } from '@/design-system/theme';
 
 import * as mockExpoUi from './expo-ui.mock';
 import { Button } from './expo-ui';
@@ -24,13 +25,10 @@ describe('AppButton', () => {
     const button = tree!.root.findByType(Button);
 
     expect(button.props.variant).toBe('filled');
-    expect(button.props.style.backgroundColor).toBe('#B94D3C');
+    expect(button.props.style.backgroundColor).toBe(resolveSemanticTheme('system', 'light').colors.budgetRisk);
   });
 
-  it.each([
-    ['light', '#087F73'],
-    ['dark', '#54C5B5'],
-  ])('maps primary buttons to the %s focus token', (scheme, focusColor) => {
+  it.each(['light', 'dark'] as const)('maps primary buttons to the %s focus token', (scheme) => {
     let tree: renderer.ReactTestRenderer;
 
     act(() => {
@@ -44,6 +42,6 @@ describe('AppButton', () => {
     const button = tree!.root.findByType(Button);
 
     expect(button.props.variant).toBe('filled');
-    expect(button.props.style.backgroundColor).toBe(focusColor);
+    expect(button.props.style.backgroundColor).toBe(resolveSemanticTheme('system', scheme).colors.focus);
   });
 });
