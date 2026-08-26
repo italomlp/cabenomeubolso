@@ -201,6 +201,12 @@ describe('create list shell rules', () => {
 
     expect(runtime.useCases.finalizeList).not.toHaveBeenCalled();
     expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'finalize-confirm')).toHaveLength(1);
+    const confirmationTexts = tree!.root.findAllByType(mockExpoUi.Text).map((text) => text.props.children);
+    expect(confirmationTexts).toContain('Ainda há itens não comprados');
+    expect(confirmationTexts).toContain('Alguns itens ainda não foram comprados. Deseja finalizar esta lista mesmo assim?');
+    const confirmationButtons = tree!.root.findAllByType(mockExpoUi.Button).map((button) => button.props.label);
+    expect(confirmationButtons).toContain('Finalizar mesmo assim');
+    expect(confirmationButtons).toContain('Agora não');
 
     await act(async () => {
       tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')!.props.onPress();
