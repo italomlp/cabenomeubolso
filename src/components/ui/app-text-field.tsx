@@ -66,7 +66,7 @@ export function AppTextField({
       <TextInput
         onBlur={handleBlur}
         onFocus={handleFocus}
-        placeholderTextColor={theme.colors.muted}
+        placeholderTextColor={theme.colors.placeholder}
         modifiers={[
           accessibilityLabelModifier(accessibilityLabel ?? label),
           ...(accessibilityHint ?? helperText ? [accessibilityHintModifier(accessibilityHint ?? helperText!)] : []),

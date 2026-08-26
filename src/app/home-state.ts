@@ -10,6 +10,24 @@ import {
 } from '@/domain/shopping-list';
 
 const DEFAULT_DRAFT_LIST_ID = 'home-create-list-draft';
+let generatedIdSequence = 0;
+
+function createUniqueId(prefix: string): string {
+  generatedIdSequence += 1;
+
+  const randomUuid = globalThis.crypto?.randomUUID?.();
+  const randomPart = randomUuid ?? Math.random().toString(36).slice(2);
+
+  return `${prefix}-${Date.now().toString(36)}-${generatedIdSequence}-${randomPart}`;
+}
+
+export function createShoppingListId(): string {
+  return createUniqueId('shopping-list');
+}
+
+export function createShoppingListItemId(listId: string): string {
+  return createUniqueId(`${listId}-item`);
+}
 
 export type CreateListDraftState = {
   budgetText: string;
@@ -18,6 +36,10 @@ export type CreateListDraftState = {
   items: readonly ShoppingListItem[];
   listId: string;
   name: string;
+  createdAt?: string;
+  deletedAt?: string | null;
+  finalizedAt?: string | null;
+  isPersisted?: boolean;
   status?: ShoppingList['status'];
 };
 
@@ -26,7 +48,7 @@ function createDraftPlaceholderItem(index: number, listId: string, timestamp: st
     actualUnitMinor: null,
     createdAt: timestamp,
     deletedAt: null,
-    id: `${listId}-item-${index + 1}`,
+    id: createShoppingListItemId(listId),
     listId,
     name: `placeholder-${index + 1}`,
     plannedUnitMinor: 0,
@@ -47,7 +69,7 @@ function normalizeDraftItems(items: readonly ShoppingListItem[], listId: string,
     ...item,
     createdAt: item.createdAt,
     deletedAt: item.deletedAt,
-    id: item.id ?? `${listId}-item-${index + 1}`,
+    id: item.id ?? createShoppingListItemId(listId),
     listId,
     name: normalizeShoppingListName(item.name),
     sortOrder: index + 1,
@@ -57,13 +79,18 @@ function normalizeDraftItems(items: readonly ShoppingListItem[], listId: string,
 
 export function createEmptyCreateListDraftState(
   currencyCode: SupportedCurrency,
-  listId = DEFAULT_DRAFT_LIST_ID
+  listId = createShoppingListId(),
+  createdAt = new Date().toISOString()
 ): CreateListDraftState {
   return {
     budgetText: '',
     currencyCode,
+    createdAt,
+    deletedAt: null,
+    finalizedAt: null,
     itemCount: 0,
     items: [],
+    isPersisted: false,
     listId,
     name: '',
     status: 'draft',
@@ -78,8 +105,12 @@ export function createCreateListDraftStateFromList(
   return {
     budgetText: formatCurrencyMinor(locale, list.budgetMinor, list.currencyCode),
     currencyCode: list.currencyCode,
+    createdAt: list.createdAt,
+    deletedAt: list.deletedAt,
+    finalizedAt: list.finalizedAt,
     itemCount: list.items.filter((item) => item.deletedAt === null).length,
     items: normalizeDraftItems(list.items, listId, list.updatedAt),
+    isPersisted: true,
     listId,
     name: list.name,
     status: list.status,
@@ -91,25 +122,29 @@ export function buildCreateListDraft(
   timestamp = new Date().toISOString(),
   locale = 'en'
 ): ShoppingList {
-  const items = state.items.length > 0 ? state.items : Array.from({ length: state.itemCount }, (_, index) => createDraftPlaceholderItem(index, state.listId, timestamp));
+  const items = state.items.length > 0
+    ? state.items
+    : Array.from({ length: state.itemCount }, (_, index) => createDraftPlaceholderItem(index, state.listId, timestamp));
+  const createdAt = state.createdAt ?? timestamp;
+  const isPersisted = state.isPersisted === true;
 
   return {
     budgetMinor: parseCurrencyMinor(locale, state.budgetText, state.currencyCode),
-    createdAt: timestamp,
+    createdAt,
     currencyCode: state.currencyCode,
-    deletedAt: null,
-    finalizedAt: null,
+    deletedAt: state.deletedAt ?? null,
+    finalizedAt: state.finalizedAt ?? null,
     id: state.listId,
     items: items.map((item, index) => ({
       ...item,
-      id: item.id ?? `${state.listId}-item-${index + 1}`,
+      id: isPersisted ? item.id : createShoppingListItemId(state.listId),
       listId: state.listId,
       name: normalizeShoppingListName(item.name),
       sortOrder: index + 1,
       updatedAt: item.updatedAt ?? timestamp,
     })),
     name: normalizeShoppingListName(state.name),
-    status: 'draft',
+    status: state.status ?? 'draft',
     updatedAt: timestamp,
   };
 }

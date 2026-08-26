@@ -1,6 +1,7 @@
 import { useMemo, useReducer, useRef, type ComponentPropsWithoutRef, type PropsWithChildren, type ReactNode } from 'react';
 import {
   Pressable as RNPressable,
+  ScrollView as RNScrollView,
   Text as RNText,
   TextInput as RNTextInput,
   View as RNView,
@@ -30,6 +31,8 @@ type HostProps = PropsWithChildren<{
   colorScheme?: string;
   style?: StyleProp<ViewStyle>;
 } & ComponentPropsWithoutRef<typeof RNView>>;
+
+type ScrollViewProps = PropsWithChildren<ComponentPropsWithoutRef<typeof RNScrollView>>;
 
 type TextInputProps = ComponentPropsWithoutRef<typeof RNTextInput> & {
   style?: StyleProp<ViewStyle>;
@@ -81,6 +84,10 @@ export function Host({ children, colorScheme: _colorScheme, style, ...props }: H
       {children}
     </RNView>
   );
+}
+
+export function ScrollView({ children, ...props }: ScrollViewProps) {
+  return <RNScrollView {...props}>{children}</RNScrollView>;
 }
 
 export function Row({ children, spacing, style, ...props }: BoxProps & ComponentPropsWithoutRef<typeof RNView>) {

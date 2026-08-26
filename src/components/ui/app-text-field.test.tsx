@@ -25,21 +25,39 @@ describe('AppTextField', () => {
 
     const input = () => tree!.root.findByType(TextInput);
 
-    expect(input().props.style.borderColor).toBe('#D7DFEA');
+    expect(input().props.style.borderColor).toBe('#E4DED2');
     expect(input().props.modifiers).toHaveLength(1);
 
     act(() => {
       input().props.onFocus?.();
     });
 
-    expect(input().props.style.borderColor).toBe('#208AEF');
+    expect(input().props.style.borderColor).toBe('#087F73');
     expect(onFocus).toHaveBeenCalledWith();
 
     act(() => {
       input().props.onBlur?.();
     });
 
-    expect(input().props.style.borderColor).toBe('#D7DFEA');
+    expect(input().props.style.borderColor).toBe('#E4DED2');
     expect(onBlur).toHaveBeenCalledWith();
+  });
+
+  it('uses a distinct placeholder color from entered text', () => {
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <AppTextField label="Search" placeholder="Type here" />
+        </AppThemeProvider>
+      );
+    });
+
+    const input = tree!.root.findByType(TextInput);
+
+    expect(input.props.placeholderTextColor).toBe('#7C8882');
+    expect(input.props.textStyle.color).toBe('#1D2B28');
+    expect(input.props.placeholderTextColor).not.toBe(input.props.textStyle.color);
   });
 });

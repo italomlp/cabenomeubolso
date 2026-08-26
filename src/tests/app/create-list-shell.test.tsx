@@ -3,11 +3,12 @@ import type { ComponentProps } from 'react';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import * as mockExpoUi from '@/components/ui/expo-ui.mock';
-import HomeScreen, { buildCreateListDraft, canPersistCreateListDraft } from '@/app/index';
+import CreateListScreen from '@/components/planning/create-list-screen';
+import { buildCreateListDraft, canPersistCreateListDraft } from '@/app/home-state';
 import type { ShoppingList } from '@/domain/shopping-list';
 import { i18n } from '@/lib/localization/i18n';
 
-type HomeScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof HomeScreen>>['dependencies']>;
+type CreateListScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof CreateListScreen>>['dependencies']>;
 
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -18,7 +19,7 @@ jest.mock('expo-localization', () => ({
   getLocales: () => [{ currencyCode: 'BRL', languageTag: 'pt-BR', regionCode: 'BR' }],
 }));
 
-function createRuntime(): HomeScreenDependencies {
+function createRuntime(): CreateListScreenDependencies {
   let savedList: ShoppingList | null = null;
 
   const runtime = {
@@ -29,8 +30,8 @@ function createRuntime(): HomeScreenDependencies {
         savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
       }),
     },
-    useCases: {
-      finalizeList: jest.fn(async (listId: string) => {
+      useCases: {
+        finalizeList: jest.fn(async (listId: string) => {
         if (savedList === null || savedList.id !== listId) {
           throw new Error(`Shopping list not found: ${listId}`);
         }
@@ -43,17 +44,20 @@ function createRuntime(): HomeScreenDependencies {
 
         return JSON.parse(JSON.stringify(savedList));
       }),
-      loadList: jest.fn(async (listId: string) => {
-        if (savedList === null || savedList.id !== listId) {
-          return null;
-        }
+        loadList: jest.fn(async (listId: string) => {
+          if (savedList === null || savedList.id !== listId) {
+            return null;
+          }
 
-        return JSON.parse(JSON.stringify(savedList));
-      }),
-      reopenList: jest.fn(async (listId: string) => {
-        if (savedList === null || savedList.id !== listId) {
-          throw new Error(`Shopping list not found: ${listId}`);
-        }
+          return JSON.parse(JSON.stringify(savedList));
+        }),
+        removeItem: jest.fn(async () => {
+          throw new Error('not expected');
+        }),
+        reopenList: jest.fn(async (listId: string) => {
+          if (savedList === null || savedList.id !== listId) {
+            throw new Error(`Shopping list not found: ${listId}`);
+          }
 
         savedList = {
           ...savedList,
@@ -61,12 +65,15 @@ function createRuntime(): HomeScreenDependencies {
           status: 'draft',
         };
 
-        return JSON.parse(JSON.stringify(savedList));
-      }),
-      saveList: jest.fn(async (list) => {
-        savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
-      }),
-    },
+          return JSON.parse(JSON.stringify(savedList));
+        }),
+        restoreItem: jest.fn(async () => {
+          throw new Error('not expected');
+        }),
+        saveList: jest.fn(async (list) => {
+          savedList = JSON.parse(JSON.stringify(list)) as typeof savedList;
+        }),
+      },
   } as const;
 
   return runtime;
@@ -132,14 +139,7 @@ describe('create list shell rules', () => {
 
     await act(async () => {
       await i18n.changeLanguage('pt-BR');
-      tree = renderer.create(<HomeScreen dependencies={runtime} />);
-    });
-
-    await act(async () => {
-      tree!.root
-        .findAllByType(mockExpoUi.Button)
-        .find((button) => button.props.label === 'Criar lista')!
-        .props.onPress();
+      tree = renderer.create(<CreateListScreen dependencies={runtime} />);
     });
 
     expect(tree!.root.findAllByProps({ testID: 'create-list-currency' }).length).toBeGreaterThan(0);
@@ -194,5 +194,24 @@ describe('create list shell rules', () => {
         ],
       })
     );
+
+    await act(async () => {
+      tree!.root.findAllByProps({ testID: 'create-list-finalize' })[0].props.onPress();
+    });
+
+    expect(runtime.useCases.finalizeList).not.toHaveBeenCalled();
+    expect(tree!.root.findAllByType(mockExpoUi.Button).filter((button) => button.props.testID === 'finalize-confirm')).toHaveLength(1);
+    const confirmationTexts = tree!.root.findAllByType(mockExpoUi.Text).map((text) => text.props.children);
+    expect(confirmationTexts).toContain('Ainda há itens não comprados');
+    expect(confirmationTexts).toContain('Alguns itens ainda não foram comprados. Deseja finalizar esta lista mesmo assim?');
+    const confirmationButtons = tree!.root.findAllByType(mockExpoUi.Button).map((button) => button.props.label);
+    expect(confirmationButtons).toContain('Finalizar mesmo assim');
+    expect(confirmationButtons).toContain('Agora não');
+
+    await act(async () => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')!.props.onPress();
+    });
+
+    expect(runtime.useCases.finalizeList).toHaveBeenCalledTimes(1);
   });
 });

@@ -449,6 +449,43 @@ export function markShoppingListItemDeleted(list: ShoppingList, itemId: string, 
   };
 }
 
+export function markShoppingListItemRestored(list: ShoppingList, itemId: string, restoredAt: string): ShoppingList {
+  assertShoppingListIsEditable(list);
+
+  if (!isValidTimestamp(restoredAt)) {
+    throw new Error('Restored timestamp is required.');
+  }
+
+  let itemFound = false;
+  const items = list.items.map((item) => {
+    if (item.id !== itemId) {
+      return item;
+    }
+
+    if (item.deletedAt === null) {
+      throw new Error('Only deleted shopping list items can be restored.');
+    }
+
+    itemFound = true;
+
+    return {
+      ...item,
+      deletedAt: null,
+      updatedAt: restoredAt,
+    };
+  });
+
+  if (!itemFound) {
+    throw new Error(`Shopping list item not found: ${itemId}`);
+  }
+
+  return {
+    ...list,
+    items,
+    updatedAt: restoredAt,
+  };
+}
+
 export function finalizeShoppingList(list: ShoppingList, finalizedAt: string): ShoppingList {
   assertShoppingListIsMutable(list);
 

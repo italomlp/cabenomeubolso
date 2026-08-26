@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppColumn, AppRow, AppSelect, AppSheet, AppTextField } from '@/components/ui';
+import { AppColumn, AppFormSheet, AppSelect, AppText, AppTextField } from '@/components/ui';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
@@ -24,6 +24,7 @@ type PlannedItemDraft = {
 
 type PlannedItemEditorSheetProps = {
   currencyCode: SupportedCurrency;
+  initialItem?: PlannedItemDraft;
   initialUnitCode?: ShoppingListUnitCode;
   onCancel: () => void;
   onSave: (draft: PlannedItemDraft) => void;
@@ -55,7 +56,7 @@ function parseErrorMessage(code: LocaleInputParseError['code'], t: (key: string)
   }
 }
 
-function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCancel, onSave }: PlannedItemEditorContentProps) {
+function PlannedItemEditorFields({ currencyCode, initialItem, initialUnitCode = 'piece', onCancel, onSave }: PlannedItemEditorContentProps) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -72,22 +73,26 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
     [t]
   );
 
-  const [name, setName] = useState('');
-  const [unitCode, setUnitCode] = useState<ShoppingListUnitCode>(initialUnitCode);
-  const [quantityText, setQuantityText] = useState('');
-  const [quantityMilli, setQuantityMilli] = useState<number | null>(null);
+  const initialUnit = initialItem?.unitCode ?? initialUnitCode;
+  const initialQuantityText = initialItem === undefined ? undefined : formatQuantityMilli(locale, initialUnit, initialItem.quantityMilli);
+  const initialPriceText = initialItem === undefined ? undefined : formatCurrencyMinor(locale, initialItem.plannedUnitMinor, currencyCode);
+  const [name, setName] = useState<string | undefined>(initialItem?.name);
+  const [unitCode, setUnitCode] = useState<ShoppingListUnitCode>(initialUnit);
+  const [quantityText, setQuantityText] = useState(initialQuantityText);
+  const [quantityMilli, setQuantityMilli] = useState<number | null>(initialItem?.quantityMilli ?? null);
   const [quantityError, setQuantityError] = useState<string | null>(null);
   const [quantityFocused, setQuantityFocused] = useState(false);
-  const [priceText, setPriceText] = useState('');
-  const [plannedUnitMinor, setPlannedUnitMinor] = useState<number | null>(null);
+  const [priceText, setPriceText] = useState(initialPriceText);
+  const [plannedUnitMinor, setPlannedUnitMinor] = useState<number | null>(initialItem?.plannedUnitMinor ?? null);
   const [priceError, setPriceError] = useState<string | null>(null);
   const [priceFocused, setPriceFocused] = useState(false);
-  const nameTextRef = useRef('');
-  const quantityTextRef = useRef('');
-  const priceTextRef = useRef('');
+  const [nameError, setNameError] = useState<string | null>(null);
+  const nameTextRef = useRef<string | undefined>(initialItem?.name);
+  const quantityTextRef = useRef(initialQuantityText);
+  const priceTextRef = useRef(initialPriceText);
   const nameState = useNativeState(name);
-  const quantityState = useNativeState('');
-  const priceState = useNativeState('');
+  const quantityState = useNativeState<string | undefined>(initialQuantityText);
+  const priceState = useNativeState<string | undefined>(initialPriceText);
 
   const unitLabel = unitOptions.find((option) => option.value === unitCode)?.label ?? unitCode;
   const quantityHint = isFractionalQuantityUnit(unitCode)
@@ -101,7 +106,7 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
 
   const commitQuantity = () => {
     try {
-      const parsed = parseQuantityMilli(locale, quantityTextRef.current, unitCode);
+      const parsed = parseQuantityMilli(locale, quantityTextRef.current ?? '', unitCode);
 
       setQuantityMilli(parsed);
       setQuantityError(null);
@@ -121,7 +126,7 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
 
   const commitPrice = () => {
     try {
-      const parsed = parseCurrencyMinor(locale, priceTextRef.current, currencyCode);
+      const parsed = parseCurrencyMinor(locale, priceTextRef.current ?? '', currencyCode);
 
       setPlannedUnitMinor(parsed);
       setPriceError(null);
@@ -142,7 +147,7 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
   const resetAndClose = () => {
     setName('');
     nameTextRef.current = '';
-    setUnitCode(initialUnitCode);
+    setUnitCode(initialUnit);
     setQuantityText('');
     quantityTextRef.current = '';
     setQuantityMilli(null);
@@ -157,11 +162,13 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
   };
 
   const handleSave = () => {
-    const normalizedName = nameTextRef.current.trim();
+    const normalizedName = (nameTextRef.current ?? '').trim();
+    const nextNameError = normalizedName.length === 0 ? t('plannedItem.errors.nameRequired') : null;
     const nextQuantityMilli = commitQuantity();
     const nextPlannedUnitMinor = commitPrice();
+    setNameError(nextNameError);
 
-    if (normalizedName.length === 0 || nextQuantityMilli === null || nextPlannedUnitMinor === null) {
+    if (nextNameError !== null || nextQuantityMilli === null || nextPlannedUnitMinor === null) {
       return;
     }
 
@@ -179,12 +186,12 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
     ? quantityText
     : quantityMilli !== null
       ? formatQuantity(quantityMilli)
-      : '';
+      : undefined;
   const priceDisplayValue = priceFocused || priceError !== null
     ? priceText
     : plannedUnitMinor !== null
       ? formatPrice(plannedUnitMinor)
-      : '';
+      : undefined;
 
   useEffect(() => {
     nameState.set(name);
@@ -199,23 +206,44 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
   }, [priceDisplayValue, priceState]);
 
   return (
-    <AppColumn spacing={theme.space.md}>
+    <AppFormSheet
+      cancelLabel={t('plannedItem.close')}
+      cancelTestID="planned-item-close"
+      onCancel={resetAndClose}
+      onSave={handleSave}
+      saveLabel={initialItem === undefined ? t('plannedItem.save') : t('plannedItem.saveEdit')}
+      saveTestID="planned-item-save"
+      title={initialItem === undefined ? t('plannedItem.title') : t('plannedItem.editTitle')}
+      visible
+    >
+      <AppColumn spacing={theme.space.md}>
+      <AppText
+        textStyle={{
+          color: theme.colors.muted,
+          fontSize: theme.typography.body.fontSize,
+          fontWeight: theme.typography.body.fontWeight,
+          lineHeight: theme.typography.body.lineHeight,
+        }}
+      >
+        {t('plannedItem.priceHint', { currency: currencyCode })}
+      </AppText>
       <AppTextField
-        accessibilityHint={t('plannedItem.nameHint')}
-        helperText={t('plannedItem.nameHint')}
+        accessibilityHint={nameError ?? t('plannedItem.nameHint')}
+        helperText={nameError ?? t('plannedItem.nameHint')}
         label={t('plannedItem.nameLabel')}
         onChangeText={(nextName) => {
           nameTextRef.current = nextName;
           setName(nextName);
+          setNameError(nextName.trim().length === 0 ? t('plannedItem.errors.nameRequired') : null);
         }}
         placeholder={t('plannedItem.namePlaceholder')}
         testID="planned-item-name"
-        value={nameState}
+        value={nameState as any}
       />
 
       <AppSelect
         helperText={t('plannedItem.unitHint')}
-        label={t('plannedItem.unitLabel')}
+        label={t('plannedItem.unitLabel', { item: name?.trim() || t('plannedItem.itemFallback') })}
         onValueChange={(nextUnit) => {
           const nextValue = nextUnit as ShoppingListUnitCode;
 
@@ -255,7 +283,7 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
         }}
         placeholder={isFractionalQuantityUnit(unitCode) ? '1.5' : '2'}
         testID="planned-item-quantity"
-        value={quantityState}
+        value={quantityState as any}
       />
 
       <AppTextField
@@ -277,14 +305,11 @@ function PlannedItemEditorFields({ currencyCode, initialUnitCode = 'piece', onCa
         }}
         placeholder={currencyCode === 'BRL' ? '12,34' : '12.34'}
         testID="planned-item-price"
-        value={priceState}
+        value={priceState as any}
       />
 
-      <AppRow spacing={theme.space.sm}>
-        <AppButton label={t('plannedItem.save')} onPress={handleSave} testID="planned-item-save" />
-        <AppButton label={t('plannedItem.close')} onPress={resetAndClose} testID="planned-item-close" variant="ghost" />
-      </AppRow>
-    </AppColumn>
+      </AppColumn>
+    </AppFormSheet>
   );
 }
 
@@ -293,17 +318,11 @@ export function PlannedItemEditorContent(props: PlannedItemEditorContentProps) {
 }
 
 export function PlannedItemEditorSheet({ visible, ...props }: PlannedItemEditorSheetProps) {
-  const { t } = useTranslation(undefined, { i18n });
-
   if (!visible) {
     return null;
   }
 
-  return (
-    <AppSheet onClose={props.onCancel} title={t('plannedItem.title')} visible>
-      <PlannedItemEditorFields {...props} />
-    </AppSheet>
-  );
+  return <PlannedItemEditorFields {...props} />;
 }
 
 export type { PlannedItemDraft };

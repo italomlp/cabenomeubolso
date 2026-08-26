@@ -1,4 +1,4 @@
-import { TextInput } from 'react-native';
+import { Text, TextInput } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
 import { describe, expect, it, jest } from '@jest/globals';
 
@@ -32,6 +32,16 @@ describe('PlannedItemEditorSheet', () => {
     const priceInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-price')!;
     const nameInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-name')!;
 
+    expect(nameInput().props.value).toBeUndefined();
+    expect(quantityInput().props.value).toBeUndefined();
+    expect(priceInput().props.value).toBeUndefined();
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
+    });
+
+    expect(onSave).not.toHaveBeenCalled();
+
     act(() => {
       nameInput().props.onChangeText?.('Batata');
       quantityInput().props.onFocus?.();
@@ -50,7 +60,7 @@ describe('PlannedItemEditorSheet', () => {
       priceInput().props.onFocus?.();
       priceInput().props.onChangeText?.('12,34');
       priceInput().props.onBlur?.();
-      tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
     });
 
     expect(onSave).toHaveBeenCalledWith({
@@ -82,6 +92,10 @@ describe('PlannedItemEditorSheet', () => {
     const priceInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-price')!;
     const nameInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-name')!;
 
+    expect(nameInput().props.value).toBeUndefined();
+    expect(quantityInput().props.value).toBeUndefined();
+    expect(priceInput().props.value).toBeUndefined();
+
     act(() => {
       nameInput().props.onChangeText?.('Potato');
       quantityInput().props.onFocus?.();
@@ -100,7 +114,7 @@ describe('PlannedItemEditorSheet', () => {
       priceInput().props.onFocus?.();
       priceInput().props.onChangeText?.('12.34');
       priceInput().props.onBlur?.();
-      tree!.root.findAllByProps({ testID: 'planned-item-save' })[0].props.onPress();
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
     });
 
     expect(onSave).toHaveBeenCalledWith({
@@ -109,5 +123,113 @@ describe('PlannedItemEditorSheet', () => {
       quantityMilli: 1500,
       unitCode: 'kg',
     });
+  });
+
+  it('prefills an item for editing and saves the edited draft', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('en');
+    });
+    const onSave = jest.fn();
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <PlannedItemEditorSheet
+            currencyCode="USD"
+            initialItem={{ name: 'Potatoes', plannedUnitMinor: 250, quantityMilli: 1500, unitCode: 'kg' }}
+            onCancel={jest.fn()}
+            onSave={onSave}
+            visible
+          />
+        </AppThemeProvider>
+      );
+    });
+
+    const inputs = tree!.root.findAllByType(TextInput);
+    expect(inputs.find((input) => input.props.testID === 'planned-item-name')?.props.value).toBe('Potatoes');
+    expect(inputs.find((input) => input.props.testID === 'planned-item-quantity')?.props.value).toBe('1.5');
+    expect(inputs.find((input) => input.props.testID === 'planned-item-price')?.props.value).toBe('$2.50');
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
+    });
+
+    expect(onSave).toHaveBeenCalledWith({ name: 'Potatoes', plannedUnitMinor: 250, quantityMilli: 1500, unitCode: 'kg' });
+  });
+
+  it('clears the quantity and price when the unit changes during editing', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('en');
+    });
+
+    const onSave = jest.fn();
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <PlannedItemEditorSheet
+            currencyCode="USD"
+            initialItem={{ name: 'Potatoes', plannedUnitMinor: 250, quantityMilli: 1500, unitCode: 'kg' }}
+            onCancel={jest.fn()}
+            onSave={onSave}
+            visible
+          />
+        </AppThemeProvider>
+      );
+    });
+
+    const quantityInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-quantity')!;
+    const priceInput = () => tree!.root.findAllByType(TextInput).find((input) => input.props.testID === 'planned-item-price')!;
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-unit')!.props.onPress();
+    });
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'app-select-option-piece')!.props.onPress();
+    });
+
+    expect(quantityInput().props.value).toBeUndefined();
+    expect(priceInput().props.value).toBeUndefined();
+
+    act(() => {
+      quantityInput().props.onFocus?.();
+      quantityInput().props.onChangeText?.('2');
+      quantityInput().props.onBlur?.();
+      priceInput().props.onFocus?.();
+      priceInput().props.onChangeText?.('3.50');
+      priceInput().props.onBlur?.();
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
+    });
+
+    expect(onSave).toHaveBeenCalledWith({
+      name: 'Potatoes',
+      plannedUnitMinor: 350,
+      quantityMilli: 2000,
+      unitCode: 'piece',
+    });
+  });
+
+  it('exposes the localized name validation message when saving without a name', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('pt-BR');
+    });
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(
+        <AppThemeProvider systemScheme="light" themePreference="system">
+          <PlannedItemEditorSheet currencyCode="BRL" onCancel={jest.fn()} onSave={jest.fn()} visible />
+        </AppThemeProvider>
+      );
+    });
+
+    act(() => {
+      tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'planned-item-save')!.props.onPress();
+    });
+
+    expect(tree!.root.findAllByType(Text).map((node) => node.props.children)).toContain('Digite o nome do item.');
   });
 });
