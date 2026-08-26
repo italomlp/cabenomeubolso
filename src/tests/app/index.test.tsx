@@ -129,6 +129,6 @@ describe('HomeScreen', () => {
       tree!.root.findAllByType(mockExpoUi.Button).find((button) => button.props.testID === 'finalize-confirm')!.props.onPress();
     });
 
-    expect(runtime.useCases.finalizeList).toHaveBeenCalledWith(list.id);
+    expect(runtime.useCases.finalizeList).toHaveBeenCalledWith(list.id, { confirmUnpurchased: true });
   });
 });

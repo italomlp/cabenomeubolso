@@ -6,6 +6,7 @@ import {
   DEV_SCREENSHOT_RESET_URL,
   handleDevScreenshotDeepLink,
   isDevScreenshotResetUrl,
+  redirectDevScreenshotSystemPath,
   resetAndSeedDevScreenshotDataForRepository,
 } from './screenshot-harness';
 
@@ -13,7 +14,15 @@ describe('development screenshot harness', () => {
   it('recognizes only the deterministic reset deep link', () => {
     expect(isDevScreenshotResetUrl(DEV_SCREENSHOT_RESET_URL)).toBe(true);
     expect(isDevScreenshotResetUrl(`${DEV_SCREENSHOT_RESET_URL}?run=1`)).toBe(true);
+    expect(isDevScreenshotResetUrl('dev/reset-seed')).toBe(true);
     expect(isDevScreenshotResetUrl('cabenomeubolso://list/new')).toBe(false);
+  });
+
+  it('consumes the reset path before Expo Router can route it', async () => {
+    const handleDeepLink = jest.fn(async () => true);
+
+    await expect(redirectDevScreenshotSystemPath('dev/reset-seed', handleDeepLink)).resolves.toBe('/');
+    expect(handleDeepLink).toHaveBeenCalledWith('dev/reset-seed');
   });
 
   it('resets through the repository and saves the supplied seed in order', async () => {

@@ -7,6 +7,7 @@ import {
   finalizeShoppingList,
   markShoppingListItemPurchased,
   markShoppingListItemUnpurchased,
+  cloneShoppingList,
   reopenShoppingList,
   validateShoppingList,
   validateShoppingListItem,
@@ -130,6 +131,51 @@ describe('shopping list domain', () => {
       remainingMinor: 2700,
       varianceMinor: -2400,
     });
+  });
+
+  it('reuses the retained actual price when purchase is toggled back on', () => {
+    const purchased = markShoppingListItemPurchased(
+      createShoppingList({ items: [createItem()] }),
+      'item-1',
+      2500,
+      '2026-07-31T00:00:00.000Z'
+    );
+    const unpurchased = markShoppingListItemUnpurchased(purchased, 'item-1', '2026-07-31T00:00:01.000Z');
+
+    expect(unpurchased.items[0].actualUnitMinor).toBe(2500);
+
+    const repurchased = markShoppingListItemPurchased(
+      unpurchased,
+      'item-1',
+      undefined,
+      '2026-07-31T00:00:02.000Z'
+    );
+
+    expect(repurchased.items[0]).toMatchObject({
+      actualUnitMinor: 2500,
+      purchasedAt: '2026-07-31T00:00:02.000Z',
+    });
+  });
+
+  it('clones only visible planned items with isolated identities and purchase state', () => {
+    const list = createShoppingList();
+    let sequence = 0;
+    const clone = cloneShoppingList(
+      list,
+      '2026-07-31T00:00:01.000Z',
+      (prefix) => `${prefix}-${++sequence}`,
+      { id: 'clone-list' }
+    );
+
+    expect(clone).toMatchObject({ id: 'clone-list', status: 'draft', finalizedAt: null });
+    expect(clone.items).toHaveLength(2);
+    expect(clone.items[0]).toMatchObject({
+      actualUnitMinor: null,
+      id: 'clone-list-item-1',
+      listId: 'clone-list',
+      purchasedAt: null,
+    });
+    expect(clone.items[0].id).not.toBe(list.items[0].id);
   });
 
   it('reopens finalized lists and blocks edits until they are reopened', () => {

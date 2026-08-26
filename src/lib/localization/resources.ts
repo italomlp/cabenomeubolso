@@ -171,6 +171,8 @@ export const localizationResources = {
         currencyUsd: 'US dollar',
         languageSystem: 'System',
       },
+      shopping: { title: 'Shopping', activeLabel: 'Active shopping', buy: 'Buy', undo: 'Undo', remaining: 'Remaining', overBy: 'Over by', actualTitle: 'Actual price', actualHint: 'Enter the price paid per unit.', actualPrice: 'Actual price per unit', saveActual: 'Save price', finalize: 'Finish shopping', finalizeHint: 'Review and finish this shopping session.', confirmTitle: 'Unpurchased items', confirmBody: 'Some items were not purchased. Finish anyway?', confirm: 'Finish anyway', cancel: 'Keep shopping', purchasedAnnouncement: 'Item marked as purchased.', priceError: 'Enter a valid price.', loadError: 'Could not load this shopping list.' },
+      summary: { title: 'Shopping summary', purchased: 'Purchased', unpurchased: 'Not purchased', cloneName: 'New list name (optional)', clone: 'Clone list' },
     },
   },
   'pt-BR': {
@@ -339,6 +341,8 @@ export const localizationResources = {
         currencyUsd: 'dólar americano',
         languageSystem: 'Sistema',
       },
+      shopping: { title: 'Compras', activeLabel: 'Compra ativa', buy: 'Comprar', undo: 'Desfazer', remaining: 'Restante', overBy: 'Acima', actualTitle: 'Preço real', actualHint: 'Digite o preço pago por unidade.', actualPrice: 'Preço real por unidade', saveActual: 'Salvar preço', finalize: 'Finalizar compras', finalizeHint: 'Revise e finalize esta compra.', confirmTitle: 'Itens não comprados', confirmBody: 'Alguns itens não foram comprados. Finalizar mesmo assim?', confirm: 'Finalizar mesmo assim', cancel: 'Continuar comprando', purchasedAnnouncement: 'Item marcado como comprado.', priceError: 'Digite um preço válido.', loadError: 'Não foi possível carregar esta lista.' },
+      summary: { title: 'Resumo da compra', purchased: 'Comprados', unpurchased: 'Não comprados', cloneName: 'Nome da nova lista (opcional)', clone: 'Clonar lista' },
     },
   },
 } as const;

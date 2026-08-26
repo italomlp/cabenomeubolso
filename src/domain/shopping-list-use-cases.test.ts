@@ -105,13 +105,9 @@ function createRepository(initialList: ShoppingList): ShoppingListRepository {
 }
 
 describe('createShoppingListUseCases', () => {
-  it('sets actual price explicitly when purchasing and preserves it on unpurchase', async () => {
+  it('sets actual price explicitly when purchasing and retains it on unpurchase', async () => {
     const list = createShoppingList();
-    const repository: ShoppingListRepository = {
-      get: jest.fn(async () => list),
-      list: jest.fn(async () => [list]),
-      save: jest.fn(async () => undefined),
-    };
+    const repository = createRepository(list);
     const useCases = createShoppingListUseCases({
       now: () => '2026-07-31T10:00:00.000Z',
       repository,
@@ -125,10 +121,28 @@ describe('createShoppingListUseCases', () => {
       purchasedAt: '2026-07-31T10:00:00.000Z',
     });
     expect(unpurchased.items[0]).toMatchObject({
-      actualUnitMinor: null,
+      actualUnitMinor: 650,
       purchasedAt: null,
     });
     expect(repository.save).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses the retained actual price when purchasing again after unpurchase', async () => {
+    const repository = createRepository(createShoppingList());
+    const useCases = createShoppingListUseCases({
+      now: () => '2026-07-31T10:00:00.000Z',
+      repository,
+    });
+
+    await useCases.setItemPurchased('list-1', 'item-1', 650);
+    await useCases.setItemUnpurchased('list-1', 'item-1');
+
+    const repurchased = await useCases.setItemPurchased('list-1', 'item-1');
+
+    expect(repurchased.items[0]).toMatchObject({
+      actualUnitMinor: 650,
+      purchasedAt: '2026-07-31T10:00:00.000Z',
+    });
   });
 
   it('refuses to mutate deleted lists or deleted items', async () => {
@@ -185,7 +199,7 @@ describe('createShoppingListUseCases', () => {
       repository,
     });
 
-    const finalized = await useCases.finalizeList('list-compra-semanal');
+    const finalized = await useCases.finalizeList('list-compra-semanal', { confirmUnpurchased: true });
     const reopened = await useCases.reopenList('list-compra-semanal');
     const reloaded = await useCases.loadList('list-compra-semanal');
 
@@ -210,6 +224,46 @@ describe('createShoppingListUseCases', () => {
     await expect(useCases.saveList(finalized)).rejects.toThrow(
       'Finalized shopping lists must be reopened before editing.'
     );
+  });
+
+  it('requires explicit confirmation before finalizing with unpurchased items', async () => {
+    const repository = createRepository(createShoppingList());
+    const useCases = createShoppingListUseCases({ repository });
+
+    await expect(useCases.finalizeList('list-1', { confirmUnpurchased: false })).rejects.toThrow(
+      'Confirmation is required to finalize with unpurchased items.'
+    );
+    await expect(useCases.finalizeList('list-1', { confirmUnpurchased: true })).resolves.toMatchObject({
+      status: 'finalized',
+    });
+  });
+
+  it('clones a list with new independent identities and no purchase state', async () => {
+    const source = createShoppingList();
+    const repository = createRepository(source);
+    let sequence = 0;
+    const useCases = createShoppingListUseCases({
+      createId: (prefix) => `${prefix}-${++sequence}`,
+      now: () => '2026-07-31T10:00:00.000Z',
+      repository,
+    });
+
+    const cloned = await useCases.cloneList('list-1', 'Next groceries');
+
+    expect(cloned).toMatchObject({
+      currencyCode: source.currencyCode,
+      id: 'shopping-list-1',
+      name: 'Next groceries',
+      status: 'draft',
+    });
+    expect(cloned.items).toHaveLength(1);
+    expect(cloned.items[0]).toMatchObject({
+      actualUnitMinor: null,
+      id: 'shopping-list-1-item-2',
+      listId: 'shopping-list-1',
+      purchasedAt: null,
+    });
+    expect(cloned.items[0].id).not.toBe(source.items[0].id);
   });
 
   it('soft-deletes planned items through the repository-backed remove flow', async () => {

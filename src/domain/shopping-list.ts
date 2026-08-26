@@ -11,6 +11,8 @@ export type ShoppingListTotals = {
   varianceMinor: number;
 };
 
+export type ShoppingListIdFactory = (prefix: string) => string;
+
 export type ShoppingListItem = {
   actualUnitMinor: number | null;
   createdAt: string;
@@ -340,14 +342,10 @@ function assertShoppingListItemIsMutable(list: ShoppingList, item: ShoppingListI
 export function markShoppingListItemPurchased(
   list: ShoppingList,
   itemId: string,
-  actualUnitMinor: number,
+  actualUnitMinor: number | undefined,
   purchasedAt: string
 ): ShoppingList {
   assertShoppingListIsEditable(list);
-
-  if (!isSafeNonNegativeInteger(actualUnitMinor)) {
-    throw new Error('Actual unit price must be a non-negative integer.');
-  }
 
   if (!isValidTimestamp(purchasedAt)) {
     throw new Error('Purchased timestamp is required.');
@@ -362,9 +360,15 @@ export function markShoppingListItemPurchased(
     assertShoppingListItemIsMutable(list, item);
     itemFound = true;
 
+    const resolvedActualUnitMinor = actualUnitMinor ?? item.actualUnitMinor;
+
+    if (resolvedActualUnitMinor === null || !isSafeNonNegativeInteger(resolvedActualUnitMinor)) {
+      throw new Error('Actual unit price must be a non-negative integer.');
+    }
+
     return {
       ...item,
-      actualUnitMinor,
+      actualUnitMinor: resolvedActualUnitMinor,
       purchasedAt,
       updatedAt: purchasedAt,
     };
@@ -413,6 +417,54 @@ export function markShoppingListItemUnpurchased(list: ShoppingList, itemId: stri
     items,
     updatedAt,
   };
+}
+
+export function cloneShoppingList(
+  list: ShoppingList,
+  clonedAt: string,
+  createId: ShoppingListIdFactory,
+  options: { id?: string; name?: string } = {}
+): ShoppingList {
+  if (list.deletedAt !== null) {
+    throw new Error('Cannot clone a deleted shopping list.');
+  }
+
+  if (!isValidTimestamp(clonedAt)) {
+    throw new Error('Cloned timestamp is required.');
+  }
+
+  const id = options.id ?? createId('shopping-list');
+  const clone: ShoppingList = {
+    ...list,
+    createdAt: clonedAt,
+    deletedAt: null,
+    finalizedAt: null,
+    id,
+    items: list.items
+      .filter((item) => item.deletedAt === null)
+      .map((item, index) => ({
+        ...item,
+        actualUnitMinor: null,
+        createdAt: clonedAt,
+        deletedAt: null,
+        id: createId(`${id}-item`),
+        listId: id,
+        purchasedAt: null,
+        sortOrder: index + 1,
+        updatedAt: clonedAt,
+      })),
+    name: options.name === undefined ? list.name : normalizeShoppingListName(options.name),
+    status: 'draft',
+    updatedAt: clonedAt,
+  };
+
+  const validation = validateShoppingListForSave(clone);
+
+  if (!validation.success) {
+    throw new Error(validation.errors.map((issue) => `${issue.field}: ${issue.message}`).join('; '));
+  }
+
+  return clone;
 }
 
 export function markShoppingListItemDeleted(list: ShoppingList, itemId: string, deletedAt: string): ShoppingList {
@@ -495,6 +547,12 @@ export function finalizeShoppingList(list: ShoppingList, finalizedAt: string): S
 
   if (list.status === 'finalized') {
     throw new Error('Shopping list is already finalized.');
+  }
+
+  const validation = validateShoppingListForSave(list);
+
+  if (!validation.success) {
+    throw new Error(validation.errors.map((issue) => `${issue.field}: ${issue.message}`).join('; '));
   }
 
   return {

@@ -17,8 +17,9 @@ import {
   type CreateListDraftState,
 } from '@/app/home-state';
 
-import { ListFormSheet } from './list-form-sheet';
+import { hasUnpurchasedPlannedItems } from './create-list-finalization';
 import { FinalizeConfirmation } from './finalize-confirmation';
+import { ListFormSheet } from './list-form-sheet';
 import type { PlannedItemDraft } from './planned-item-editor';
 import { usePlanningRuntime, type PlanningRuntime } from './planning-runtime';
 
@@ -71,7 +72,7 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
     await runtime.useCases.saveList(persistedDraft);
 
     if (finalize) {
-      await runtime.useCases.finalizeList(persistedDraft.id);
+      await runtime.useCases.finalizeList(persistedDraft.id, { confirmUnpurchased: true });
     }
 
     const reloaded = await runtime.useCases.loadList(persistedDraft.id, true);
@@ -82,6 +83,15 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
   };
 
   const canSaveDraft = canPersistCreateListDraft(draft, locale);
+  const hasUnpurchasedItems = hasUnpurchasedPlannedItems(draft.items);
+  const requestFinalize = () => {
+    if (hasUnpurchasedItems) {
+      setFinalizeConfirmationVisible(true);
+      return;
+    }
+
+    void saveCurrentDraft(true);
+  };
   const draftBudgetMinor = (() => {
     try {
       return parseCurrencyMinor(locale, draft.budgetText, draft.currencyCode);
@@ -92,15 +102,6 @@ export default function CreateListScreen({ dependencies, onClose = () => undefin
   const draftBudgetPreview = formatCurrencyMinor(locale, draftBudgetMinor, draft.currencyCode);
   const draftItemCount = draft.items.length;
   const selectedCurrencyLabel = draft.currencyCode === 'USD' ? t('preferences.currencyUsd') : t('preferences.currencyBrl');
-  const requestFinalize = () => {
-    const hasUnpurchasedItems = draft.items.some((item) => item.deletedAt === null && item.purchasedAt === null);
-    if (hasUnpurchasedItems) {
-      setFinalizeConfirmationVisible(true);
-      return;
-    }
-
-    void saveCurrentDraft(true);
-  };
 
   if (runtime === null) {
     return (

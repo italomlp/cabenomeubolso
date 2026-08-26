@@ -69,7 +69,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
     }
 
     try {
-      await runtime.useCases.finalizeList(listId);
+      await runtime.useCases.finalizeList(listId, { confirmUnpurchased: true });
       await refreshLists();
       setFailedFinalizeListId(null);
     } catch {

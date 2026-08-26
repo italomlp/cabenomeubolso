@@ -1,5 +1,6 @@
 import type { ShoppingList } from './shopping-list';
 import {
+  cloneShoppingList,
   finalizeShoppingList,
   markShoppingListItemPurchased,
   markShoppingListItemDeleted,
@@ -11,18 +12,20 @@ import {
 import type { ShoppingListRepository } from './shopping-list-repository';
 
 export type ShoppingListUseCaseDependencies = {
+  createId?: (prefix: string) => string;
   now?: () => string;
   repository: ShoppingListRepository;
 };
 
 export type ShoppingListUseCases = {
   loadList: (id: string, includeDeleted?: boolean) => Promise<ShoppingList | null>;
-  finalizeList: (listId: string) => Promise<ShoppingList>;
+  finalizeList: (listId: string, options?: { confirmUnpurchased?: boolean } | boolean) => Promise<ShoppingList>;
+  cloneList: (listId: string, name?: string) => Promise<ShoppingList>;
   reopenList: (listId: string) => Promise<ShoppingList>;
   removeItem: (listId: string, itemId: string) => Promise<ShoppingList>;
   restoreItem: (listId: string, itemId: string) => Promise<ShoppingList>;
   saveList: (list: ShoppingList) => Promise<void>;
-  setItemPurchased: (listId: string, itemId: string, actualUnitMinor: number) => Promise<ShoppingList>;
+  setItemPurchased: (listId: string, itemId: string, actualUnitMinor?: number) => Promise<ShoppingList>;
   setItemUnpurchased: (listId: string, itemId: string) => Promise<ShoppingList>;
 };
 
@@ -34,7 +37,19 @@ function requireLoadedList(list: ShoppingList | null, listId: string): ShoppingL
   return list;
 }
 
-export function createShoppingListUseCases({ now = () => new Date().toISOString(), repository }: ShoppingListUseCaseDependencies): ShoppingListUseCases {
+let generatedIdSequence = 0;
+
+function defaultCreateId(prefix: string): string {
+  generatedIdSequence += 1;
+  const randomPart = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2);
+  return `${prefix}-${Date.now().toString(36)}-${generatedIdSequence}-${randomPart}`;
+}
+
+export function createShoppingListUseCases({
+  createId = defaultCreateId,
+  now = () => new Date().toISOString(),
+  repository,
+}: ShoppingListUseCaseDependencies): ShoppingListUseCases {
   function assertListCanBeEdited(list: ShoppingList): void {
     if (list.status === 'finalized') {
       throw new Error('Finalized shopping lists must be reopened before editing.');
@@ -43,12 +58,26 @@ export function createShoppingListUseCases({ now = () => new Date().toISOString(
 
   return {
     loadList: async (id, includeDeleted = false) => repository.get(id, { includeDeleted }),
-    finalizeList: async (listId) => {
+    finalizeList: async (listId, options = false) => {
       const list = requireLoadedList(await repository.get(listId), listId);
+      const confirmUnpurchased = typeof options === 'boolean' ? options : options.confirmUnpurchased === true;
+      const hasUnpurchasedItems = list.items.some((item) => item.deletedAt === null && item.purchasedAt === null);
+
+      if (hasUnpurchasedItems && !confirmUnpurchased) {
+        throw new Error('Confirmation is required to finalize with unpurchased items.');
+      }
+
       const updated = finalizeShoppingList(list, now());
 
       await repository.save(updated);
       return updated;
+    },
+    cloneList: async (listId, name) => {
+      const list = requireLoadedList(await repository.get(listId, { includeDeleted: true }), listId);
+      const cloned = cloneShoppingList(list, now(), createId, { name });
+
+      await repository.save(cloned);
+      return cloned;
     },
     reopenList: async (listId) => {
       const list = requireLoadedList(await repository.get(listId), listId);
