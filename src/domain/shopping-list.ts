@@ -538,6 +538,38 @@ export function markShoppingListItemRestored(list: ShoppingList, itemId: string,
   };
 }
 
+export function markShoppingListDeleted(list: ShoppingList, deletedAt: string): ShoppingList {
+  assertShoppingListIsMutable(list);
+
+  if (!isValidTimestamp(deletedAt)) {
+    throw new Error('Deleted timestamp is required.');
+  }
+
+  return { ...list, deletedAt, updatedAt: deletedAt };
+}
+
+export function markShoppingListRestored(list: ShoppingList, restoredAt: string): ShoppingList {
+  if (list.deletedAt === null) {
+    throw new Error('Only deleted shopping lists can be restored.');
+  }
+
+  if (!isValidTimestamp(restoredAt)) {
+    throw new Error('Restored timestamp is required.');
+  }
+
+  return { ...list, deletedAt: null, updatedAt: restoredAt };
+}
+
+export const SHOPPING_LIST_TRASH_RETENTION_DAYS = 7;
+
+export function isShoppingListTrashExpired(deletedAt: string, now: string): boolean {
+  if (!isValidTimestamp(deletedAt) || !isValidTimestamp(now)) {
+    throw new Error('Trash timestamps must be valid timestamps.');
+  }
+
+  return Date.parse(deletedAt) + SHOPPING_LIST_TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000 <= Date.parse(now);
+}
+
 export function finalizeShoppingList(list: ShoppingList, finalizedAt: string): ShoppingList {
   assertShoppingListIsMutable(list);
 

@@ -173,7 +173,7 @@ async function runInTransaction(
     return;
   }
 
-  await database.withTransactionAsync(task);
+  await database.withTransactionAsync(async () => task(database));
 }
 
 async function loadShoppingLists(
@@ -247,6 +247,29 @@ async function loadShoppingListById(
   };
 }
 
+async function loadTrashLists(database: SQLiteShoppingListRepositoryDatabase): Promise<readonly ShoppingList[]> {
+  const rows = await database.getAllAsync<ShoppingListRow>(
+    `SELECT id, name, currency_code, budget_minor, status, finalized_at, deleted_at, created_at, updated_at
+     FROM ${SHOPPING_LIST_TABLE}
+     WHERE deleted_at IS NOT NULL
+     ORDER BY updated_at DESC, created_at DESC, id DESC`
+  );
+
+  const result: ShoppingList[] = [];
+  for (const row of rows) {
+    const itemRows = await database.getAllAsync<ShoppingListItemRow>(
+      `SELECT id, list_id, name, unit_code, quantity_milli, planned_unit_minor, actual_unit_minor,
+              purchased_at, sort_order, deleted_at, created_at, updated_at
+       FROM ${SHOPPING_LIST_ITEM_TABLE}
+       WHERE list_id = ? ORDER BY sort_order, created_at, id`,
+      row.id
+    );
+    result.push({ ...mapShoppingListRow(row), items: itemRows.map(mapShoppingListItemRow) });
+  }
+
+  return result;
+}
+
 function buildListUpsertStatement(): string {
   return `
     INSERT INTO ${SHOPPING_LIST_TABLE} (
@@ -291,6 +314,42 @@ export function createSQLiteShoppingListRepository(
   return {
     get: async (id, query) => loadShoppingListById(database, id, query),
     list: async (query) => loadShoppingLists(database, query),
+    listTrash: async () => loadTrashLists(database),
+    purgeExpired: async (now) => {
+      if (Number.isNaN(Date.parse(now))) throw new Error('Trash cleanup timestamp is required.');
+      const cutoff = new Date(Date.parse(now) - 7 * 24 * 60 * 60 * 1000).toISOString();
+      await runInTransaction(database, async (transaction) => {
+        // Child rows are purged first so parent deletion remains safe even on databases
+        // where foreign-key cascades are not enabled by the caller.
+        await transaction.runAsync(
+          `DELETE FROM ${SHOPPING_LIST_ITEM_TABLE} WHERE deleted_at IS NOT NULL AND deleted_at <= ?`,
+          cutoff
+        );
+        await transaction.runAsync(
+          `DELETE FROM ${SHOPPING_LIST_ITEM_TABLE}
+           WHERE list_id IN (SELECT id FROM ${SHOPPING_LIST_TABLE} WHERE deleted_at IS NOT NULL AND deleted_at <= ?)`,
+          cutoff
+        );
+        await transaction.runAsync(
+          `DELETE FROM ${SHOPPING_LIST_TABLE} WHERE deleted_at IS NOT NULL AND deleted_at <= ?`,
+          cutoff
+        );
+      });
+    },
+    permanentlyDeleteItem: async (listId, itemId) => {
+      await runInTransaction(database, async (transaction) => {
+        await transaction.runAsync(
+          `DELETE FROM ${SHOPPING_LIST_ITEM_TABLE} WHERE id = ? AND list_id = ? AND deleted_at IS NOT NULL`,
+          itemId,
+          listId
+        );
+      });
+    },
+    permanentlyDeleteList: async (listId) => {
+      await runInTransaction(database, async (transaction) => {
+        await transaction.runAsync(`DELETE FROM ${SHOPPING_LIST_TABLE} WHERE id = ? AND deleted_at IS NOT NULL`, listId);
+      });
+    },
     save: async (shoppingList) => {
       const normalizedShoppingList = {
         ...shoppingList,

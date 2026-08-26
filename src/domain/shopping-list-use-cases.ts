@@ -6,6 +6,9 @@ import {
   markShoppingListItemDeleted,
   markShoppingListItemUnpurchased,
   markShoppingListItemRestored,
+  markShoppingListDeleted,
+  markShoppingListRestored,
+  isShoppingListTrashExpired,
   reopenShoppingList,
   validateShoppingListForSave,
 } from './shopping-list';
@@ -18,7 +21,13 @@ export type ShoppingListUseCaseDependencies = {
 };
 
 export type ShoppingListUseCases = {
+  cleanupExpiredTrash: () => Promise<void>;
+  deleteList: (listId: string) => Promise<ShoppingList>;
   loadList: (id: string, includeDeleted?: boolean) => Promise<ShoppingList | null>;
+  listTrash: () => Promise<readonly ShoppingList[]>;
+  permanentlyDeleteItem: (listId: string, itemId: string, confirmed: boolean) => Promise<void>;
+  permanentlyDeleteList: (listId: string, confirmed: boolean) => Promise<void>;
+  restoreList: (listId: string) => Promise<ShoppingList>;
   finalizeList: (listId: string, options?: { confirmUnpurchased?: boolean } | boolean) => Promise<ShoppingList>;
   cloneList: (listId: string, name?: string) => Promise<ShoppingList>;
   reopenList: (listId: string) => Promise<ShoppingList>;
@@ -57,7 +66,30 @@ export function createShoppingListUseCases({
   }
 
   return {
+    cleanupExpiredTrash: async () => {
+      if (repository.purgeExpired === undefined) {
+        return;
+      }
+
+      await repository.purgeExpired(now());
+    },
+    deleteList: async (listId) => {
+      const list = requireLoadedList(await repository.get(listId), listId);
+      const updated = markShoppingListDeleted(list, now());
+      await repository.save(updated);
+      return updated;
+    },
     loadList: async (id, includeDeleted = false) => repository.get(id, { includeDeleted }),
+    listTrash: async () => {
+      const currentTime = now();
+      await (repository.purgeExpired?.(currentTime) ?? Promise.resolve());
+      if (repository.listTrash === undefined) {
+        const lists = await repository.list({ includeDeleted: true });
+        return lists.filter((list) => list.deletedAt !== null);
+      }
+
+      return repository.listTrash({ now: currentTime });
+    },
     finalizeList: async (listId, options = false) => {
       const list = requireLoadedList(await repository.get(listId), listId);
       const confirmUnpurchased = typeof options === 'boolean' ? options : options.confirmUnpurchased === true;
@@ -106,12 +138,35 @@ export function createShoppingListUseCases({
       await repository.save(updated);
       return updated;
     },
+    permanentlyDeleteItem: async (listId, itemId, confirmed) => {
+      if (!confirmed) throw new Error('Confirmation is required to permanently delete an item.');
+      if (repository.permanentlyDeleteItem === undefined) throw new Error('Permanent item deletion is unavailable.');
+      await repository.permanentlyDeleteItem(listId, itemId);
+    },
+    permanentlyDeleteList: async (listId, confirmed) => {
+      if (!confirmed) throw new Error('Confirmation is required to permanently delete a list.');
+      if (repository.permanentlyDeleteList === undefined) throw new Error('Permanent list deletion is unavailable.');
+      await repository.permanentlyDeleteList(listId);
+    },
     restoreItem: async (listId, itemId) => {
-      const list = requireLoadedList(await repository.get(listId), listId);
+      const list = requireLoadedList(await repository.get(listId, { includeDeleted: true }), listId);
       assertListCanBeEdited(list);
+      const item = list.items.find((candidate) => candidate.id === itemId);
+      if (item?.deletedAt !== null && item !== undefined && isShoppingListTrashExpired(item.deletedAt, now())) {
+        throw new Error('Cannot restore an expired shopping list item.');
+      }
 
       const updated = markShoppingListItemRestored(list, itemId, now());
 
+      await repository.save(updated);
+      return updated;
+    },
+    restoreList: async (listId) => {
+      const list = requireLoadedList(await repository.get(listId, { includeDeleted: true }), listId);
+      if (list.deletedAt !== null && isShoppingListTrashExpired(list.deletedAt, now())) {
+        throw new Error('Cannot restore an expired shopping list.');
+      }
+      const updated = markShoppingListRestored(list, now());
       await repository.save(updated);
       return updated;
     },

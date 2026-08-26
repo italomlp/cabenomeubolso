@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-export const SQLITE_DATABASE_VERSION = 2;
+export const SQLITE_DATABASE_VERSION = 3;
 
 export type SQLiteMigration = {
   version: number;
@@ -62,6 +62,42 @@ const MIGRATIONS: readonly SQLiteMigration[] = [
 
         CREATE INDEX IF NOT EXISTS idx_shopping_list_items_list_id_deleted_at_sort_order
           ON shopping_list_items(list_id, deleted_at, sort_order);
+      `);
+    },
+  },
+  {
+    version: 3,
+    up: async (database) => {
+      await database.execAsync(`
+        CREATE TABLE IF NOT EXISTS recurrence_templates (
+          id TEXT PRIMARY KEY NOT NULL,
+          source_list_id TEXT REFERENCES shopping_lists(id) ON DELETE SET NULL,
+          name TEXT NOT NULL,
+          currency_code TEXT NOT NULL CHECK (currency_code IN ('BRL', 'USD')),
+          budget_minor INTEGER NOT NULL CHECK (budget_minor >= 0),
+          cadence TEXT NOT NULL,
+          next_occurrence_on TEXT,
+          active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS template_items (
+          id TEXT PRIMARY KEY NOT NULL,
+          template_id TEXT NOT NULL REFERENCES recurrence_templates(id) ON DELETE CASCADE,
+          name TEXT NOT NULL,
+          unit_code TEXT NOT NULL CHECK (unit_code IN ('piece', 'pack', 'kg', 'g', 'l', 'ml')),
+          quantity_milli INTEGER NOT NULL CHECK (quantity_milli > 0),
+          planned_unit_minor INTEGER NOT NULL CHECK (planned_unit_minor >= 0),
+          sort_order INTEGER NOT NULL CHECK (sort_order > 0),
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_recurrence_templates_active_updated_at
+          ON recurrence_templates(active, updated_at);
+        CREATE INDEX IF NOT EXISTS idx_template_items_template_id_sort_order
+          ON template_items(template_id, sort_order);
       `);
     },
   },
