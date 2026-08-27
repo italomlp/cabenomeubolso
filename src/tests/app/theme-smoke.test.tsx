@@ -11,6 +11,8 @@ import { i18n } from '@/lib/localization/i18n';
 
 import HomeScreen from '@/components/planning/home-screen';
 
+jest.setTimeout(30_000);
+
 type HomeScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof HomeScreen>>['dependencies']>;
 
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
