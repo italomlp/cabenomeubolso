@@ -39,6 +39,10 @@
     "@types/react": "~19.2.2",
     "typescript": "~6.0.3"
   },
+  "overrides": {
+    "@react-native/metro-config": "0.86.3",
+    "react-dom": "19.2.3"
+  },
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
