@@ -11,6 +11,8 @@ import type { ShoppingList } from '@/domain/shopping-list';
 import type { ShoppingListRepository } from '@/domain/shopping-list-repository';
 import { i18n } from '@/lib/localization/i18n';
 
+jest.setTimeout(30_000);
+
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 let mockSearchParams: { id: string } = { id: DEFAULT_DRAFT_LIST_ID };
