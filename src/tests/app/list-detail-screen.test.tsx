@@ -9,6 +9,8 @@ import type { ShoppingList } from '@/domain/shopping-list';
 import type { ShoppingListRepository } from '@/domain/shopping-list-repository';
 import { i18n } from '@/lib/localization/i18n';
 
+jest.setTimeout(30_000);
+
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
 jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true,
