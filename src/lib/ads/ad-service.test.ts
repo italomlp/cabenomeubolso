@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 
 import { AdsConsentPrivacyOptionsRequirementStatus, type AdsConsentInfo } from 'react-native-google-mobile-ads';
 import { createAdService, DEFAULT_ADS_RELEASE_FLAG, resolveAdSlotEligibility } from './ad-service';
-import { resolveAdRequestConfiguration, resolveBannerAdRequestOptions, resolveBannerAdUnitId, TEST_BANNER_AD_UNIT_ID } from './ad-request-configuration';
+import { resolveAdRequestConfiguration } from './ad-request-configuration';
 
 jest.mock('react-native-google-mobile-ads', () => ({
   AdsConsent: {
@@ -173,9 +173,5 @@ describe('ad service', () => {
     expect(
       resolveAdRequestConfiguration({ isDevelopment: true, testDeviceIdentifiers: ['EMULATOR', 'qa-device'] })
     ).toEqual({ testDeviceIdentifiers: ['EMULATOR', 'qa-device'] });
-    expect(resolveBannerAdUnitId({ shouldUseTestAds: true, productionBannerAdUnitId: 'prod-banner' })).toBe(TEST_BANNER_AD_UNIT_ID);
-    expect(resolveBannerAdUnitId({ shouldUseTestAds: false, productionBannerAdUnitId: ' prod-banner ' })).toBe('prod-banner');
-    expect(resolveBannerAdUnitId({ shouldUseTestAds: false })).toBeNull();
-    expect(resolveBannerAdRequestOptions()).toEqual({ requestNonPersonalizedAdsOnly: true });
   });
 });

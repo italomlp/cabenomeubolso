@@ -43,7 +43,7 @@ type AdServiceDependencies = {
   testDeviceIdentifiers?: readonly string[];
 };
 
-export type AdService = {
+type AdService = {
   prepare: () => Promise<AdServiceSnapshot>;
   requestPrivacyOptions: () => Promise<AdServiceSnapshot>;
   getSnapshot: () => AdServiceSnapshot | null;

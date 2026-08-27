@@ -10,7 +10,7 @@ This file is the persistent status record for V2 work across sessions. The roadm
 | 02 Design-system foundations | Complete | `epic/02-design-system-foundations` / #42 | 14 Jest suites, lint, typecheck, review |
 | 03 Domain and persistence | Complete | `epic/03-domain-and-persistence` / #43 | 32 Jest tests, lint, typecheck, review |
 | 04 List planning | Ready | — | Epics 2–3 complete |
-| 08 Monetization foundation | Ready | — | Epic 2 complete; placements remain blocked by Home/Summary flows |
+| 08 Monetization foundation | Ready | — | Epic 2 complete; runtime placement/configuration/lifecycle deferred until Gate 7 owner-approved release decision |
 | 05–07, 09 | Blocked by roadmap dependencies | — | See `roadmap.md` |
 
 ## Completed work
