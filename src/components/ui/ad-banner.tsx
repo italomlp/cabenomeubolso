@@ -2,6 +2,9 @@ export type AdaptiveBannerPlacement = 'home-list-content' | 'finalized-summary';
 
 type AdBannerProps = {
   placement: AdaptiveBannerPlacement;
+  advertisementLabel: string;
+  shouldUseTestAds: boolean;
+  productionBannerAdUnitId?: string;
 };
 
 /** The only adapter allowed to know about the native banner control and sizes. */

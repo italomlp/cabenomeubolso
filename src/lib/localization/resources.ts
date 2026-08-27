@@ -15,6 +15,7 @@ export const localizationResources = {
         designPreviewBody: 'Semantic tokens, adapters, and theme resolution are wired up.',
         designPreviewTitle: 'Design system preview',
       },
+      ads: { advertisement: 'Advertisement' },
       feedback: {
         undo: 'Undo',
         undoHint: 'Restore the removed item.',
@@ -347,6 +348,7 @@ export const localizationResources = {
       },
       shopping: { title: 'Compras', activeLabel: 'Compra ativa', buy: 'Comprar', undo: 'Desfazer', remaining: 'Restante', overBy: 'Acima', actualTitle: 'Preço real', actualHint: 'Digite o preço pago por unidade.', actualPrice: 'Preço real por unidade', saveActual: 'Salvar preço', finalize: 'Finalizar compras', finalizeHint: 'Revise e finalize esta compra.', confirmTitle: 'Itens não comprados', confirmBody: 'Alguns itens não foram comprados. Finalizar mesmo assim?', confirm: 'Finalizar mesmo assim', cancel: 'Continuar comprando', purchasedAnnouncement: 'Item marcado como comprado.', priceError: 'Digite um preço válido.', loadError: 'Não foi possível carregar esta lista.', finalizeError: 'Não foi possível finalizar esta compra. Seus dados atuais continuam aqui.', mutationError: 'Não foi possível atualizar este item. Seus dados atuais continuam aqui.' },
         summary: { title: 'Resumo da compra', purchased: 'Comprados', unpurchased: 'Não comprados', cloneName: 'Nome da nova lista (opcional)', clone: 'Clonar lista', loadError: 'Não foi possível carregar este resumo.', cloneError: 'Não foi possível clonar esta lista. Seus dados atuais continuam aqui.' },
+        ads: { advertisement: 'Publicidade' },
       trash: { title: 'Lixeira', subtitle: 'Listas excluídas ficam aqui por sete dias.', empty: 'A lixeira está vazia.', restore: 'Restaurar', restoreHint: 'Restaura esta lista para o início.', deleteForever: 'Excluir para sempre', confirmTitle: 'Excluir permanentemente?', confirmBody: 'Essa ação não pode ser desfeita.', confirmDelete: 'Excluir permanentemente', cancel: 'Cancelar', loadError: 'Não foi possível carregar a lixeira.', retry: 'Tentar novamente' },
       templates: { title: 'Modelos', subtitle: 'Snapshots reutilizáveis para seus planos de compras.', create: 'Criar da lista mais recente', snapshot: '{{count}} itens · {{cadence}}', generate: 'Gerar agora', edit: 'Editar', editTitle: 'Editar modelo', name: 'Nome do modelo', cadence: 'Frequência', save: 'Salvar alterações', cancel: 'Cancelar', loadError: 'Não foi possível carregar os modelos.', retry: 'Tentar novamente' },
     },

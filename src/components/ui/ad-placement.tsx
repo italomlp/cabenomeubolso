@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { AdService, AdSlotEligibility } from '@/lib/ads/ad-service';
 
@@ -7,8 +7,12 @@ import { AdSlot } from './ad-slot';
 
 type AdPlacementProps = {
   placement: AdaptiveBannerPlacement;
+  advertisementLabel: string;
   service?: AdService;
+  productionBannerAdUnitId?: string;
 };
+
+const sharedService: { value: AdService | null } = { value: null };
 
 const disabledEligibility: AdSlotEligibility = {
   canRender: false,
@@ -19,36 +23,51 @@ const disabledEligibility: AdSlotEligibility = {
   shouldUseTestAds: false,
 };
 
-export function AdPlacement({ placement, service: providedService }: AdPlacementProps) {
-  const service = useMemo(() => {
-    if (providedService) return providedService;
+const disabledService: AdService = {
+  getSnapshot: () => ({ eligibility: disabledEligibility, initialized: false, trackingAuthorizationStatus: null }),
+  prepare: async () => ({ eligibility: disabledEligibility, initialized: false, trackingAuthorizationStatus: null }),
+  requestPrivacyOptions: async () => ({ eligibility: disabledEligibility, initialized: false, trackingAuthorizationStatus: null }),
+};
 
-    // Keep native SDK loading behind this adapter. A JS-only runtime (Jest or
-    // Expo Go) falls back to the same disabled state as the release flag.
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      return require('@/lib/ads/ad-service').createAdService() as AdService;
-    } catch {
-      return {
-        getSnapshot: () => ({ eligibility: disabledEligibility, initialized: false, trackingAuthorizationStatus: null }),
-        prepare: async () => ({ eligibility: disabledEligibility, initialized: false, trackingAuthorizationStatus: null }),
-        requestPrivacyOptions: async () => ({ eligibility: disabledEligibility, initialized: false, trackingAuthorizationStatus: null }),
-      } satisfies AdService;
-    }
-  }, [providedService]);
+export function AdPlacement({ placement, advertisementLabel, service: providedService, productionBannerAdUnitId }: AdPlacementProps) {
+  const [service, setService] = useState<AdService>(providedService ?? disabledService);
   const [eligibility, setEligibility] = useState<AdSlotEligibility>(
     () => service.getSnapshot()?.eligibility ?? disabledEligibility
   );
 
   useEffect(() => {
     let active = true;
-    void service.prepare().then((snapshot) => {
-      if (active) setEligibility(snapshot.eligibility);
-    });
+    if (providedService) {
+      void providedService.prepare().then((snapshot) => {
+        if (active) setEligibility(snapshot.eligibility);
+      });
+      return () => { active = false; };
+    }
+
+    // Create the default once, outside render. A JS-only runtime (Jest or
+    // Expo Go) falls back to the same disabled state as the release flag.
+    try {
+      if (!sharedService.value) {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        sharedService.value = require('@/lib/ads/ad-service').createAdService() as AdService;
+      }
+      const nextService = sharedService.value;
+      queueMicrotask(() => {
+        if (active) setService(nextService);
+      });
+      void nextService.prepare().then((snapshot) => {
+        if (active) setEligibility(snapshot.eligibility);
+      });
+    } catch {
+      sharedService.value = disabledService;
+      queueMicrotask(() => {
+        if (active) setService(disabledService);
+      });
+    }
     return () => {
       active = false;
     };
-  }, [service]);
+  }, [providedService]);
 
-  return <AdSlot eligibility={eligibility}><AdBanner placement={placement} /></AdSlot>;
+  return <AdSlot eligibility={eligibility}><AdBanner advertisementLabel={advertisementLabel} placement={placement} productionBannerAdUnitId={productionBannerAdUnitId} shouldUseTestAds={eligibility.shouldUseTestAds} /></AdSlot>;
 }

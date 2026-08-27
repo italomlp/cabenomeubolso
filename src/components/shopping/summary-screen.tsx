@@ -46,6 +46,8 @@ export default function SummaryScreen({ listId, dependencies, onCloned, adServic
     {error ? <AppText>{error}</AppText> : null}
     <AppTextField label={t('summary.cloneName')} value={cloneName} onChangeText={(value) => cloneName.set(value)} />
     <AppButton label={t('summary.clone')} onPress={async () => { if (!runtime?.useCases.cloneList) return; try { const cloned = await runtime.useCases.cloneList(list.id, cloneName.value.trim() || undefined); setError(null); onCloned?.(cloned.id); } catch { const message = t('summary.cloneError'); setError(message); announceForAccessibility(message); } }} />
-     {resolveAllowedAdPlacement('summary', list.status) === 'finalized-summary' ? <AdPlacement placement="finalized-summary" service={adService} /> : null}
+    {resolveAllowedAdPlacement('summary', list.status) === 'finalized-summary' ? (
+      <AdPlacement advertisementLabel={t('ads.advertisement')} placement="finalized-summary" service={adService} />
+    ) : null}
   </AppColumn></AppScreen>;
 }

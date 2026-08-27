@@ -10,6 +10,8 @@ jest.mock('@/design-system/theme-context', () => ({
   useAppTheme: () => ({ colors: { border: '#000', surfaceRaised: '#fff' } }),
 }));
 
+// The adapter must be imported after the native module mock is installed.
+// eslint-disable-next-line import/first
 import { AdBanner } from './ad-banner.android';
 
 describe('Android AdBanner', () => {
@@ -17,9 +19,23 @@ describe('Android AdBanner', () => {
     let tree: renderer.ReactTestRenderer;
 
     act(() => {
-      tree = renderer.create(<AdBanner placement="home-list-content" />);
+      tree = renderer.create(<AdBanner advertisementLabel="Advertisement" placement="home-list-content" shouldUseTestAds />);
     });
 
-    expect(tree!.root.findAll((node) => String(node.type) === 'mock-banner-ad')[0]?.props.size).toBe('inline-adaptive');
+    const banner = tree!.root.findAll((node) => String(node.type) === 'mock-banner-ad')[0];
+    expect(banner?.props.size).toBe('inline-adaptive');
+    expect(banner?.props.unitId).toBe('ca-app-pub-3940256099942544/6300978111');
+    expect(banner?.props.requestOptions).toEqual({ requestNonPersonalizedAdsOnly: true });
+  });
+
+  it('uses the supplied production unit when test ads are not eligible', () => {
+    let tree: renderer.ReactTestRenderer;
+
+    act(() => {
+      tree = renderer.create(<AdBanner advertisementLabel="Advertisement" placement="finalized-summary" productionBannerAdUnitId="prod-banner" shouldUseTestAds={false} />);
+    });
+
+    const banner = tree!.root.findAll((node) => String(node.type) === 'mock-banner-ad')[0];
+    expect(banner?.props.unitId).toBe('prod-banner');
   });
 });

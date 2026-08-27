@@ -1,23 +1,35 @@
-import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 import { StyleSheet, View } from 'react-native';
 
 import { useAppTheme } from '@/design-system/theme-context';
 
 import type { AdaptiveBannerPlacement } from './ad-banner';
+import { resolveBannerAdRequestOptions, resolveBannerAdUnitId } from '@/lib/ads/ad-request-configuration';
 
-export function AdBanner({ placement }: { placement: AdaptiveBannerPlacement }) {
+export function AdBanner({ placement, advertisementLabel, shouldUseTestAds, productionBannerAdUnitId }: { placement: AdaptiveBannerPlacement; advertisementLabel: string; shouldUseTestAds: boolean; productionBannerAdUnitId?: string }) {
   const theme = useAppTheme();
   // Both approved placements are rendered inside AppScreen's ScrollView.
   // Inline adaptive banners are the correct format for scrolling content.
-  const size = BannerAdSize.INLINE_ADAPTIVE_BANNER;
+  let ads: typeof import('react-native-google-mobile-ads');
+  try {
+    // Expo Go does not contain the native module. Keep this require out of
+    // module scope so the disabled/no-native path remains safe.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    ads = require('react-native-google-mobile-ads');
+  } catch {
+    return null;
+  }
+  const unitId = resolveBannerAdUnitId({ productionBannerAdUnitId, shouldUseTestAds });
+  if (!unitId) return null;
 
   return (
     <View
-      accessibilityLabel="Advertisement"
+      accessible
+      accessibilityLabel={advertisementLabel}
+      accessibilityRole="image"
       style={[styles.container, { backgroundColor: theme.colors.surfaceRaised, borderColor: theme.colors.border }]}
       testID={`ad-banner-${placement}`}
     >
-      <BannerAd requestOptions={{}} size={size} unitId={TestIds.BANNER} />
+      <ads.BannerAd requestOptions={resolveBannerAdRequestOptions()} size={ads.BannerAdSize.INLINE_ADAPTIVE_BANNER} unitId={unitId} />
     </View>
   );
 }

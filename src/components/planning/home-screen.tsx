@@ -214,7 +214,9 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, ad
             ))}
           </AppColumn>
         )}
-        {resolveAllowedAdPlacement('home') === 'home-list-content' ? <AdPlacement placement="home-list-content" service={adService} /> : null}
+        {lists.length > 0 && resolveAllowedAdPlacement('home') === 'home-list-content' ? (
+          <AdPlacement advertisementLabel={t('ads.advertisement')} placement="home-list-content" service={adService} />
+        ) : null}
       </AppColumn>
       <FinalizeConfirmation
         cancelHint={t('home.finalizeCancelHint')}
