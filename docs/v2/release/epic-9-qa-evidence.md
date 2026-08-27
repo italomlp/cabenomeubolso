@@ -11,9 +11,9 @@ turning unrun device checks into release claims.
 | Currency input | `pt-BR` and `en` × explicit `BRL` and `USD` | `src/tests/qa/epic9-locale-matrix.test.ts` | Automated (suite: 14 passed) |
 | Currency/language independence | Explicit currency remains selected under either language/device locale | `src/tests/qa/epic9-locale-matrix.test.ts` | Automated (suite: 14 passed) |
 | System currency resolution | `en-US` language tag + fixed `BR` region resolves `BRL`; a fixed `US` region resolves `USD` even with `pt-BR` language | `src/tests/qa/epic9-locale-matrix.test.ts` | Automated (suite: 14 passed) |
-| Offline create and persistence | Create a named list; generate a persisted occurrence; enable airplane mode; kill the app process; relaunch with `clearState: false` | `.maestro/offline-journey.yaml` | Syntax validated; device run pending |
-| Shop and finalize | Deterministic development fixture, shopping, confirmation, summary | `.maestro/offline-journey.yaml` | Flow added; device run pending |
-| Manual template generation | Create from latest list → Generate now → Home → relaunch | `.maestro/offline-journey.yaml` | Flow added; device run pending |
+| Offline create and persistence | Create a named list; generate a persisted occurrence; enable airplane mode; kill the app process; relaunch with `clearState: false` | `.maestro/offline-journey.yaml` | Syntax validated; Android/English device run pending |
+| Shop and finalize | Deterministic development fixture, shopping, confirmation, summary | `.maestro/offline-journey.yaml` | Flow added; Android/English device run pending |
+| Manual template generation | Create from latest list → Generate now → Home → relaunch | `.maestro/offline-journey.yaml` | Flow added; Android/English device run pending |
 | Trash restore | Restore a deleted list | — | Pending product/harness support |
 
 The matrix test was run with Node/Jest in this worktree (14 tests passed). Maestro syntax for
@@ -29,6 +29,12 @@ list-delete action and the harness exposes no deleted-list fixture, so the
 Maestro flow verifies the reachable empty Trash state instead of claiming a
 restore run. A future flow can replace that assertion once a deterministic
 deleted-list setup and stable delete/restore selectors exist.
+
+The Maestro flow's device prerequisite is an Android emulator/device with the
+system UI language set to English. It uses test IDs wherever available and
+English text selectors only where the current app exposes no test ID. Maestro
+syntax validation is not evidence for iOS, another device language, or a
+completed device run.
 
 ## Accessibility evidence
 

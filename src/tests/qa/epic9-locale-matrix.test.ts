@@ -5,6 +5,7 @@ import type { ShoppingListUnitCode } from '@/domain/shopping-list';
 import {
   formatCurrencyMinor,
   formatQuantityMilli,
+  LocaleInputParseError,
   parseCurrencyMinor,
   parseQuantityMilli,
 } from '@/lib/locale-input';
@@ -22,6 +23,22 @@ const quantities: readonly { unit: ShoppingListUnitCode; milli: number }[] = [
   { unit: 'l', milli: 1_250 },
   { unit: 'ml', milli: 750_000 },
 ];
+
+function expectPrecisionError(action: () => unknown): void {
+  let caught: unknown;
+
+  try {
+    action();
+  } catch (error) {
+    caught = error;
+  }
+
+  expect(caught).toBeInstanceOf(LocaleInputParseError);
+
+  if (caught instanceof LocaleInputParseError) {
+    expect(caught.code).toBe('precision');
+  }
+}
 
 describe('Epic 9 locale and currency regression matrix', () => {
   it.each(locales)('round-trips every supported unit category in %s', (locale) => {
@@ -78,7 +95,7 @@ describe('Epic 9 locale and currency regression matrix', () => {
 
   it.each(['piece', 'pack', 'g', 'ml'] as const)('rejects fractional input for whole unit %s in both locales', (unit) => {
     for (const locale of locales) {
-      expect(() => parseQuantityMilli(locale, locale === 'pt-BR' ? '1,5' : '1.5', unit)).toThrow();
+      expectPrecisionError(() => parseQuantityMilli(locale, locale === 'pt-BR' ? '1,5' : '1.5', unit));
     }
   });
 });

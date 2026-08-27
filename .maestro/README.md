@@ -11,6 +11,11 @@ These flows target the Expo development build with app ID
   clear app state so they are independent of one another.
 - Run `maestro check-syntax <flow.yaml>` for each changed flow before
   executing it; `check-syntax` accepts one file at a time.
+- `offline-journey.yaml` specifically requires an Android emulator/device with
+  the system UI language set to English. Its controls use test IDs wherever
+  available; English text selectors remain for controls that expose no test
+  ID. Runs on iOS or another device language are not covered by that flow's
+  evidence.
 
 ## Flows
 
