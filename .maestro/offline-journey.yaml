@@ -1,5 +1,9 @@
 # Bounded Epic 9 offline journey.
 #
+# Run this flow on an Android emulator/device whose system UI language is
+# English. It uses test IDs wherever the app exposes them; remaining text
+# selectors/assertions use the English copy for controls without test IDs.
+#
 # The reset deep link is the existing development harness. It supplies the
 # stable `dev-screenshot-list` ID needed to open shopping without relying on
 # runtime-generated IDs. The first section still exercises list creation from
