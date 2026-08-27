@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { announceForAccessibility, AppButton, AppColumn, AppScreen, AppText, AppTextField } from '@/components/ui';
+import { AdPlacement, announceForAccessibility, AppButton, AppColumn, AppScreen, AppText, AppTextField } from '@/components/ui';
 import { useNativeState } from '@/components/ui/expo-ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import { calculateShoppingListTotals, type ShoppingList } from '@/domain/shopping-list';
 import { formatCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
+import { resolveAllowedAdPlacement } from '@/lib/ads/ad-placements';
 import { usePlanningRuntime, type PlanningRuntime } from '@/components/planning/planning-runtime';
 
 import { BudgetRail } from './budget-rail';
+import type { AdService } from '@/lib/ads/ad-service';
 
-type Props = { listId: string; dependencies?: PlanningRuntime; onCloned?: (id: string) => void };
+type Props = { listId: string; dependencies?: PlanningRuntime; onCloned?: (id: string) => void; adService?: AdService };
 
-export default function SummaryScreen({ listId, dependencies, onCloned }: Props) {
+export default function SummaryScreen({ listId, dependencies, onCloned, adService }: Props) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -44,5 +46,6 @@ export default function SummaryScreen({ listId, dependencies, onCloned }: Props)
     {error ? <AppText>{error}</AppText> : null}
     <AppTextField label={t('summary.cloneName')} value={cloneName} onChangeText={(value) => cloneName.set(value)} />
     <AppButton label={t('summary.clone')} onPress={async () => { if (!runtime?.useCases.cloneList) return; try { const cloned = await runtime.useCases.cloneList(list.id, cloneName.value.trim() || undefined); setError(null); onCloned?.(cloned.id); } catch { const message = t('summary.cloneError'); setError(message); announceForAccessibility(message); } }} />
+     {resolveAllowedAdPlacement('summary', list.status) === 'finalized-summary' ? <AdPlacement placement="finalized-summary" service={adService} /> : null}
   </AppColumn></AppScreen>;
 }

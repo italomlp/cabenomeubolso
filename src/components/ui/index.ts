@@ -4,6 +4,8 @@ export { AppButton } from './app-button';
 export { AppFormSheet } from './app-form-sheet';
 export { AppHost } from './app-host';
 export { AdSlot } from './ad-slot';
+export { AdBanner } from './ad-banner';
+export { AdPlacement } from './ad-placement';
 export { AppScreen } from './app-screen';
 export { AppRow } from './app-row';
 export { AppSelect } from './app-select';

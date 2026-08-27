@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppColumn, AppScreen, AppText } from '@/components/ui';
+import { AdPlacement, AppButton, AppColumn, AppScreen, AppText } from '@/components/ui';
 import { useAppTheme } from '@/design-system/theme-context';
 import type { SupportedCurrency } from '@/domain/currency';
 import { calculateShoppingListTotals, type ShoppingList } from '@/domain/shopping-list';
 import { formatCurrencyMinor } from '@/lib/locale-input';
 import { i18n } from '@/lib/localization/i18n';
+import { resolveAllowedAdPlacement } from '@/lib/ads/ad-placements';
 
 import { AppEmptyState } from './app-empty-state';
 import { BudgetSummary } from './budget-summary';
@@ -14,14 +15,16 @@ import { ListCard } from './list-card';
 import { FinalizeConfirmation } from './finalize-confirmation';
 import type { PlanningRuntime } from './planning-runtime';
 import { usePlanningRuntime } from './planning-runtime';
+import type { AdService } from '@/lib/ads/ad-service';
 
 type HomeScreenProps = {
   dependencies?: PlanningRuntime;
   onOpenList?: (listId: string) => void;
   onOpenNewList?: () => void;
+  adService?: AdService;
 };
 
-export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: HomeScreenProps = {}) {
+export default function HomeScreen({ dependencies, onOpenList, onOpenNewList, adService }: HomeScreenProps = {}) {
   const theme = useAppTheme();
   const { t } = useTranslation(undefined, { i18n });
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -211,6 +214,7 @@ export default function HomeScreen({ dependencies, onOpenList, onOpenNewList }: 
             ))}
           </AppColumn>
         )}
+        {resolveAllowedAdPlacement('home') === 'home-list-content' ? <AdPlacement placement="home-list-content" service={adService} /> : null}
       </AppColumn>
       <FinalizeConfirmation
         cancelHint={t('home.finalizeCancelHint')}
