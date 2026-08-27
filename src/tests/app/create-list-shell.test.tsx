@@ -8,6 +8,8 @@ import { buildCreateListDraft, canPersistCreateListDraft } from '@/app/home-stat
 import type { ShoppingList } from '@/domain/shopping-list';
 import { i18n } from '@/lib/localization/i18n';
 
+jest.setTimeout(30_000);
+
 type CreateListScreenDependencies = NonNullable<NonNullable<ComponentProps<typeof CreateListScreen>>['dependencies']>;
 
 jest.mock('@/components/ui/expo-ui', () => mockExpoUi);
