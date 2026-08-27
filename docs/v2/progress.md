@@ -2,7 +2,7 @@
 
 This file is the persistent status record for V2 work across sessions. The roadmap remains the implementation contract; update this file only after an epic PR is validated and merged into `v2-agentic-implementation`.
 
-**PR scope:** this update reflects merged epics #45–#53 against `v2-agentic-implementation`; Epics 1–3 and #45/#46 landed in `v2` historically.
+**PR scope:** this update records the merged state at commit 200efac. Epics 1–3, #45, and #46 landed in `v2`. Epics 4–9 (via #47–#53) merged into `v2-agentic-implementation`.
 
 ## Current status
 
@@ -41,7 +41,7 @@ This file is the persistent status record for V2 work across sessions. The roadm
 
 ### Epic 4 — List planning
 
-- Merged into `v2` via #45, #47, #48.
+- #45 merged into `v2`; #47, #48 merged into `v2-agentic-implementation`.
 - Added Home, create/edit list, planned items, locale-aware parsing, and planning summaries.
 
 ### Epic 5 — In-store execution
@@ -61,8 +61,8 @@ This file is the persistent status record for V2 work across sessions. The roadm
 
 ### Epic 8 — Monetization and operations
 
-- Merged into `v2-agentic-implementation` via #46, #49.
-- Added AdMob SDK, `AdService`/entitlement/flags, consent/ATT/test-ad safeguards, and release/OTA procedure documentation; EAS policy and credentials remain deferred.
+- #46 merged into `v2`; #49 merged into `v2-agentic-implementation`.
+- Added AdMob SDK, `AdService`/entitlement/flags, consent/ATT/test-ad safeguards, and release/OTA procedure (8.5) documented; EAS policy and store credentials deferred and owner-gated.
 - **8.4 banner placements remain pending** — Home and Summary now exist; implement the allowed placements behind the default-disabled flag.
 
 ### Epic 9 — Release readiness
