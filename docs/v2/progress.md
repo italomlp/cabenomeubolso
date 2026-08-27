@@ -2,6 +2,8 @@
 
 This file is the persistent status record for V2 work across sessions. The roadmap remains the implementation contract; update this file only after an epic PR is validated and merged into `v2-agentic-implementation`.
 
+**PR scope:** this update reflects merged epics #45–#53 against `v2-agentic-implementation`; Epics 1–3 and #45/#46 landed in `v2` historically.
+
 ## Current status
 
 | Epic | Status | Branch / PR | Validation |
@@ -13,33 +15,33 @@ This file is the persistent status record for V2 work across sessions. The roadm
 | 05 In-store execution | Complete | `epic/05-in-store-execution` / #50 | Shopping/Summary/clone integration tests, review |
 | 06 Trash and recurrence | Complete | `epic/06-trash-and-recurrence` / #51 | Trash/template integration tests, review |
 | 07 Visual polish and accessibility | Complete | `epic/07-visual-polish-accessibility` / #52 | Maestro smoke flows, native UI audit, accessibility review |
-| 08 Monetization and operations | Foundation complete | `epic/08-monetization-and-operations` / #46, #49 | 8.1–8.3 merged; 8.4 banner placements pending |
+| 08 Monetization and operations | Foundation complete | `epic/08-monetization-operations` / #46, #49 | 8.1–8.3 merged; 8.4 banner placements pending |
 | 09 Release readiness | Scaffolding merged | `epic/09-release-readiness` / #53 | 9.1/9.3/9.4 pending; 9.5 owner-gated |
 
 ## Completed work
 
 ### Epic 1 — Expo stack foundation
 
-- Merged into `v2-agentic-implementation` on 2026-07-31.
+- Merged into `v2` on 2026-07-31.
 - Replaced the legacy React Native root with native-only Expo SDK 57.
 - Added Expo Router, versioned SQLite WAL bootstrap, persisted preferences, `pt-BR`/`en` localization, BRL/USD default resolution, and development-build configuration.
 - Follow-up commits included transactional migrations and localized shell copy.
 
 ### Epic 2 — Design-system foundations
 
-- Merged into `v2-agentic-implementation` on 2026-07-31 via #42.
+- Merged into `v2` on 2026-07-31 via #42.
 - Added semantic Light/Dark/System theme resolution, a project-owned `@expo/ui` adapter boundary, and isolated ad-slot platform adapters.
 - Added adapter, accessibility-semantics, and theme smoke coverage; centralized the `@expo/ui` Jest mock helper.
 
 ### Epic 3 — Domain and persistence
 
-- Merged into `v2-agentic-implementation` on 2026-07-31 via #43.
+- Merged into `v2` on 2026-07-31 via #43.
 - Added integer-safe money/unit domain rules, ordered SQLite migrations, repositories, and transactional use cases.
 - Added real upgrade-fixture, atomic-write, soft-delete-preservation, and currency-lock coverage.
 
 ### Epic 4 — List planning
 
-- Merged into `v2-agentic-implementation` via #45, #47, #48.
+- Merged into `v2` via #45, #47, #48.
 - Added Home, create/edit list, planned items, locale-aware parsing, and planning summaries.
 
 ### Epic 5 — In-store execution
@@ -55,12 +57,12 @@ This file is the persistent status record for V2 work across sessions. The roadm
 ### Epic 7 — Visual polish and accessibility
 
 - Merged into `v2-agentic-implementation` via #52.
-- Applied shared adapters and refined states across flows; completed full bilingual/accessibility audit.
+- Applied shared adapters and refined states across flows; completed native UI audit and accessibility review artifact.
 
 ### Epic 8 — Monetization and operations
 
 - Merged into `v2-agentic-implementation` via #46, #49.
-- Added AdMob SDK, `AdService`/entitlement/flags, consent/ATT/test-ad safeguards, and release/OTA procedure.
+- Added AdMob SDK, `AdService`/entitlement/flags, consent/ATT/test-ad safeguards, and release/OTA procedure documentation; EAS policy and credentials remain deferred.
 - **8.4 banner placements remain pending** — Home and Summary now exist; implement the allowed placements behind the default-disabled flag.
 
 ### Epic 9 — Release readiness
