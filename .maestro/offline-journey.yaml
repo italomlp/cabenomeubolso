@@ -1,0 +1,106 @@
+# Bounded Epic 9 offline journey.
+#
+# Run this flow on an Android emulator/device whose system UI language is
+# English. It uses test IDs wherever the app exposes them; remaining text
+# selectors/assertions use the English copy for controls without test IDs.
+#
+# The reset deep link is the existing development harness. It supplies the
+# stable `dev-screenshot-list` ID needed to open shopping without relying on
+# runtime-generated IDs. The first section still exercises list creation from
+# the real UI; the harness reset intentionally starts the deterministic
+# shopping/template section from a known persisted fixture.
+appId: com.italomlp.cabenomeubolso
+onFlowComplete:
+  # Restore normal network connectivity even when the flow exits after the
+  # offline segment. This intentionally restores the runner's online baseline;
+  # Maestro does not expose a portable read of the pre-flow airplane state.
+  - setAirplaneMode: disabled
+
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 10000
+- tapOn:
+    id: home-primary-create
+- assertVisible:
+    id: create-list-name
+- tapOn:
+    id: create-list-name
+- inputText: "Offline QA groceries"
+- tapOn:
+    id: create-list-budget
+- inputText: "40"
+- tapOn:
+    id: create-list-add-item
+- assertVisible: "Planned item"
+- tapOn:
+    id: planned-item-name
+- inputText: "Eggs"
+- tapOn:
+    id: planned-item-quantity
+- inputText: "2"
+- tapOn:
+    id: planned-item-price
+- inputText: "2"
+- tapOn:
+    id: planned-item-save
+- assertVisible: "Eggs"
+- tapOn:
+    id: create-list-save
+- hideKeyboard
+- waitForAnimationToEnd
+- pressKey: BACK
+- extendedWaitUntil:
+    visible: "Offline QA groceries"
+    timeout: 10000
+
+# Use the existing deterministic fixture for the route that has a stable ID.
+- launchApp:
+    clearState: false
+- openLink: "cabenomeubolso://dev/reset-seed"
+- openLink: "cabenomeubolso:///list/dev-screenshot-list/shop"
+- extendedWaitUntil:
+    visible: "Active shopping"
+    timeout: 10000
+- assertVisible: "Eggs"
+- tapOn:
+    id: finalize-shopping
+- assertVisible: "Some items were not purchased. Finish anyway?"
+- tapOn: "Finish anyway"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Shopping summary"
+    timeout: 10000
+
+# Trash is reachable, but this build has no list-delete action or deleted-list
+# seed route. Keep this assertion honest; restore remains a product/device
+# follow-up rather than inventing a selector for a control that is not present.
+- openLink: "cabenomeubolso:///(tabs)/trash"
+- extendedWaitUntil:
+    visible: "Trash"
+    timeout: 10000
+- assertVisible: "Trash is empty."
+
+- openLink: "cabenomeubolso:///(tabs)/templates"
+- extendedWaitUntil:
+    visible: "Templates"
+    timeout: 10000
+- tapOn: "Create from latest list"
+- extendedWaitUntil:
+    visible: "Generate now"
+    timeout: 10000
+- tapOn: "Generate now"
+- waitForAnimationToEnd
+- openLink: "cabenomeubolso:///(tabs)/home"
+- extendedWaitUntil:
+    visible: "Screenshot grocery list"
+    timeout: 10000
+- setAirplaneMode: enabled
+- killApp
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible: "Screenshot grocery list"
+    timeout: 10000
