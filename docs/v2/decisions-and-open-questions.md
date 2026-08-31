@@ -28,7 +28,7 @@
 | Default language | System: saved supported override → supported OS language → English. |
 | Default new-list currency | Explicit saved selection wins; otherwise first configured locale’s supported `currencyCode` → `BR`/`US` region mapping → BRL. No physical location, language-tag, or timezone inference. |
 | UI foundation | Use `@expo/ui` universal components first behind project-owned semantic-token/adapters; isolate SwiftUI/Compose-only APIs by platform. |
-| Advertising | Install AdMob behind `AdService`, entitlement, and a release flag defaulting off. Placements are Home after list content and finalized Summary only; consent precedes initialization; test ads are mandatory in development. |
+| Advertising | Keep AdMob behind `AdService`, entitlement, and a release flag defaulting off. Runtime placement, configuration, and lifecycle remain deferred until Gate 7 has an owner-approved release decision; consent and test-ad safeguards remain part of that future enabled path. |
 | Initial store release | Android only; iOS remains a native target but is not submitted without an Apple Developer account. |
 
 ## Assumptions to validate
@@ -62,7 +62,7 @@ Remote sync, API, accounts, authentication, collaboration, cloud backup, backend
 | 4. Trash | **Confirmed:** manual permanent deletion is required; expired-record cleanup runs on app launch and when Trash opens. | Manual deletion is an explicit recovery action, and both approved foreground entry points keep retention maintenance reliable without background execution. |
 | 5. Recurrence | Is manual “Generate now” sufficient for V2? If not, what cadences and missed-occurrence behavior are required? | Before template generation/scheduling work begins. |
 | 6. Design approval | **Confirmed:** the current logo, restored color direction, typography, and Portuguese/English product terminology are approved. | Gate 6 visual direction is approved; accepted native UI audit exceptions remain documented separately. |
-| 7. Monetization | **Confirmed:** installed AdMob is flag-disabled by default; Home-after-content and finalized-Summary banners only; no active-shopping, interstitial, or rewarded ads. | Before enabling ads for a release. |
+| 7. Monetization | **Confirmed:** installed AdMob remains flag-disabled by default. Runtime placement, configuration, and lifecycle are deferred until an owner-approved release decision; no active-shopping, interstitial, or rewarded ads are enabled. | Before enabling ads for a release. |
 | 8. Release policy | Which EAS Update channels and runtime-version policy should be used? | Before production delivery configuration. |
 | 9. Internationalization defaults | **Confirmed:** System language resolution and locale/region/BRL fallback currency proposal; users may explicitly choose BRL/USD independently of language. | Implement in preferences/create-list behavior. |
 | 10. Internationalization product behavior | What English store descriptor/market positioning should accompany the Portuguese product name? | Before store assets are finalized. |

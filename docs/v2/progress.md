@@ -15,7 +15,7 @@ This file is the persistent status record for V2 work across sessions. The roadm
 | 05 In-store execution | Complete | `epic/05-in-store-execution` / #50 | Shopping/Summary/clone integration tests, review |
 | 06 Trash and recurrence | Complete | `epic/06-trash-and-recurrence` / #51 | Trash/template integration tests, review |
 | 07 Visual polish and accessibility | Complete | `epic/07-visual-polish-accessibility` / #52 | Maestro smoke flows, native UI audit, accessibility review |
-| 08 Monetization and operations | Foundation complete | `epic/08-monetization-operations` / #46, #49 | 8.1–8.3 merged; 8.4 banner placements pending |
+| 08 Monetization and operations | Foundation complete | `epic/08-monetization-operations` / #46, #49 | 8.1–8.3 merged; runtime placement/configuration/lifecycle deferred until Gate 7 owner-approved release decision |
 | 09 Release readiness | Scaffolding merged | `epic/09-release-readiness` / #53 | 9.1/9.3/9.4 pending; 9.5 owner-gated |
 
 ## Completed work
@@ -63,7 +63,7 @@ This file is the persistent status record for V2 work across sessions. The roadm
 
 - #46 merged into `v2`; #49 merged into `v2-agentic-implementation`.
 - Added AdMob SDK, `AdService`/entitlement/flags, consent/ATT/test-ad safeguards, and release/OTA procedure (8.5) documented; EAS policy and store credentials deferred and owner-gated.
-- **8.4 banner placements remain pending** — Home and Summary now exist; implement the allowed placements behind the default-disabled flag.
+- **8.4 banner placements remain deferred** — runtime placement/configuration/lifecycle awaits a Gate 7 owner-approved release decision; AdMob remains installed and default-disabled.
 
 ### Epic 9 — Release readiness
 
@@ -74,7 +74,7 @@ This file is the persistent status record for V2 work across sessions. The roadm
 
 Start the next eligible branches from the latest `v2-agentic-implementation`:
 
-- Complete Epic 8.4 banner placements behind the default-disabled flag
+- Keep Epic 8.4 runtime placement/configuration/lifecycle deferred until the Gate 7 owner-approved release decision
 - Complete Epic 9.1 offline E2E, 9.3 matrix/accessibility regression, and 9.4 Android build smoke; 9.5 remains owner-gated
 
 Read the relevant roadmap files, the architecture, and decision log before implementation.
